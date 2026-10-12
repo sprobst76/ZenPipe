@@ -144,13 +144,8 @@ public class ChannelTabFragment extends BaseListInfoFragment<InfoItem, ChannelTa
         }
 
         if (playlistControlBinding != null) {
-            // PlaylistControls should be visible only if there is some item in
-            // infoListAdapter other than header
-            if (infoListAdapter.getItemCount() > 1) {
-                playlistControlBinding.getRoot().setVisibility(View.VISIBLE);
-            } else {
-                playlistControlBinding.getRoot().setVisibility(View.GONE);
-            }
+            // zen: no "play all" on channel tabs (the queue keeps loading more pages)
+            playlistControlBinding.getRoot().setVisibility(View.GONE);
 
             PlayButtonHelper.initPlaylistControlClickListener(
                     activity, playlistControlBinding, this);

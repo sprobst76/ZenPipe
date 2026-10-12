@@ -5,7 +5,6 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
-import org.schabi.newpipe.util.NavigationHelper;
 import org.schabi.newpipe.util.external_communication.ShareUtils;
 
 final class HashtagLongPressClickableSpan extends LongPressClickableSpan {
@@ -26,7 +25,8 @@ final class HashtagLongPressClickableSpan extends LongPressClickableSpan {
 
     @Override
     public void onClick(@NonNull final View view) {
-        NavigationHelper.openSearch(context, relatedInfoServiceId, parsedHashtag);
+        // zen: do not open a hashtag search (endless feed), copy the tag instead
+        ShareUtils.copyToClipboard(context, parsedHashtag);
     }
 
     @Override
