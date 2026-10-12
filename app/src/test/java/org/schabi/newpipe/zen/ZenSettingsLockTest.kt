@@ -59,7 +59,7 @@ class ZenSettingsLockTest {
         val e = Env()
         val l = e.lock()
         val r = l.apply(mapOf(FEED_BUDGET to 10, MIN_LENGTH_MIN to 3))
-        assertTrue(r is ZenSettingsLock.Result.Applied)
+        assertTrue((r as ZenSettingsLock.Result.Applied).pending.isEmpty())
         assertEquals(10, l.effective(FEED_BUDGET))
         assertEquals(3, l.effective(MIN_LENGTH_MIN)) // looser, but immediate in setup
         assertFalse(l.isLocked())

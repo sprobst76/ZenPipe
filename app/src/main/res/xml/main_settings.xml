@@ -5,6 +5,12 @@
     android:title="@string/settings">
 
     <PreferenceScreen
+        android:fragment="org.schabi.newpipe.zen.ZenSettingsFragment"
+        android:icon="@drawable/ic_hourglass_top"
+        android:title="@string/zen_settings_title"
+        app:iconSpaceReserved="false" />
+
+    <PreferenceScreen
         android:fragment="org.schabi.newpipe.settings.VideoAudioSettingsFragment"
         android:icon="@drawable/ic_headset"
         android:title="@string/settings_category_video_audio_title"

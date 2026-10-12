@@ -183,27 +183,28 @@ class ZenSettingsLock(
         val kinds = changes.mapValues { (k, v) -> classify(k, v) }.filterValues { it != Kind.UNCHANGED }
         if (kinds.isEmpty()) return Result.NoChange
         val pendOld = readPending()
-        val loosen = kinds.filterValues { it == Kind.LOOSER }.keys
-        val now = changes.filterKeys { it in kinds && (setup || kinds[it] != Kind.LOOSER) }
+        // in the first-time setup a looser value is not pending but applied at once
+        val loosen = if (setup) emptySet() else kinds.filterValues { it == Kind.LOOSER }.keys
+        val now = changes.filterKeys { it in kinds && it !in loosen }
         val effAfter = eff + now
         val pendAfter = if (setup) emptyMap() else pendOld.filterKeys { it !in changes } + changes.filterKeys { it in loosen }
-        if (!setup && loosen.isNotEmpty() && lockCd.remainingMs() > 0) {
+        if (loosen.isNotEmpty() && lockCd.remainingMs() > 0) {
             return Result.Rejected(Reason.LOCKED, loosen.first())
         }
         ZenSettingDefs.combinationError(effAfter)?.let { return Result.Rejected(Reason.INVALID_COMBINATION, it) }
         ZenSettingDefs.combinationError(effAfter + pendAfter)?.let { return Result.Rejected(Reason.INVALID_COMBINATION, it) }
 
-        val startsLock = !setup && loosen.isNotEmpty()
+        val startsLock = loosen.isNotEmpty()
         if (!setup) saveUndo(eff, pendOld, startsLock)
         val entries = ArrayList<Pair<String, Any?>>()
         effAfter.forEach { (k, v) -> if (eff[k] != v) entries.add(kEff(k) to v) }
         // pending: removed for every key touched here, set for the loosened ones
         changes.keys.forEach { entries.add(kPend(it) to null) }
-        if (!setup) loosen.forEach { entries.add(kPend(it) to changes.getValue(it)) }
+        loosen.forEach { entries.add(kPend(it) to changes.getValue(it)) }
         store.put(*entries.toTypedArray())
         if (startsLock) lockCd.start(lockMs)
         if (!setup) undoCd.start(undoMs)
-        val immediate = kinds.filterValues { it == Kind.STRICTER || (setup && it == Kind.LOOSER) }.keys.toList()
+        val immediate = kinds.filterValues { it != Kind.CANCEL_PENDING && it != Kind.UNCHANGED }.keys.filter { it !in loosen }
         val cancelled = kinds.filterValues { it == Kind.CANCEL_PENDING }.keys.toList()
         log?.invoke(
             "settings_change",
