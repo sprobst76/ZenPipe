@@ -303,8 +303,6 @@
     <string-array name="show_channel_tabs_value_list">
         <item>@string/show_channel_tabs_videos</item>
         <item>@string/show_channel_tabs_tracks</item>
-        <item>@string/show_channel_tabs_shorts</item>
-        <item>@string/show_channel_tabs_livestreams</item>
         <item>@string/show_channel_tabs_channels</item>
         <item>@string/show_channel_tabs_playlists</item>
         <item>@string/show_channel_tabs_albums</item>
@@ -316,8 +314,6 @@
     <string-array name="show_channel_tabs_description_list">
         <item>@string/channel_tab_videos</item>
         <item>@string/channel_tab_tracks</item>
-        <item>@string/channel_tab_shorts</item>
-        <item>@string/channel_tab_livestreams</item>
         <item>@string/channel_tab_channels</item>
         <item>@string/channel_tab_playlists</item>
         <item>@string/channel_tab_albums</item>
@@ -407,8 +403,6 @@
     <string-array name="feed_fetch_channel_tabs_value_list">
         <item>@string/fetch_channel_tabs_videos</item>
         <item>@string/fetch_channel_tabs_tracks</item>
-        <item>@string/fetch_channel_tabs_shorts</item>
-        <item>@string/fetch_channel_tabs_livestreams</item>
         <item>@string/fetch_channel_tabs_likes</item>
         <item>@string/fetch_channel_tabs_podcasts</item>
         <item>@string/fetch_channel_tabs_courses</item>
@@ -416,8 +410,6 @@
     <string-array name="feed_fetch_channel_tabs_description_list">
         <item>@string/channel_tab_videos</item>
         <item>@string/channel_tab_tracks</item>
-        <item>@string/channel_tab_shorts</item>
-        <item>@string/channel_tab_livestreams</item>
         <item>@string/channel_tab_likes</item>
         <item>@string/channel_tab_podcasts</item>
         <item>@string/channel_tab_courses</item>

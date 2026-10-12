@@ -138,8 +138,8 @@ public final class NewPipeSettings {
 
     public static boolean showRemoteSearchSuggestions(final Context context,
                                                       final SharedPreferences sharedPreferences) {
-        return showSearchSuggestions(context, sharedPreferences,
-                R.string.show_remote_search_suggestions_key);
+        // zen: remote suggestions (YouTube autocomplete) are permanently off
+        return false;
     }
 
     private static void disableMediaTunnelingIfNecessary(@NonNull final Context context) {

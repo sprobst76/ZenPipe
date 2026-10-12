@@ -142,7 +142,8 @@ public final class ChannelTabHelper {
                                          final SharedPreferences sharedPreferences,
                                          final String tab) {
         final int key = ChannelTabHelper.getShowTabKey(tab);
-        if (key == -1 || ChannelTabs.SHORTS.equals(tab)) { // ZenPipe: no shorts
+        if (key == -1 || ChannelTabs.SHORTS.equals(tab)
+                || ChannelTabs.LIVESTREAMS.equals(tab)) { // ZenPipe: no shorts, no live
             return false;
         }
         return showChannelTab(context, sharedPreferences, key);
@@ -157,7 +158,8 @@ public final class ChannelTabHelper {
         }
 
         final int key = ChannelTabHelper.getFetchFeedTabKey(contentFilters.get(0));
-        if (key == -1 || ChannelTabs.SHORTS.equals(contentFilters.get(0))) { // ZenPipe: no shorts
+        if (key == -1 || ChannelTabs.SHORTS.equals(contentFilters.get(0))
+                || ChannelTabs.LIVESTREAMS.equals(contentFilters.get(0))) { // ZenPipe: no live
             return false;
         }
 

@@ -161,7 +161,7 @@ class FeedViewModel(
             .getBoolean(context.getString(R.string.feed_show_partially_watched_items_key), true)
 
         private fun getShowFutureItemsFromPreferences(context: Context) = PreferenceManager.getDefaultSharedPreferences(context)
-            .getBoolean(context.getString(R.string.feed_show_future_items_key), true)
+            .getBoolean(context.getString(R.string.feed_show_future_items_key), false)
 
         fun getFactory(context: Context, groupId: Long) = viewModelFactory {
             initializer {

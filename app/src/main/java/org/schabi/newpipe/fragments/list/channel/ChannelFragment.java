@@ -430,7 +430,7 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
             );
         }
 
-        menuNotifyButton.setVisible(subscription != null);
+        menuNotifyButton.setVisible(false); // zen: no new-video notifications
     }
 
     private void setNotify(final boolean isEnabled) {
