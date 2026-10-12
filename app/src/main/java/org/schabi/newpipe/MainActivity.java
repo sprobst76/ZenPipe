@@ -206,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         MigrationManager.showUserInfoIfPresent(this);
+
+        // ZenPipe: ask for the intention once per app start
+        org.schabi.newpipe.util.ZenIntentPrompt.showIfNeeded(this);
     }
 
     @Override
