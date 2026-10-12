@@ -265,14 +265,16 @@ Grundlage: `research-achtsamer-konsum.md` (dort Evidenz und Quellen). Neue Ideen
 
 ---
 
+> **Stand 2026-10-12 – Phase 0 teilweise erledigt:** L4, L5, L7, L8, L9, L10, L14 und Settings-Verifikation/Unit-Tests (L17) sind umgesetzt (siehe `.planning/STATE.md`). Zusaetzlich Shorts ueberall gesperrt (inkl. Direktlinks). Offen: L12, L13, L18, Feed-Default/Listenansicht.
+
 ## 5. Vorgeschlagene Roadmap
 
 **Phase 0 – Hygiene und Lücken schließen (≈ 2–3 Tage, alles S, geringes Merge-Risiko)**
 1. `applicationId`, App-Name, Crash-Report-Ziel (L18)
 2. Settings-Screens verifizieren, Unit-Tests laufen lassen (L17)
-3. Shorts: Suche committen, Listen bereinigen, RSS-Schnellmodus prüfen (L4, L5)
-4. Live sperren, „kommende“ Default aus, Remote-Vorschläge Default aus (L7, L8)
-5. „Im Browser öffnen“ ausblenden, Neue-Video-Benachrichtigungen und Glocke verstecken (L9, L14)
+3. Shorts: Suche committen, Listen bereinigen, RSS-Schnellmodus prüfen (L4, L5) **[ERLEDIGT 2026-10-12]**
+4. Live sperren, „kommende“ Default aus, Remote-Vorschläge Default aus (L7, L8) **[ERLEDIGT 2026-10-12]**
+5. „Im Browser öffnen“ ausblenden, Neue-Video-Benachrichtigungen und Glocke verstecken (L9, L14) **[ERLEDIGT 2026-10-12]**
 6. Downloads-Eintrag zurück, „Inhalt der Hauptseite“ gefiltert zurück (L12, L13)
 7. Feed-Default „gesehene ausblenden“, Listenansicht Default „Liste“
 

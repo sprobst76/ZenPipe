@@ -22,3 +22,13 @@
 - Absicht (Freitext) wird nicht gespeichert (nicht gewuenscht).
 - Der RouterActivity-Auswahldialog erscheint vor der Absichtsabfrage (Dialog kommt erst in MainActivity).
 - Branding/applicationId/Signierung, Tageslimit etc. spaeter.
+
+## Phase 0 (2026-10-12), je Commit `zen:`, auf Defy ZY32CVNR2B verifiziert (Logcat ohne FATAL, `assembleDebug runCheckstyle testDebugUnitTest` gruen)
+- "Im Browser oeffnen" -> "Link kopieren" (neuer String `zen_copy_link`, ersetzt `open_in_browser` an allen Aufrufstellen). `ShareUtils.openUrlInBrowser` kopiert YouTube-URLs statt Browser; `openUrlInApp` leitet YouTube-URLs an die eigene App (nie an die YouTube-App; Fund: Beschreibungs-Link auf youtube.com/hashtag oeffnete die YouTube-App). Nicht aufloesbar -> Link kopieren. Gepruefte Stellen: Long-Press-Menue, Kanal-Overflow, Hashtag-Klick.
+- Livestreams: Kanal-Tab und Feed-Abruf gesperrt (`ChannelTabHelper`), "kommende" im Feed Default aus (`FeedViewModel`), Eintraege aus Einstellungslisten entfernt. Kanalseite zeigt nur Videos/Playlists/About.
+- Remote-Suchvorschlaege fest aus (`NewPipeSettings`), Schalter entfernt; lokale Vorschlaege bleiben.
+- "Alle abspielen"-Leiste auf Kanal-Tabs ausgeblendet; Hashtag-Klick kopiert statt Suche zu oeffnen.
+- Shorts ueberall: zentral in `InfoListAdapter.addInfoItemList` gefiltert (Suche, Playlists, Kanal), RSS-Schnellmodus fest aus (`FeedLoadManager`, Schalter + Hilfe-Icon entfernt), Shorts-Eintraege aus Einstellungslisten, `youtube.com/shorts/...`-Links in `RouterActivity` blockiert (Toast, `adb am start` verifiziert).
+- Kanal-Glocke (Neue-Video-Benachrichtigung) ausgeblendet.
+- Offen/bewusst nicht gemacht: Live-Streams in Suchergebnissen (Live-Kachel gesehen) und Playlists; Shorts-Filter nicht mit echtem Short in Playlist getestet; leere gefilterte Seiten koennen Nachladen bremsen; Leerraum ueber Kanal-Videoliste (ausgeblendete Play-Leiste); L12/L13 (Downloads-Eintrag, Hauptseiten-Inhalt), Feed-Default "gesehene ausblenden"/Listenansicht, L18 (applicationId/Crash-Reports) nicht Teil dieses Auftrags; Autoplay bleibt dauerhaft aus (Nutzerentscheidung).
+
