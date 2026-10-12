@@ -6,7 +6,6 @@
 package org.schabi.newpipe.error
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -15,7 +14,6 @@ import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.IntentCompat
-import androidx.core.net.toUri
 import com.grack.nanojson.JsonWriter
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -57,9 +55,6 @@ class ErrorActivity : AppCompatActivity() {
             return "$name $osBase ${Build.VERSION.RELEASE} - ${Build.VERSION.SDK_INT}"
         }
 
-    private val errorEmailSubject: String
-        get() = "$ERROR_EMAIL_SUBJECT ${getString(R.string.app_name)} ${BuildConfig.VERSION_NAME}"
-
     // /////////////////////////////////////////////////////////////////////
     // Activity lifecycle
     // /////////////////////////////////////////////////////////////////////
@@ -87,9 +82,9 @@ class ErrorActivity : AppCompatActivity() {
         // print current time, as zoned ISO8601 timestamp
         currentTimeStamp = ZonedDateTime.now().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
-        binding.errorReportEmailButton.setOnClickListener { _ ->
-            openPrivacyPolicyDialog(this, "EMAIL")
-        }
+        // ZenPipe: no e-mail reports (the NewPipe address must not receive ZenPipe crashes);
+        // reports can be copied, shared or opened as a ZenPipe GitHub issue.
+        binding.errorReportEmailButton.visibility = android.view.View.GONE
 
         binding.errorReportCopyButton.setOnClickListener { _ ->
             ShareUtils.copyToClipboard(this, buildMarkdown())
@@ -143,14 +138,7 @@ class ErrorActivity : AppCompatActivity() {
                 ShareUtils.openUrlInApp(context, context.getString(R.string.privacy_policy_url))
             }
             .setPositiveButton(R.string.accept) { _, _ ->
-                if (action == "EMAIL") { // send on email
-                    val intent = Intent(Intent.ACTION_SENDTO)
-                        .setData("mailto:".toUri()) // only email apps should handle this
-                        .putExtra(Intent.EXTRA_EMAIL, arrayOf(ERROR_EMAIL_ADDRESS))
-                        .putExtra(Intent.EXTRA_SUBJECT, errorEmailSubject)
-                        .putExtra(Intent.EXTRA_TEXT, buildJson())
-                    ShareUtils.openIntentInApp(context, intent)
-                } else if (action == "GITHUB") { // open the NewPipe issue page on GitHub
+                if (action == "GITHUB") { // open the ZenPipe issue page on GitHub
                     ShareUtils.openUrlInApp(this, ERROR_GITHUB_ISSUE_URL)
                 }
             }
@@ -274,9 +262,6 @@ class ErrorActivity : AppCompatActivity() {
         // BUNDLE TAGS
         const val ERROR_INFO = "error_info"
 
-        private const val ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org"
-        private const val ERROR_EMAIL_SUBJECT = "Exception in "
-
-        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/TeamNewPipe/NewPipe/issues"
+        private const val ERROR_GITHUB_ISSUE_URL = "https://github.com/sprobst76/ZenPipe/issues"
     }
 }

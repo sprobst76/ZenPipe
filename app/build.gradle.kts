@@ -48,9 +48,9 @@ configure<ApplicationExtension> {
             version = release(NEWPIPE_VERSION_SDK_TARGET)
         }
 
-        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: NEWPIPE_VERSION_CODE
+        versionCode = System.getProperty("versionCodeOverride")?.toInt() ?: ZENPIPE_VERSION_CODE
 
-        versionName = NEWPIPE_VERSION_NAME
+        versionName = ZENPIPE_VERSION_NAME
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

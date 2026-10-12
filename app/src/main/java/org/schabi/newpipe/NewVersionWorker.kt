@@ -177,6 +177,8 @@ class NewVersionWorker(
          */
         @JvmStatic
         fun enqueueNewVersionCheckingWork(context: Context, isManual: Boolean) {
+            // ZenPipe: never talk to NewPipe's release API (isReleaseApk is always false)
+            if (!ReleaseVersionUtil.isReleaseApk) return
             val workRequest = OneTimeWorkRequestBuilder<NewVersionWorker>()
                 .setInputData(workDataOf(IS_MANUAL to isManual))
                 .build()
