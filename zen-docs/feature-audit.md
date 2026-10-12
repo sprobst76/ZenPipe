@@ -1,6 +1,6 @@
 # ZenPipe – Feature-Audit (NewPipe-Bestand + neue Zen-Features)
 
-**Stand:** 12.10.2026 · Branch `zen` (HEAD `f120f8cc5`, dazu eine noch nicht committete Änderung an `SearchFragment.java`, an der parallel gearbeitet wird)
+**Stand:** 12.10.2026 · Branch `zen` (Ursprungsstand HEAD `f120f8cc5`; Werte unten bei Widerspruch durch `rules.md` ersetzt, überholte Stellen sind markiert)
 **Bezug:** `ZenPipe-Konzept_v0.1.md`, `research-achtsamer-konsum.md`, `.planning/STATE.md`
 **Methode:** Code-Durchsicht von `app/src/main` (alle `res/xml/*_settings.xml`, `MainActivity`, `RouterActivity`, `VideoDetailFragment`, `Player`/`PlayerHelper`, `local/feed/*`, `fragments/list/*`, `info_list/dialog/*`, `settings/tabs/*`, `error/*`, `NewVersionWorker`, `AndroidManifest.xml`) plus eine kurze Web-Recherche zu vergleichbaren Tools. Es wurde nichts gebaut, nichts installiert und kein Code geändert.
 
@@ -22,7 +22,7 @@ Der MVP greift an den richtigen Stellen: Drawer, Kiosk-Tabs, Auto-Queue, Komment
 2. **Die Absichtsabfrage ist umgehbar:** Sie erscheint nur einmal pro Prozess, nicht bei geteilten Links (`RouterActivity` → Hintergrund/Popup) und nicht nach Rückkehr aus dem Hintergrund. Die Absicht wird auch nicht gespeichert.
 3. **Fork-Hygiene:** `applicationId` ist noch `org.schabi.newpipe` (Release), und Crash-Reports gehen an NewPipe (E-Mail und GitHub-Issues). Beides sollte vor jeder Verteilung geändert werden.
 
-Für die neuen Zen-Features ist die wichtigste Architekturentscheidung: **ein eigenes Paket `org.schabi.newpipe.zen` mit eigenem SharedPreferences-File**. Upstream-Klassen bekommen nur Einzeiler-Hooks. Das hält den Patch-Satz rebasebar und macht den Time-Lock möglich, weil Zen-Werte dann nicht über „Einstellungen zurücksetzen“ oder „Daten importieren“ ausgehebelt werden können.
+Für die neuen Zen-Features ist die wichtigste Architekturentscheidung: **ein eigenes Paket `org.schabi.newpipe.zen` mit eigenem SharedPreferences-File (`zen_state`, nicht `zen`)**. Upstream-Klassen bekommen nur Einzeiler-Hooks. Das hält den Patch-Satz rebasebar und macht den Time-Lock möglich, weil Zen-Werte dann nicht über „Einstellungen zurücksetzen“ oder „Daten importieren“ ausgehebelt werden können.
 
 **Top 10 (Reihenfolge = Empfehlung)**
 
@@ -30,11 +30,11 @@ Für die neuen Zen-Features ist die wichtigste Architekturentscheidung: **ein ei
 |---|---|---|---|
 | 1 | Fork-Hygiene: eigene `applicationId`/App-Name, Crash-Report-Ziel auf ZenPipe-Repo umstellen | S | gering |
 | 2 | „Im Browser öffnen“ für YouTube-Inhalte entfernen (zentral in `ShareUtils.openUrlInBrowser` oder in den Menüs) | S | gering–mittel |
-| 3 | Absichtsabfrage v2: auch in `RouterActivity`, erneut nach ≥ 15 min im Hintergrund, Absicht als Text bzw. Auswahl speichern | M | gering |
+| 3 | Absichtsabfrage v2: auch in `RouterActivity`, erneut nach ≥ 5 min im Hintergrund (Wert aktualisiert, siehe `rules.md`), Absicht als Text bzw. Auswahl speichern | M | gering |
 | 4 | Live-Streams standardmäßig aus Feed-Abruf und Kanal-Tabs nehmen (wie Shorts per Code-Filter); Remote-Suchvorschläge standardmäßig aus | S | gering |
 | 5 | Shorts-Lücken schließen: Suche (läuft parallel), Einstellungslisten bereinigen, Shorts über RSS-Schnellmodus prüfen | S | gering |
 | 6 | Feed mit Ende („Du bist durch“, nur Neues seit letztem Besuch, Standardfilter „Gesehene ausblenden“) | M | mittel |
-| 7 | Zen-Einstellungsbereich + **Time-Lock** (Strenger sofort, Lockern ab nächstem Tag 4:00) + monotone Uhr | M | gering |
+| 7 | Zen-Einstellungsbereich + **Time-Lock** (Strenger sofort, Lockern erst nach 24 h und abbrechbar, siehe `spec-einstellungs-sperre.md`) + monotone Uhr | M | gering |
 | 8 | Sitzungs-Timer mit sanftem Ende (laufendes Video zu Ende, dann Pause-Screen) + Tageslimit mit Escape-Ventil „Nur Audio/Später-Liste“ | M | gering–mittel |
 | 9 | Ruhiges Erscheinungsbild: Standard „Liste“ statt Karten, Thumbnails gedämpft oder aus (NewPipe kann „keine Bilder“ schon), optional Graustufen | S–M | gering |
 | 10 | Reflexion: am Sitzungsende „Hast du gefunden, was du wolltest?“ + Wochenbilanz ohne Schuldgefühl (inkl. Umgehungs-Protokoll) | M | gering |
@@ -68,7 +68,7 @@ Alle Fundstellen relativ zu `app/src/main/`.
 | Kommentare-Tab | `VideoDetailFragment.onCreate` (`showComments = false`) | **ERLEDIGT** [Code] | – | gering | `shouldShowComments()` prüft `showComments`. `CommentRepliesFragment` ist nur über Kommentare erreichbar, also mit tot. |
 | Related/„Nächstes Video“ (Phone-Tab und Tablet-Seitenleiste) | `VideoDetailFragment` (`showRelatedItems = false`, `relatedItemsLayout` → GONE, Z. 1508/1925) | **ERLEDIGT** [Code] | – | gering | Beide Layouts abgedeckt. |
 | Auto-Queue (Related ans Ende der Queue) | `PlayerHelper.isAutoQueueEnabled` → `false`; Aufruf in `Player.maybeAutoQueueNextStream` | **ERLEDIGT** [Code] | – | gering | Das ist der eigentliche „nächstes Video“-Mechanismus. `RelatedItemsFragment` hat noch einen Schalter auf `auto_queue_key`, der ist aber nicht mehr erreichbar und wird ignoriert. |
-| „Autoplay“ (Autostart des **geöffneten** Videos) | `PlayerHelper.getAutoplayType` → `NEVER` | **ERLEDIGT**, **Neubewertung** empfohlen | S | gering | [Code] In NewPipe bedeutet `autoplay_key` nur „Video beim Öffnen der Detailseite sofort starten“. Kein Folgevideo, das macht Auto-Queue. `NEVER` ist ein zusätzlicher Bremspunkt (gut), führt laut STATE aber zum Auswahldialog bei Links. Option: belassen (Empfehlung, kostet nur einen Tipp) oder für explizit gewählte Videos wieder `WIFI`. |
+| „Autoplay“ (Autostart des **geöffneten** Videos) | `PlayerHelper.getAutoplayType` → `NEVER` | **ERLEDIGT, dauerhaft aus (Nutzerentscheidung)** | S | gering | [Code] In NewPipe bedeutet `autoplay_key` nur „Video beim Öffnen der Detailseite sofort starten“. Kein Folgevideo, das macht Auto-Queue. `NEVER` ist ein zusätzlicher Bremspunkt (gut), führt laut STATE aber zum Auswahldialog bei Links. Entschieden: bleibt aus, auch nicht für explizit gewählte Videos. [überholt: frühere Empfehlung „Neubewertung/WIFI“] |
 | Beschreibung, Kapitel, Metadaten | `show_description_key`, `show_meta_info_key`, Segmente | **BEHALTEN** | – | – | Kapitel helfen gezielt zu schauen. |
 | Hashtags und Tags in der Beschreibung öffnen eine Suche | `util/text/HashtagLongPressClickableSpan`, `BaseDescriptionFragment:266` | **UMKONFIGURIEREN** (später): Tags nicht klickbar | S | gering | [Code] Kleiner Kaninchenbau („#xyz“ → Suchergebnisse). Niedrige Priorität. |
 | Links in der Beschreibung auf andere Videos | `TextLinkifier` | **BEHALTEN** | – | – | Explizite, vom Creator gesetzte Verweise. Die Absicht entscheidet. |
@@ -185,12 +185,12 @@ Alle Punkte **[Code]**, sofern nicht anders markiert.
 
 | # | Bereich | Lücke | Fundstelle | Fix-Vorschlag | Aufwand | Merge-Risiko |
 |---|---|---|---|---|---|---|
-| L1 | Absichtsabfrage | Nur einmal pro **Prozess** (`static shownInThisProcess`). „Doch nicht“ ruft `finishAffinity()`, der Prozess lebt weiter, und der nächste Start aus dem Launcher zeigt **keine** Abfrage. | `util/ZenIntentPrompt.java` | Zeitstempel statt Prozess-Flag: zeigen, wenn letzte Antwort > 15 min her ist **oder** nach „Doch nicht“. Prüfung in `onResume`. | S | gering |
+| L1 | Absichtsabfrage | **[ERLEDIGT 2026-10-12, Phase 1 Teil 2]** (nach „Doch nicht“ fragt der nächste Start wieder, Router-Wiedergabe fragt ebenfalls, nur eigene Wiedergabe unterdrückt die Abfrage). Ursprünglicher Befund: Nur einmal pro **Prozess** (`static shownInThisProcess`). „Doch nicht“ ruft `finishAffinity()`, der Prozess lebt weiter, und der nächste Start aus dem Launcher zeigt **keine** Abfrage. | `util/ZenIntentPrompt.java` | Zeitstempel statt Prozess-Flag: zeigen, wenn letzte Antwort > 5 min her ist **oder** nach „Doch nicht“. Prüfung in `onResume`. | S | gering |
 | L2 | Absichtsabfrage | Geteilte Links und `vnd.youtube`-Intents öffnen Hintergrund/Popup ohne Abfrage. | `RouterActivity` | Gleiche Abfrage (Dialog) vor Ausführung der Choice. | S–M | gering |
 | L3 | Absichtsabfrage | Keine Eingabe, nichts gespeichert, kein Weiterleiten in Suche/Abo/Später-Liste. | `ZenIntentPrompt` | Implementation-Intention-Dialog (Abschnitt 4, Z1). | M | gering |
 | L4 | Shorts | Suche läuft parallel (uncommittet). Einstellungslisten zeigen weiter „Shorts“ (Kanal-Tabs, Feed-Abruf), Häkchen wirkungslos. | `settings_keys.xml:306, 410` | Einträge aus beiden Arrays entfernen (Ressourcen-Diff) **oder** in den Settings-Fragments per Code filtern (konfliktärmer). | S | gering |
 | L5 | Shorts | Schnellmodus/RSS enthält vermutlich Shorts. Der Tab-Filter greift dort nicht. | `FeedLoadManager:67/170` | Am Gerät prüfen. Falls ja: Schnellmodus-Schalter verstecken bzw. erzwingen aus. `StreamEntity` hat kein Shorts-Feld, ein DB-Filter wäre L. | S | gering |
-| L6 | Shorts | Shorts-URLs (`youtube.com/shorts/…`) über Teilen/Links öffnen den normalen Player. Das ist ok (einzelnes Video, kein Swipe-Feed). | `RouterActivity` | Behalten, kein Fix nötig [Einschätzung]. | – | – |
+| L6 | Shorts | **[ERLEDIGT, geändert]** `youtube.com/shorts/…`-Links werden in `RouterActivity` blockiert (Toast). Restrisiko: Watch-Links auf Short-IDs. [überholt: „ok, kein Fix nötig“] | `RouterActivity` | – | – | – |
 | L7 | Live | Livestreams im Feed-Abruf und als Kanal-Tab aktiv. Kein Live-Kiosk mehr, aber Live-Kacheln erscheinen im Feed (inkl. „kommend“). | `ChannelTabHelper`, `FeedViewModel` (`feed_show_future_items` Default `true`) | `LIVESTREAMS` analog zu Shorts sperren (2 Zeilen), „kommende“ Default aus. | S | gering |
 | L8 | Vorschläge | Remote-Suchvorschläge standardmäßig an. | `content_settings.xml:83` | Default auf nur lokal (Ressource) oder in `SearchFragment:793` remote ignorieren. | S | gering |
 | L9 | Browser | „Im Browser öffnen“ an 19 Stellen. | `ShareUtils.openUrlInBrowser` u. a. | Menüeinträge ausblenden. Nicht `ShareUtils` selbst ändern, das nutzen auch About/Lizenzen. | S | gering–mittel |
@@ -222,8 +222,8 @@ Grundlage: `research-achtsamer-konsum.md` (dort Evidenz und Quellen). Neue Ideen
 
 | # | Feature | Beschreibung | Evidenz | Aufwand | Umgehungsrisiko | Merge-Risiko |
 |---|---|---|---|---|---|---|
-| Z1 | **Absicht v2 (Implementation Intention)** | Dialog: „Ich schaue [Kanal/Thema/Video] für [10/20/30/45 min]“. Chips aus Abo-Gruppen und Später-Liste, Freitext optional. Danach direkt zur passenden Stelle (Suche mit Begriff, Kanal, Playlist). Wartezeit bleibt 5 s, eskaliert bei mehreren Öffnungen pro Stunde (wie ScreenZen). Absicht + gewählte Dauer werden gespeichert und speisen Z3/Z4/Z10. Auch in `RouterActivity` und nach Rückkehr aus dem Hintergrund (> 15 min). | stark (One Sec PNAS, Gollwitzer, LocknType) | M | gering–mittel | gering |
-| Z2 | **Feed mit Ende** | Default: nur „neu seit letztem abgeschlossenen Besuch“, gesehene ausgeblendet. Am Listenende eine Karte „Du bist durch – 7 neue Videos von 5 Kanälen“ + Buttons „Später-Liste“, „App schließen“. Ältere Videos nur über „Ältere zeigen“. Kein Pull-to-Refresh-Nachladen innerhalb von X h (nutzt `feed_update_threshold`). | mittel (Rixen 2023, Stopp-Signale) | M | gering | mittel (`FeedFragment.kt`) |
+| Z1 | **Absicht v2 (Implementation Intention)** | Dialog: „Ich schaue [Kanal/Thema/Video] für [10/20/30/45 min]“. Chips aus Abo-Gruppen und Später-Liste, Freitext optional. Danach direkt zur passenden Stelle (Suche mit Begriff, Kanal, Playlist). Wartezeit bleibt 5 s, eskaliert bei mehreren Öffnungen pro Stunde (wie ScreenZen). Absicht + gewählte Dauer werden gespeichert und speisen Z3/Z4/Z10. Auch in `RouterActivity` und nach Rückkehr aus dem Hintergrund (> 5 min). [Router und Rückkehr umgesetzt; Chips/Freitext nicht] | stark (One Sec PNAS, Gollwitzer, LocknType) | M | gering–mittel | gering |
+| Z2 | **Feed mit Ende** | **[überholt, siehe `spec-feed-mit-ende.md`, `rules.md`]** Umgesetzt als Ausgabe mit 15 Videos, frühestens 60 min nach der letzten, Deckel 30 verschiedene Videos pro Zen-Tag, Abschlusskarte „Du bist durch“, kein „Ältere zeigen“. Ursprünglich: nur „neu seit letztem Besuch“, Karte mit „App schließen“. | mittel (Rixen 2023, Stopp-Signale) | M | gering | mittel (`FeedFragment.kt`) |
 | Z3 | **Sitzungs-Timer mit sanftem Ende** | Startet mit der Dauer aus Z1. Bei Ablauf: laufendes Video zu Ende, dann **keine** neue Wiedergabe aus Feed/Suche, sondern ein ruhiger Pause-Screen („Deine 20 Minuten sind um. Hast du gefunden, was du wolltest? Ja / Teilweise / Nein“). „5 Minuten mehr“ ist möglich, wird protokolliert. Zählt alle Player inkl. Hintergrund, mit Option „Audio zählt halb“. | mittel (MyTime) | S–M | mittel (ohne Time-Lock) | gering (Hook in `Player`) |
 | Z4 | **Reflexion am Ende** | Die Ja/Teilweise/Nein-Frage aus Z3, auch beim Verlassen der App nach > 5 min. Speichert, ob die Absicht erfüllt wurde. Keine Bewertung, nur Spiegel. | schwach–mittel (Selbstreflexion; „Agency“ bei Lukoff) [Einschätzung] | S | – | gering |
 | Z5 | **Ruhige Darstellung** | Zen-Schalter „Ruhig“: Liste statt Karten, Thumbnails gedämpft (Graustufen + 50 % Deckkraft, Tippen zeigt Farbe) oder aus, View-Zahlen ausgeblendet. Optional **Graustufen für die ganze App** per `ColorMatrix` auf der Decor-View, z. B. automatisch ab 21 Uhr oder nach dem Limit. | gut für systemweite Graustufen (Zimmermann & Sobolev 2023), in-app unbelegt | S–M | gering | gering (Decor-View) bis mittel (Holder) |
@@ -232,13 +232,13 @@ Grundlage: `research-achtsamer-konsum.md` (dort Evidenz und Quellen). Neue Ideen
 
 | # | Feature | Beschreibung | Evidenz | Aufwand | Umgehungsrisiko | Merge-Risiko |
 |---|---|---|---|---|---|---|
-| Z6 | **Time-Lock für Zen-Einstellungen** | Strenger sofort, Lockern wird zur „ausstehenden Änderung“ mit Wirkung ab nächstem Tag 4:00 (abbrechbar). Optional Sperrzeitraum 7/30 Tage. Zen-Einstellungen öffnen erst nach 30-s-Countdown + Begründungsfeld. | stark (Allcott 2022, Commitment Devices) | M | gering | gering |
-| Z7 | **Tageslimit mit Escape-Ventil** | Tagesbudget (z. B. 45 min Video). Danach: nur Audio (Hintergrundplayer), nur Später-Liste oder ein „Notfall-Video“ pro Tag mit 60 s Wartezeit. Feed und Suche gesperrt. Tagesgrenze 4:00. | stark (Allcott) | M | gering mit Z6 | gering–mittel |
+| Z6 | **Time-Lock für Zen-Einstellungen** | **[aktualisiert, siehe `spec-einstellungs-sperre.md`]** Strenger wirkt sofort, Lockern wirkt erst nach 24 h und ist abbrechbar; danach 24 h keine weitere Änderung; 3 s Bestätigung mit Zusammenfassung, 5 min Rückgängig. [überholt: „Wirkung ab nächstem Tag 4:00“, 30-s-Countdown + Begründungsfeld] | stark (Allcott 2022, Commitment Devices) | M | gering | gering |
+| Z7 | **Tageslimit mit Escape-Ventil** | Tagesbudget (Wert offen, Entscheidung F2: Minuten-Limit ja, aber erst nach der Einstellungs-Sperre; „45 min“ war nur ein Beispiel und nicht mit „30 Videos“ zu verwechseln). Danach: nur Audio (Hintergrundplayer), nur Später-Liste oder ein „Notfall-Video“ pro Tag mit 60 s Wartezeit. Feed und Suche gesperrt. Tagesgrenze 4:00. | stark (Allcott) | M | gering mit Z6 | gering–mittel |
 | Z8 | **Nachtruhe** | Zeitfenster (z. B. 22:30–6:00): nur Audio, Graustufen, Feed aus, Absichtsabfrage mit längerer Wartezeit. Kein Video-Start. | [Einschätzung]; Schlaf-Bezug plausibel | S | gering mit Z6 | gering |
 | Z9 | **Umgehungsschutz und Protokoll** | Erkennt Uhr-Rücksprünge, Neuinstallation (`firstInstallTime`), Daten-Reset (fehlender Zen-Marker bei vorhandener DB), „5 min mehr“, Lockerungen. Alles landet in der Wochenbilanz. Keine Strafe, Sichtbarkeit. | Research 1.5/3.1 | S–M | – | gering |
 | Z10 | **Wochen-/Tagesbilanz ohne Schuldgefühl** | Ein Screen: Zeit pro Tag (Video/Audio getrennt), Absichten erfüllt ja/teilweise/nein, häufigste Kanäle, Lern- vs. Unterhaltungsanteil (Z12), Umgehungen. Neutrale Sprache („Diese Woche: 3 h 10 min, davon 1 h Audio“), kein Ranking, keine roten Zahlen. Optional sonntags als einmalige Benachrichtigung. | schwach (Self-Tracking allein wirkt kaum), sinnvoll mit Z6/Z7 | M | – | gering |
-| Z11 | **„Später ansehen“ mit Budget** | Fest angelegte lokale Playlist „Später“, schnell per Long-Press befüllbar. Obergrenze z. B. 15 Einträge (der älteste muss raus oder wird automatisch entfernt nach 30 Tagen). Wird in Z1 als erste Option angeboten. Macht aus Impuls („will ich sehen“) eine aufgeschobene, bewusste Entscheidung. | [Einschätzung]; passt zu „Ausweg statt Verbot“ | S–M | – | gering (`StreamDialogDefaultEntry` + neue Datei) |
-| Z12 | **Kategorien pro Kanal (Lernen/Musik/Unterhaltung)** | Auf Basis der vorhandenen **Feed-Gruppen**: drei vorgeschlagene Gruppen beim Einrichten. Unterhaltung zählt voll aufs Limit, Lernen nur halb, Musik/Podcast im Audio-Modus gar nicht (konfigurierbar). Feed-Gruppen-Tabs wieder erlauben (L12). | [Einschätzung] | M | mittel (Selbsteinstufung) | gering |
+| Z11 | **„Später ansehen“ mit Budget** | Fest angelegte lokale Playlist „Später“, schnell per Long-Press befüllbar. Obergrenze 10 Einträge (umgesetzt, `ZenWatchLater.MAX_ITEMS`; „15“ war ein Beispiel) (der älteste muss raus oder wird automatisch entfernt nach 30 Tagen). Wird in Z1 als erste Option angeboten. Macht aus Impuls („will ich sehen“) eine aufgeschobene, bewusste Entscheidung. | [Einschätzung]; passt zu „Ausweg statt Verbot“ | S–M | – | gering (`StreamDialogDefaultEntry` + neue Datei) |
+| Z12 | **Kategorien pro Kanal (Lernen/Musik/Unterhaltung)** | Auf Basis der vorhandenen **Feed-Gruppen**: drei vorgeschlagene Gruppen beim Einrichten. Unterhaltung zählt voll aufs Limit, Lernen nur halb, Musik gar nicht. **Podcasts zählen für die Pflichtpause mit** (Nutzerentscheidung; [überholt: „Podcast zählt nicht“]). Feed-Gruppen-Tabs wieder erlauben (L12). | [Einschätzung] | M | mittel (Selbsteinstufung) | gering |
 | Z13 | **Abo-Hygiene** | Monatlicher Vorschlag: „Diese 8 Kanäle hast du seit 90 Tagen nicht angesehen – abbestellen oder in ‚Ruhend‘ verschieben?“ Daten aus Verlauf + Abos. Ruhend = nicht im Feed, aber im Kanal-Verzeichnis. Weniger Abos = kürzerer Feed. | [Einschätzung] | M | – | gering |
 
 ### Später / optional
@@ -276,7 +276,7 @@ Grundlage: `research-achtsamer-konsum.md` (dort Evidenz und Quellen). Neue Ideen
 4. Live sperren, „kommende“ Default aus, Remote-Vorschläge Default aus (L7, L8) **[ERLEDIGT 2026-10-12]**
 5. „Im Browser öffnen“ ausblenden, Neue-Video-Benachrichtigungen und Glocke verstecken (L9, L14) **[ERLEDIGT 2026-10-12]**
 6. Downloads-Eintrag zurück, „Inhalt der Hauptseite“ gefiltert zurück (L12, L13)
-7. Feed-Default „gesehene ausblenden“, Listenansicht Default „Liste“
+7. ~~Feed-Default „gesehene ausblenden“~~ [durch das Ausgabe-Modell ersetzt], Listenansicht Default „Liste“
 
 **Phase 1 – Absicht und Stopp-Signale (≈ 1–1,5 Wochen)**
 1. Zen-Grundgerüst: Paket `zen`, Prefs-File, Zen-Einstellungsbereich, Zeitbasis
@@ -337,3 +337,7 @@ Begründung der Reihenfolge: Phase 0 schließt Seitentüren, die alle späteren 
 - **Z11 Spaeter-Liste: ERLEDIGT** (max 10, Ablauf 30 Tage, Long-Press-Aktion im Feed); Umgehung ueber "Weitere Optionen -> Zur Playlist hinzufuegen" bewusst akzeptiert (W25).
 - **Kanalseiten 15 / Suche 2 Seiten: ERLEDIGT, verifiziert** (15 distinct Titel gezaehlt, Footer "Refine your search" nach 2 Seiten).
 - Musik: Feed schliesst Musik per Heuristik aus (Z12 nur teilweise).
+
+## Update Phase 1 Teil 2 (2026-10-12)
+- **L1 Absichtsabfrage-Lücken: ERLEDIGT, auf dem Geraet verifiziert** (Neuöffnen nach „Doch nicht“ fragt wieder; Wiedergabe-Unterdrückung nur durch die eigene Wiedergabe, `ZenPlayback`; `RouterActivity` fragt vor Video-/Hintergrund-/Popup-Wiedergabe über geteilte Links, `ZenIntentPrompt.gate`; Uhr: Neustart-Erkennung per Boot-Zähler, Pausen laufen über `ZenCountdown` nur auf Gerätelaufzeit). Restrisiko: ein Vorstellen der Uhr plus Neustart kann Ausgabe-Takt und Zen-Tag weiter verschieben (nur im ZenLog als `clock_reboot_gap` sichtbar), nicht aber die Pause.
+- **Pflichtpause nach Abbruch: ERLEDIGT** (siehe `spec-pause-nach-abbruch.md`, `rules.md`). Z-Eintrag „Später fortsetzen“ (F6) als Rückfrage beim Schließen über das Mini-Player-X umgesetzt, nicht als Benachrichtigungs-Aktion (Android 11 zeigt nur 3 Aktionen).

@@ -2,7 +2,7 @@
 
 **Version:** 0.1
 **Datum:** 12.10.2026
-**Status:** Idee / Entwurf
+**Status:** Idee / Entwurf (historisch; gültige Regeln stehen in `rules.md` und den Specs)
 
 ## 1. Ausgangslage
 

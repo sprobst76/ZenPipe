@@ -138,6 +138,8 @@ Quellen:
 | **Umgehungs-Protokoll** | Jede Lockerung, jedes „5 Minuten mehr“, Uhr-Anomalien und App-Neuinstallationen (Erkennung über `firstInstallTime`) landen in einer **Wochenbilanz** | Unbewusstes Umgehen | – | S–M |
 | **Escape-Ventil statt Härte** | Nach dem Limit: nur Audio, nur „Später-Liste“, oder ein Notfall-Video pro Tag mit langer Wartezeit | Reaktanz bzw. Abwandern in die YouTube-App | – | M |
 
+> **[Historisch, ersetzt durch `spec-einstellungs-sperre.md` und `rules.md`: Lockern wirkt erst nach 24 h, nicht „bis 4:00“.]**
+
 **Empfehlung für die Lock-Mechanik [Einschätzung]:** Ein einziges, durchgängiges Prinzip: **„Lockern dauert bis morgen 4:00 Uhr“**, mit Tagesgrenze 4:00 statt Mitternacht, damit Nachtsessions nicht den nächsten Tag freischalten. Zusätzlich optional ein Partner-PIN als Sofort-Freigabe. Das ist leicht verständlich, leicht zu implementieren (gespeicherter `pendingConfig` + `effectiveAt`) und deckt den „heißen Moment“ vollständig ab.
 
 ### 3.2 Auf Android-Systemebene (ohne Root)
