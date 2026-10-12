@@ -97,6 +97,7 @@ open class App :
         NewPipeSettings.initSettings(this)
 
         // ZenPipe: a playback session left open by a killed process counts as an aborted video
+        org.schabi.newpipe.zen.ZenSettings.init(this)
         org.schabi.newpipe.zen.ZenPause.recover(this)
 
         NewPipe.init(

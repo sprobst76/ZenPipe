@@ -16,10 +16,8 @@ enum class ZenKind { VIDEO, PODCAST, MUSIC }
  */
 object ZenPauseRules {
     /** Playing time of ONE video session needed before an abort triggers a pause. */
-    const val MIN_WATCH_MS = 5 * 60 * 1000L
-    const val PAUSE_FRACTION = 0.20
-    const val MIN_PAUSE_MS = 60 * 1000L
-    const val MAX_PAUSE_MS = 15 * 60 * 1000L
+    @JvmStatic
+    fun minWatchMs() = ZenSettings.pauseTriggerMs()
 
     /** "Watched to the end": at least this fraction played or at most this much left. */
     const val FINISHED_FRACTION = 0.90
@@ -32,14 +30,14 @@ object ZenPauseRules {
     const val PERSIST_INTERVAL_MS = 10 * 1000L
 
     @JvmStatic
-    fun pauseLengthMs(playedMs: Long): Long = (playedMs * PAUSE_FRACTION).toLong().coerceIn(MIN_PAUSE_MS, MAX_PAUSE_MS)
+    fun pauseLengthMs(playedMs: Long): Long = (playedMs * ZenSettings.pauseFraction()).toLong().coerceIn(ZenSettings.minPauseMs(), ZenSettings.maxPauseMs())
 
     @JvmStatic
     fun isFinished(positionMs: Long, durationMs: Long): Boolean = durationMs > 0 && positionMs >= 0 &&
         (positionMs >= durationMs * FINISHED_FRACTION || durationMs - positionMs <= FINISHED_REMAINING_MS)
 
     @JvmStatic
-    fun qualifies(playedMs: Long, kind: ZenKind): Boolean = kind != ZenKind.MUSIC && playedMs >= MIN_WATCH_MS
+    fun qualifies(playedMs: Long, kind: ZenKind): Boolean = ZenSettings.pauseEnabled() && kind != ZenKind.MUSIC && playedMs >= minWatchMs()
 }
 
 /**
@@ -94,7 +92,7 @@ object ZenContentKind {
  *    switch to another video, or process kill (detected at the next start): abort;
  *  - "resume later" ([later]): no abort, at most [ZenPauseRules.LATER_PER_DAY] per Zen day.
  * Pausing in the player does not end the session. Only time while really playing counts; seeking
- * does not add time. An abort after >= [ZenPauseRules.MIN_WATCH_MS] of non-music playing starts
+ * does not add time. An abort after >= [ZenPauseRules.minWatchMs()] of non-music playing starts
  * a pause of 20 % of the playing time (min 1, max 15 min) that only runs down with device uptime.
  */
 class ZenPauseEngine(
@@ -329,7 +327,11 @@ class ZenPauseEngine(
             log("abort_exempt", detail)
             return Outcome.Exempt(playedMs, k)
         }
-        if (playedMs < ZenPauseRules.MIN_WATCH_MS) {
+        if (!ZenSettings.pauseEnabled()) {
+            log("abort_pause_off", detail)
+            return Outcome.Short(playedMs)
+        }
+        if (playedMs < ZenPauseRules.minWatchMs()) {
             log("abort_short", detail)
             return Outcome.Short(playedMs)
         }

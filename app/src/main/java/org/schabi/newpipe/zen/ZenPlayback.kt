@@ -14,5 +14,6 @@ object ZenPlayback {
     @JvmStatic
     fun setPlaying(value: Boolean) {
         playing = value
+        if (value) ZenSettings.lock()?.onPlaybackStarted()
     }
 }

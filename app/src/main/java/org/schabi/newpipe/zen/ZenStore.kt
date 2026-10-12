@@ -78,4 +78,21 @@ object Zen {
 
     @JvmStatic
     fun log(context: Context) = ZenLog(store(context), clock(context))
+
+    @Volatile
+    private var settingsLock: ZenSettingsLock? = null
+
+    /** The one settings lock of this process (all Zen settings go through it). */
+    @JvmStatic
+    fun settingsLock(context: Context): ZenSettingsLock {
+        return settingsLock ?: synchronized(this) {
+            settingsLock ?: ZenSettingsLock(
+                store(context),
+                countdown(context, "settings_lock"),
+                countdown(context, "settings_undo"),
+                countdown(context, "settings_setup"),
+                log = { type, detail -> log(context).add(type, detail) }
+            ).also { settingsLock = it }
+        }
+    }
 }

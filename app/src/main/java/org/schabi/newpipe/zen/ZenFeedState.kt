@@ -45,7 +45,7 @@ class ZenFeedState(
             store.put(KEY_DAY to day, KEY_DAY_URLS to "")
         }
         var edition = load()
-        val capReached = counted().size >= ZenFeedPlanner.DAILY_CAP
+        val capReached = counted().size >= ZenSettings.dailyCap()
         val due = edition == null || edition.day != day ||
             (!capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS)
         if (allowCreate && due) {
@@ -53,7 +53,7 @@ class ZenFeedState(
         }
         val handled = handled()
         val open = edition?.picks?.filter { it.url !in handled } ?: emptyList()
-        val capNow = counted().size >= ZenFeedPlanner.DAILY_CAP
+        val capNow = counted().size >= ZenSettings.dailyCap()
         val next = when {
             edition == null -> null
             capNow -> ZenDay.nextDayStart(nowMillis, zone)
@@ -73,9 +73,9 @@ class ZenFeedState(
         val sel = ZenFeedPlanner.select(
             candidates().filter { it.url !in handled },
             now,
-            ZenFeedPlanner.BUDGET_PER_HOUR,
+            ZenSettings.feedBudget(),
             counted,
-            maxOf(0, ZenFeedPlanner.DAILY_CAP - counted.size)
+            maxOf(0, ZenSettings.dailyCap() - counted.size)
         )
         // no data yet: do not seal an empty edition, retry on the next call
         if (sel.picks.isEmpty()) return previous

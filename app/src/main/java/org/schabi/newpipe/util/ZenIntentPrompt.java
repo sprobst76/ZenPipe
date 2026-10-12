@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.zen.ZenPlayback;
+import org.schabi.newpipe.zen.ZenSettings;
 
 /**
  * ZenPipe: asks "What do you want to watch?" on app start, when an external/shared link is
@@ -19,9 +20,7 @@ import org.schabi.newpipe.zen.ZenPlayback;
  * Background/popup playback started from a shared link goes through {@link #gate}.
  */
 public final class ZenIntentPrompt {
-    private static final int WAIT_SECONDS = 5;
     private static final long MIN_INTERVAL_MS = 5 * 60 * 1000L;
-    private static final long BACKGROUND_THRESHOLD_MS = 5 * 60 * 1000L;
 
     // elapsedRealtime of the last CONFIRMED prompt, -1 if the latest prompt was not confirmed
     private static long lastAskedAt = -1;
@@ -73,7 +72,7 @@ public final class ZenIntentPrompt {
         final long stoppedAt = backgroundedAt;
         backgroundedAt = -1;
         if (stoppedAt >= 0
-                && SystemClock.elapsedRealtime() - stoppedAt >= BACKGROUND_THRESHOLD_MS) {
+                && SystemClock.elapsedRealtime() - stoppedAt >= ZenSettings.intentBackgroundMs()) {
             showIfAllowed(activity);
         }
     }
@@ -169,7 +168,7 @@ public final class ZenIntentPrompt {
         final android.widget.Button continueButton =
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         continueButton.setEnabled(false);
-        new CountDownTimer(WAIT_SECONDS * 1000L, 1000L) {
+        new CountDownTimer(ZenSettings.intentWaitSeconds() * 1000L, 1000L) {
             @Override
             public void onTick(final long millisUntilFinished) {
                 continueButton.setText(activity.getString(R.string.zen_intent_continue_wait,

@@ -11,18 +11,13 @@ package org.schabi.newpipe.zen
  *  - Length bonus (smaller than a group step): long videos are preferred on purpose.
  */
 object ZenFeedPlanner {
-    const val BUDGET_PER_HOUR = 15
-
-    /** Cap on DISTINCT videos offered per Zen day (a re-offered video counts once). */
-    const val DAILY_CAP = 30
-
+    // Budget per edition, daily cap (distinct videos per Zen day) and minimum length (live streams
+    // and unknown length never enter an edition) are Zen settings, see ZenSettings.
     /** Minimum time between two editions (measured from the last one, not the clock hour). */
     const val EDITION_INTERVAL_MS = 60 * 60 * 1000L
     const val MAX_AGE_DAYS = 7
     const val MAX_PER_CHANNEL = 3
 
-    /** Shorter videos (and live streams / unknown length) never enter an edition. */
-    const val MIN_DURATION_SEC = 5 * 60
     const val LONG_VIDEO_SEC = 15 * 60
     const val VERY_LONG_VIDEO_SEC = 30 * 60
 
@@ -70,7 +65,7 @@ object ZenFeedPlanner {
     @JvmStatic
     fun isEligible(c: Candidate, nowMillis: Long): Boolean {
         if (isMusic(c)) return false
-        if (c.isLive || c.durationSec < MIN_DURATION_SEC) return false
+        if (c.isLive || c.durationSec < ZenSettings.minLengthSec()) return false
         val age = nowMillis - c.uploadMillis
         return age <= MAX_AGE_DAYS * DAY_MS
     }
