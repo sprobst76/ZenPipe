@@ -19,7 +19,7 @@ erneut geändert werden.
   Bis dahin frei änderbar. (Verhindert, dass ein Tippfehler am ersten Tag einen Tag lang festhängt.)
 - **Gruppierte Änderungen:** Mehrere Änderungen in einem Einstellungsdialog = eine Bestätigung = eine Sperre.
 
-## Offene Entscheidungen (Empfehlung zuerst)
+## Entscheidungen (Nutzer 2026-10-12: „Klingt gut" — Empfehlungen übernommen)
 1. **Strenger stellen während der Sperre?** Empfehlung: erlaubt, ohne die Sperre zu verlängern oder neu zu starten
    (verschärft ist nie ein Schlupfloch). Alternative: strikt keine Änderung, auch nicht strenger.
 2. **Notfallschlüssel** (Opal-Stil, 1x pro Woche, mit Wartezeit und Protokolleintrag)? Empfehlung: standardmäßig aus;
