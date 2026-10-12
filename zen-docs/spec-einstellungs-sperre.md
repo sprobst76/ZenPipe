@@ -1,8 +1,20 @@
 # Spec: 24-Stunden-Sperre für Zen-Einstellungen (Time-Lock)
 
 Anforderung (Nutzer, 2026-10-12): Nach einer Änderung an den Zen-Einstellungen können diese 24 h lang nicht erneut geändert
-werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: Spec, noch nicht umgesetzt (Phase 2).** Bis dahin sind
-alle Werte Konstanten (`rules.md`).
+werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetzt (Phase 2 Teil 1, 2026-10-12).** Maßgeblich ist `rules.md`
+(Abschnitte „Zen-Einstellungen“ und „Einstellungs-Sperre“); Abweichungen dieser Spec von dort sind unten markiert.
+
+## Auflösungen bei der Umsetzung (2026-10-12, gelten vor dem Rest dieser Spec)
+- **Nur Lockern startet die Sperre.** Der Satz „jede bestätigte Änderung startet eine 24-h-Sperre“ widerspricht F7 („strenger startet/verlängert
+  die Sperre nicht“). Umgesetzt: eine Gruppe mit mindestens einer Lockerung startet die Sperre (die Lockerung wird ausstehend und wirkt
+  mit dem Sperrende); rein strengere Gruppen starten nichts. Während der Sperre sind Lockerungen abgelehnt, Strenger geht immer.
+- **Richtung pro Einstellung, Gruppen werden aufgeteilt** (strenger sofort, lockerer Teil ausstehend). „Gemischt = Lockern“ entfällt, bis es die
+  Nachtruhe (Zeitfenster) gibt.
+- **Ersteinrichtung:** Ende durch „Fertig“, ersten Wiedergabestart oder 24 h Gerätelaufzeit seit dem ersten Zugriff (consistency-review S8/S9);
+  danach beginnt die Sperre. Keine Rückgängig-Funktion in der Einrichtung.
+- **Rückgängig** wirkt auch auf die Sperre: hat die Änderung sie gestartet, wird sie wieder gelöscht. Abbrechen einer ausstehenden Lockerung
+  lässt die Sperre dagegen weiterlaufen.
+- Notfallschlüssel: bewusst nicht gebaut (Default aus).
 
 ## Regel
 - **Asymmetrie (F7):** **Strenger stellen wirkt sofort. Lockern wirkt erst nach 24 h** und ist bis dahin abbrechbar

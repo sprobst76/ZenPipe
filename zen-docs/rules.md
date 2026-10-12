@@ -1,6 +1,6 @@
 # ZenPipe: Regel-Tabelle (Single Source of Truth)
 
-Stand: 2026-10-12, nach Phase 1 Teil 2. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
+Stand: 2026-10-12, nach Phase 2 Teil 1. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
 tragen dieselben Namen (Spalte „Code“). Entscheidungen F1-F9 stehen am Ende von `consistency-review.md`.
 Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieben; **offen** = nicht entschieden/nicht gebaut.
 

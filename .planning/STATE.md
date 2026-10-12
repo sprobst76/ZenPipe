@@ -1,7 +1,7 @@
 # State
 
 - Stand: 2026-10-12
-- Phase: MVP umgesetzt (Branch `zen`), auf Motorola Defy verifiziert
+- Phase: MVP + Phase 0/1 + Phase 2 Teil 1 (Zen-Einstellungen mit 24-h-Sperre) umgesetzt (Branch `zen`), auf Motorola Defy verifiziert
 
 ## Erledigt (je ein Commit `zen:`)
 1. Drawer: nur Abos, Feed, Playlists, Suche (+ Einstellungen, Info); Kiosk/Downloads/Verlauf/Spenden entfernt. Kiosk-/Blank-/History-Tabs werden in `TabsManager.getTabs()` gefiltert, Default-Tabs = Feed, Abos, Playlists, Einstellung "Inhalt der Hauptseite" entfernt. Startseite = Feed.
@@ -48,3 +48,11 @@
 - Am Geraet mit verkuerzten Konstanten (20 s / 25-60 s) geprueft, danach zurueckgesetzt: Schliessen -> Pause -> Pausenbildschirm (Countdown, "Pause vorbei"), Prozess-Kill -> `reason=KILLED`, Pausieren 35 s ist kein Abbruch, Musik -> `abort_exempt`, Rueckfrage mit Spaeter fortsetzen/Trotzdem schliessen/Weiterschauen (Hintergrund- und Video-Player), Gate aus der Detailseite.
 - Specs/Audit/PROJECT.md aktualisiert, neue `zen-docs/rules.md` (Single Source of Truth).
 - Offen/bekannte Luecken: Mini-Player nach unten ziehen und Popup-Schliessen ohne Rueckfrage (Abbruch zaehlt trotzdem); keine "Spaeter fortsetzen"-Aktion in der Benachrichtigung (Android 11 zeigt nur 3 Aktionen); waehrend der Pause entsteht beim Feed-Oeffnen weiter eine Ausgabe (W14); Android-Auto-/MediaBrowser-Wiedergabe nicht gesperrt; Update/Absturz waehrend der Wiedergabe loest eine Pause aus (Kill-Erkennung, bewusst streng); ein "Spaeter fortsetzen" ist auf dem Testgeraet heute bereits verbraucht (1 von 2); 24-h-Sperre/Zen-Einstellungen, Entdecken, Minuten-Limit, applicationId/Branding weiter offen (Phase 2).
+
+
+## Phase 2 Teil 1 (2026-10-12): Zen-Einstellungen mit 24-h-Sperre, je Commit `zen:`
+- `ZenSettings`/`ZenSettingDefs` (10 Einstellungen, Spannen, Richtung strenger/lockerer, Tabelle in `rules.md`); alle bisherigen Konstanten (Ausgabe 15, Deckel 30, Mindestlänge, Pausenanteil/min/max/Schauzeit-Schwelle, Pflichtpause an/aus, Abfrage-Wartezeit, Hintergrund-Schwelle) werden über `ZenSettings` gelesen (Defaults = alte Werte; ohne `ZenSettings.init` gelten die Defaults, Tests bleiben unverändert). `ZenSettings.init` in `App.onCreate`.
+- `ZenSettingsLock` (24 Unit-Tests, `ZenSettingsLockTest`): strenger sofort ohne Sperre, Lockern ausstehend + startet Sperre (24 h Gerätelaufzeit, `ZenCountdown`), während der Sperre nur strenger, Abbrechen, 5-min-Rückgängig (stellt auch die Sperre wieder her), Ersteinrichtung ohne Sperre bis „Fertig“/erstes Video/24 h. Auflösung der Spec-Widersprüche in `spec-einstellungs-sperre.md` und `rules.md`.
+- UI `ZenSettingsFragment` (Einstellungen > Zen): Liste mit Wert, Entwurf mit „Apply changes“, Bestätigungsdialog (3 s, Zusammenfassung, Hinweis Sperre/Rückgängig), Status/Restzeit („Änderbar ab <Zeit>“), „pending bis <Zeit>“, „Cancel pending“, „Undo“-Knopf mit Restzeit, ausgegraut in Lockern-Richtung während der Sperre. DE+EN Strings.
+- Am Defy mit verkürzten Zeiten (Sperre 60 s, Rückgängig 20 s) geprüft, danach auf 24 h / 5 min zurückgesetzt und neu gebaut/installiert: Ersteinrichtung frei, 3-s-Bestätigung, Fertig startet Sperre, gesperrt = Lockern-Knöpfe grau/Strenger aktiv ohne Sperre zu verlängern, Lockern -> ausstehend + Sperre, Undo, Abbrechen (Sperre läuft weiter), Ausstehendes wird nach Ablauf wirksam, ZenLog-Einträge. Mit echten Zeiten: Abfrage-Wartezeit 5 -> 6 s wirkt (Dialog „Continue (6)“), Undo zeigt 4:57. Der Zen-Zustand des Defy (`zs_*`, `cd_settings_*`) wurde danach zurückgesetzt (Ersteinrichtung offen).
+- Offen: deutsche Texte nicht am Gerät gesehen; Feed-Wirkung (Mindestlänge/Ausgabe/Deckel) und Pausen-Wirkung nur per Unit-Test, nicht am Gerät; Settings-Suche findet den Zen-Bereich nicht; Rückgängig/Sperre zeigen nach Geräteneustart die Restzeit nur korrekt, wenn zuvor beobachtet wurde (Fortschritt wird beim Hinsehen gespeichert: ohne Hinsehen gilt der letzte gespeicherte Stand, also konservativ); Beschränkung: nur Lockern mit Wirkung auf laufende Ausgabe nicht live (nächste Ausgabe); Entdecken, Minuten-Limit, Nachtruhe, Notfallschlüssel weiter offen.
