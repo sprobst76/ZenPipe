@@ -14,5 +14,6 @@
         android:icon="@drawable/ic_help"
         android:title="@string/fast_mode"
         android:orderInCategory="4"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 </menu>

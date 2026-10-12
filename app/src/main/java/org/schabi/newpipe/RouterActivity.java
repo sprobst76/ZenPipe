@@ -222,6 +222,14 @@ public class RouterActivity extends AppCompatActivity {
     }
 
     private void handleUrl(final String url) {
+        // zen: Shorts are not available anywhere, not even via shared links
+        if (url != null && url.toLowerCase(java.util.Locale.ROOT)
+                .matches("^(https?://)?([a-z0-9-]+\\.)*youtube\\.com/shorts(/.*|\\?.*)?$")) {
+            android.widget.Toast.makeText(this, R.string.zen_shorts_blocked,
+                    android.widget.Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
         disposables.add(Observable
                 .fromCallable(() -> {
                     try {
@@ -286,7 +294,7 @@ public class RouterActivity extends AppCompatActivity {
                 .setTitle(R.string.unsupported_url)
                 .setMessage(R.string.unsupported_url_dialog_message)
                 .setIcon(R.drawable.ic_share)
-                .setPositiveButton(R.string.open_in_browser,
+                .setPositiveButton(R.string.zen_copy_link,
                         (dialog, which) -> ShareUtils.openUrlInBrowser(this, url))
                 .setNegativeButton(R.string.share,
                         (dialog, which) -> ShareUtils.shareText(this, "", url)) // no subject

@@ -123,9 +123,17 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.itemMode = itemViewMode;
     }
 
-    public void addInfoItemList(@Nullable final List<? extends InfoItem> data) {
-        if (data == null) {
+    public void addInfoItemList(@Nullable final List<? extends InfoItem> unfilteredData) {
+        if (unfilteredData == null) {
             return;
+        }
+        // zen: Shorts are never shown in any list
+        final List<InfoItem> data = new ArrayList<>(unfilteredData.size());
+        for (final InfoItem candidate : unfilteredData) {
+            if (!(candidate instanceof StreamInfoItem
+                    && ((StreamInfoItem) candidate).isShortFormContent())) {
+                data.add(candidate);
+            }
         }
         if (DEBUG) {
             Log.d(TAG, "addInfoItemList() before > infoItemList.size() = "

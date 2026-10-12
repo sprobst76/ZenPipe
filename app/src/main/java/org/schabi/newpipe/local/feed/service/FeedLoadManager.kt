@@ -63,10 +63,8 @@ class FeedLoadManager(private val context: Context) {
         ignoreOutdatedThreshold: Boolean = false
     ): Single<List<Notification<FeedUpdateInfo>>> {
         val defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val useFeedExtractor = defaultSharedPreferences.getBoolean(
-            context.getString(R.string.feed_use_dedicated_fetch_method_key),
-            false
-        )
+        // zen: the RSS "fast mode" cannot filter shorts/live streams, so it is permanently off
+        val useFeedExtractor = false
 
         val outdatedThreshold = if (ignoreOutdatedThreshold) {
             OffsetDateTime.now(ZoneOffset.UTC)
