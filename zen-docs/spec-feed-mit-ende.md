@@ -7,7 +7,7 @@ Der Feed ist keine Strömung, sondern eine **Ausgabe** (wie eine Zeitung): begre
 Wer die Ausgabe durch hat, ist durch — bis zur nächsten Ausgabe.
 
 ## Regeln (Defaults, als Konstanten im `zen`-Paket)
-1. **Budget (Entscheidung Nutzer 2026-10-12):** Pro **Stunde** stehen **15 verschiedene Videos** zur Verfügung (Spanne 10–25 konfigurierbar, nur strenger stellen wirkt sofort, Lockern ab nächstem Tag). Eine neue Stunden-Ausgabe wird zur vollen Stunde freigeschaltet; Unerledigtes der vorigen Stunde wird nicht aufgestockt, sondern neu gewichtet. **Tages-Deckel (Empfehlung, offen):** max. 45 Videos/Tag, sonst ergäbe 15/h theoretisch >300 am Tag und das Ende wäre wieder Fiktion.
+1. **Budget (Entscheidung Nutzer 2026-10-12):** Pro **Stunde** stehen **15 verschiedene Videos** zur Verfügung (Spanne 10–25 konfigurierbar, nur strenger stellen wirkt sofort, Lockern ab nächstem Tag). Eine neue Stunden-Ausgabe wird zur vollen Stunde freigeschaltet; Unerledigtes der vorigen Stunde wird nicht aufgestockt, sondern neu gewichtet. **Tages-Deckel (Entscheidung Nutzer 2026-10-12):** max. 30 Videos/Tag, sonst ergäbe 15/h theoretisch >300 am Tag und das Ende wäre wieder Fiktion.
 2. **Auswahl („passt zum Nutzer"):** Kandidaten sind ungesehene Videos aus den eigenen Abos, **maximal 7 Tage alt**. Die Auswahl der 15 erfolgt über ein **transparentes, lokales Scoring** — kein Empfehlungsalgorithmus, keine YouTube-Empfehlungen, keine Daten verlassen das Gerät:
    - **Explizite Signale (Vorrang):** Kanal-Priorität bzw. Feed-Gruppe, vom Nutzer gesetzt (z. B. „Lernen" > „Unterhaltung" > „Nebenbei"), plus Stichwort-Filter (ausblenden/bevorzugen, vgl. PipePipe).
    - **Implizite lokale Signale (schwach gewichtet):** pro Kanal Anteil zu Ende geschauter Videos und geschaute Minuten (aus dem lokalen Verlauf); Kanäle, deren Videos fast immer abgebrochen werden, rutschen nach unten.
@@ -37,5 +37,5 @@ Wer die Ausgabe durch hat, ist durch — bis zur nächsten Ausgabe.
 - Footer-Karte „Du bist durch" als eigenes Item oder Footer-View; kein Nachlade-Trigger (Paging deaktivieren).
 
 ## Offene Entscheidungen
-- Tages-Deckel 45 ja/nein bzw. andere Zahl?
+- (entschieden) Tages-Deckel 30; Scoring-Start: Gruppen-Priorität + Vielfalt + Frische.
 - Reicht das Scoring (Gruppen-Priorität + lokale Zu-Ende-Quote + Stichwortfilter) oder sollen Kanal-Prioritäten zunächst nur manuell sein? (Empfehlung: Start mit Gruppen-Priorität + Vielfalt, implizite Signale in Phase 2.)
