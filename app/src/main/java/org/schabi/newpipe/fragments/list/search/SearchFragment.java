@@ -154,6 +154,9 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
     private StreamingService service;
     @Nullable
     private Page nextPage;
+    // zen: at most this many result pages, then "refine your search"
+    private static final int ZEN_MAX_PAGES = 2;
+    private int zenPagesLoaded = 0;
     private boolean showLocalSuggestions = true;
     private boolean showRemoteSuggestions = true;
 
@@ -880,6 +883,8 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
         // prepare search
         lastSearchedString = this.searchString;
         this.searchString = theSearchString;
+        zenPagesLoaded = 0;
+        infoListAdapter.setZenEnded(false);
         infoListAdapter.clearStreamItemList();
         hideSuggestionsPanel();
         showMetaInfoInTextView(null, searchBinding.searchMetaInfoTextView,
@@ -943,7 +948,7 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
 
     @Override
     protected boolean hasMoreItems() {
-        return Page.isValid(nextPage);
+        return Page.isValid(nextPage) && zenPagesLoaded < ZEN_MAX_PAGES;
     }
 
     @Override
@@ -1081,6 +1086,7 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
 
         lastSearchedString = searchString;
         nextPage = result.getNextPage();
+        zenPagesLoaded = 1;
 
         if (infoListAdapter.getItemsList().isEmpty()) {
             if (!result.getRelatedItems().isEmpty()) {
@@ -1164,6 +1170,11 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
         // keep the reassignment of nextPage after the error handling to ensure that nextPage
         // still holds the correct value during the error handling
         nextPage = result.getNextPage();
+        zenPagesLoaded++;
+        if (zenPagesLoaded >= ZEN_MAX_PAGES && Page.isValid(nextPage)) {
+            infoListAdapter.setZenLimit(0, R.string.zen_search_refine);
+            infoListAdapter.setZenEnded(true);
+        }
         super.handleNextItems(result);
     }
 

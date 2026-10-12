@@ -927,4 +927,6 @@
     <string name="zen_later_added">Saved for later</string>
     <string name="zen_later_full">Watch-later list is full (%1$d)</string>
     <string name="zen_later_playlist_name">Watch later</string>
+    <string name="zen_list_end">That\'s the latest. Use search to find more.</string>
+    <string name="zen_search_refine">Refine your search</string>
 </resources>

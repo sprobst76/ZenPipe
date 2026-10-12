@@ -6,10 +6,20 @@
     android:orientation="vertical">
 
     <ProgressBar
+        android:id="@+id/zenFooterProgress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:id="@+id/zenFooterHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:gravity="center"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:visibility="gone" />
 
 </LinearLayout>

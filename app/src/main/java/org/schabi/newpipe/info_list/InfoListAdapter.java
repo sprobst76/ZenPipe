@@ -7,10 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.schabi.newpipe.R;
 import org.schabi.newpipe.databinding.PignateFooterBinding;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.channel.ChannelInfoItem;
@@ -87,6 +89,11 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private boolean useMiniVariant = false;
     private boolean showFooter = false;
+    // zen: lists end instead of loading more. maxItems <= 0 means no item limit.
+    private int zenMaxItems = 0;
+    private boolean zenEnded = false;
+    @StringRes
+    private int zenEndHintRes = 0;
 
     private ItemViewMode itemMode = ItemViewMode.LIST;
 
@@ -123,15 +130,40 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         this.itemMode = itemViewMode;
     }
 
+    // zen: limit the list to maxItems entries (no more loading afterwards) and show
+    // the hint endHintRes at its end.
+    public void setZenLimit(final int maxItems, @StringRes final int endHintRes) {
+        this.zenMaxItems = maxItems;
+        this.zenEndHintRes = endHintRes;
+    }
+
+    // zen: mark the list as ended (e.g. search page limit reached), shows the end hint.
+    public void setZenEnded(final boolean ended) {
+        this.zenEnded = ended;
+        showFooter(showFooter);
+    }
+
+    public boolean isZenEnded() {
+        return zenEnded || (zenMaxItems > 0 && infoItemList.size() >= zenMaxItems);
+    }
+
+    private boolean zenShowsEndHint() {
+        return zenEndHintRes != 0 && isZenEnded();
+    }
+
     public void addInfoItemList(@Nullable final List<? extends InfoItem> unfilteredData) {
         if (unfilteredData == null) {
             return;
         }
         // zen: Shorts are never shown in any list
         final List<InfoItem> data = new ArrayList<>(unfilteredData.size());
+        final int zenRoom = zenMaxItems > 0 ? zenMaxItems - infoItemList.size() : Integer.MAX_VALUE;
         for (final InfoItem candidate : unfilteredData) {
             if (!(candidate instanceof StreamInfoItem
                     && ((StreamInfoItem) candidate).isShortFormContent())) {
+                if (data.size() >= zenRoom) {
+                    break;
+                }
                 data.add(candidate);
             }
         }
@@ -150,6 +182,10 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     + "showFooter = " + showFooter);
         }
         notifyItemRangeInserted(offsetStart, data.size());
+
+        if (zenShowsEndHint()) {
+            showFooter(true);
+        }
 
         if (showFooter) {
             final int footerNow = sizeConsideringHeaderOffset();
@@ -186,12 +222,17 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (DEBUG) {
             Log.d(TAG, "showFooter() called with: show = [" + show + "]");
         }
-        if (show == showFooter) {
+        final boolean effective = show || zenShowsEndHint();
+        if (effective == showFooter) {
+            if (effective) {
+                // the footer may switch between progress bar and end hint
+                notifyItemChanged(sizeConsideringHeaderOffset());
+            }
             return;
         }
 
-        showFooter = show;
-        if (show) {
+        showFooter = effective;
+        if (effective) {
             notifyItemInserted(sizeConsideringHeaderOffset());
         } else {
             notifyItemRemoved(sizeConsideringHeaderOffset());
@@ -340,6 +381,18 @@ public class InfoListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             Log.d(TAG, "onBindViewHolder() called with: "
                     + "holder = [" + holder.getClass().getSimpleName() + "], "
                     + "position = [" + position + "]");
+        }
+        if (holder instanceof HFHolder) {
+            final View hint = holder.itemView.findViewById(R.id.zenFooterHint);
+            final View progress = holder.itemView.findViewById(R.id.zenFooterProgress);
+            if (hint instanceof android.widget.TextView && progress != null) {
+                final boolean showHint = zenShowsEndHint();
+                hint.setVisibility(showHint ? View.VISIBLE : View.GONE);
+                progress.setVisibility(showHint ? View.GONE : View.VISIBLE);
+                if (showHint) {
+                    ((android.widget.TextView) hint).setText(zenEndHintRes);
+                }
+            }
         }
         if (holder instanceof InfoItemHolder) {
             ((InfoItemHolder) holder).updateFromItem(

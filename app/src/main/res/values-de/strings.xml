@@ -892,4 +892,6 @@
     <string name="zen_later_added">Für später gemerkt</string>
     <string name="zen_later_full">Später-Liste ist voll (%1$d)</string>
     <string name="zen_later_playlist_name">Später ansehen</string>
+    <string name="zen_list_end">Das war das Neueste. Nutze die Suche, um mehr zu finden.</string>
+    <string name="zen_search_refine">Suche verfeinern</string>
 </resources>

@@ -72,6 +72,20 @@ public class ChannelTabFragment extends BaseListInfoFragment<InfoItem, ChannelTa
         setHasOptionsMenu(false);
     }
 
+    // zen: channel pages show only the latest videos, no endless loading
+    static final int ZEN_MAX_ITEMS = 15;
+
+    @Override
+    protected void initViews(final View rootView, final Bundle savedInstanceState) {
+        infoListAdapter.setZenLimit(ZEN_MAX_ITEMS, R.string.zen_list_end);
+        super.initViews(rootView, savedInstanceState);
+    }
+
+    @Override
+    protected boolean hasMoreItems() {
+        return super.hasMoreItems() && !infoListAdapter.isZenEnded();
+    }
+
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater,
                              @Nullable final ViewGroup container,
