@@ -177,13 +177,7 @@ public final class VideoDetailFragment
 
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener =
             (sharedPreferences, key) -> {
-                if (getString(R.string.show_comments_key).equals(key)) {
-                    showComments = sharedPreferences.getBoolean(key, true);
-                    tabSettingsChanged = true;
-                } else if (getString(R.string.show_next_video_key).equals(key)) {
-                    showRelatedItems = sharedPreferences.getBoolean(key, true);
-                    tabSettingsChanged = true;
-                } else if (getString(R.string.show_description_key).equals(key)) {
+                if (getString(R.string.show_description_key).equals(key)) {
                     showDescription = sharedPreferences.getBoolean(key, true);
                     tabSettingsChanged = true;
                 }
@@ -318,8 +312,9 @@ public final class VideoDetailFragment
         super.onCreate(savedInstanceState);
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        showComments = prefs.getBoolean(getString(R.string.show_comments_key), true);
-        showRelatedItems = prefs.getBoolean(getString(R.string.show_next_video_key), true);
+        // ZenPipe: comments and related videos are permanently hidden
+        showComments = false;
+        showRelatedItems = false;
         showDescription = prefs.getBoolean(getString(R.string.show_description_key), true);
         selectedTabTag = prefs.getString(
                 getString(R.string.stream_info_selected_tab_key), COMMENTS_TAB_TAG);

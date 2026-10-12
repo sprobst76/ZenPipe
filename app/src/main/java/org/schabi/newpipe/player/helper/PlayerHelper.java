@@ -229,8 +229,8 @@ public final class PlayerHelper {
     }
 
     public static boolean isAutoQueueEnabled(@NonNull final Context context) {
-        return getPreferences(context)
-                .getBoolean(context.getString(R.string.auto_queue_key), false);
+        // ZenPipe: auto-queueing of related streams is permanently disabled
+        return false;
     }
 
     public static boolean isClearingQueueConfirmationRequired(@NonNull final Context context) {
@@ -253,15 +253,8 @@ public final class PlayerHelper {
 
     @AutoplayType
     public static int getAutoplayType(@NonNull final Context context) {
-        final String type = getPreferences(context).getString(
-                context.getString(R.string.autoplay_key), "");
-        if (type.equals(context.getString(R.string.autoplay_always_key))) {
-            return AUTOPLAY_TYPE_ALWAYS;
-        } else if (type.equals(context.getString(R.string.autoplay_never_key))) {
-            return AUTOPLAY_TYPE_NEVER;
-        } else {
-            return AUTOPLAY_TYPE_WIFI; // default
-        }
+        // ZenPipe: autoplay is permanently disabled, videos start only on explicit play
+        return AUTOPLAY_TYPE_NEVER;
     }
 
     public static boolean isAutoplayAllowedByUser(@NonNull final Context context) {
