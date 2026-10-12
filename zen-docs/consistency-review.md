@@ -277,3 +277,18 @@ Vorschlag: Diese Tabelle nach Freigabe als `zen-docs/rules.md` führen. Alle Spe
 7. **Code vs. Regeln:** Drawer, Autoplay, Related/Kommentare, Shorts und Backup-Ausschluss sind regelkonform. Die Absichtsabfrage widerspricht der Regel in drei Punkten (U-1 bis U-3).
 8. **24-h-Sperre (neu):** Sie lässt Lockern sofort wirken und ersetzt damit den Impulsschutz von „Lockern erst morgen“, statt ihn zu ergänzen (S1). Empfehlung F7: strenger sofort, lockern erst nach 24 h. Weitere Punkte: Feed-Gruppen nicht sperren (S3, sonst kollidiert es mit Abonnieren/Entdecken), laufende Pause und Ausgabe nie durch Änderungen verkürzen bzw. neu würfeln (S4/S5), Ersteinrichtung braucht ein Auto-Ende (S8), „Protokoll im Export“ widerspricht dem Export-Ausschluss (S10), Rückgängig-Fenster gegen Tippfehler (U11).
 9. **Nächster Schritt:** Regel-Tabelle 4.1 als `zen-docs/rules.md` übernehmen und die Anpassungsliste 4.2 abarbeiten, sobald F1–F9 entschieden sind.
+
+---
+
+## Entscheidungen des Nutzers (2026-10-12): alle neun Empfehlungen aus 4.3 übernommen
+
+- F1: Deckel zählt **verschiedene** Videos; Ausgabe wird erst **nach der Absichtsabfrage** gebaut („Doch nicht" kostet nichts).
+- F2: Minuten-Tageslimit ja, aber erst nach der Einstellungs-Sperre.
+- F3: Keine Musik-Kanäle im Feed, kein Längenbonus für Musik.
+- F4: Später-Liste läuft nach 30 Tagen ab.
+- F5: Ausgabe-Takt: 60 min nach der letzten Ausgabe (nicht zur vollen Stunde).
+- F6: „Später fortsetzen" ohne Pause (Podcast, Anruf): 2x pro Tag.
+- F7: Strenger stellen wirkt sofort; **Lockern wirkt erst nach 24 h** und ist abbrechbar. (Ersetzt „Strenger darf während der Sperre geändert werden, Lockern sofort" aus spec-einstellungs-sperre.md.)
+- F8: Feed-Gruppen werden nicht gesperrt.
+- F9: Rückgängig-Fenster 5 min nach Bestätigung.
+- Zusätzlich übernommen: Zustand (Ausgabe, verworfen, Später) nach Video-URL schlüsseln statt nach DB-ID; Lücken der Absichtsabfrage schließen (Neuöffnen nach „Doch nicht", systemweite Musik-Prüfung, Hintergrund/Popup-Links, Zeitzonen-/Uhr-Härtung).
