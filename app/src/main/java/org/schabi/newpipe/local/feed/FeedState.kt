@@ -15,7 +15,9 @@ sealed class FeedState {
         val items: List<StreamItem>,
         val oldestUpdate: OffsetDateTime?,
         val notLoadedCount: Long,
-        val itemsErrors: List<Throwable>
+        val itemsErrors: List<Throwable>,
+        /** ZenPipe: end-of-edition info; null if no edition could be built yet. */
+        val zenEnd: org.schabi.newpipe.zen.ZenFeedProvider.End? = null
     ) : FeedState()
 
     data class ErrorState(

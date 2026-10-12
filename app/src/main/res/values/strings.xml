@@ -912,4 +912,19 @@
     <string name="zen_intent_not_now">Never mind</string>
     <string name="zen_shorts_blocked">Shorts are not available in ZenPipe</string>
     <string name="zen_copy_link">Copy link</string>
+    <string name="zen_reason_group">%1$d min · Group %2$s</string>
+    <string name="zen_reason_minutes">%1$d min</string>
+    <string name="zen_feed_done">You\'re done.</string>
+    <string name="zen_feed_next">Next edition at %1$s.</string>
+    <string name="zen_feed_next_tomorrow">Daily limit reached. Next edition from %1$s.</string>
+    <plurals name="zen_feed_leftover">
+        <item quantity="one">%1$d more video is waiting.</item>
+        <item quantity="other">%1$d more videos are waiting.</item>
+    </plurals>
+    <string name="zen_later">Watch later</string>
+    <string name="zen_dismiss">Dismiss</string>
+    <string name="zen_more_options">More options…</string>
+    <string name="zen_later_added">Saved for later</string>
+    <string name="zen_later_full">Watch-later list is full (%1$d)</string>
+    <string name="zen_later_playlist_name">Watch later</string>
 </resources>

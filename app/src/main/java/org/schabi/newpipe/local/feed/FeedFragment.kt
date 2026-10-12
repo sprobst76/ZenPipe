@@ -74,6 +74,7 @@ import org.schabi.newpipe.ktx.animate
 import org.schabi.newpipe.ktx.animateHideRecyclerViewAllowingScrolling
 import org.schabi.newpipe.ktx.slideUp
 import org.schabi.newpipe.local.feed.item.StreamItem
+import org.schabi.newpipe.local.feed.item.ZenEndCardItem
 import org.schabi.newpipe.local.feed.service.FeedLoadService
 import org.schabi.newpipe.local.subscription.SubscriptionManager
 import org.schabi.newpipe.util.DeviceUtils
@@ -83,6 +84,8 @@ import org.schabi.newpipe.util.ThemeHelper.getGridSpanCountStreams
 import org.schabi.newpipe.util.ThemeHelper.getItemViewMode
 import org.schabi.newpipe.util.ThemeHelper.resolveDrawable
 import org.schabi.newpipe.util.ThemeHelper.shouldUseGridLayout
+import org.schabi.newpipe.util.ZenIntentPrompt
+import org.schabi.newpipe.zen.ZenWatchLater
 
 class FeedFragment : BaseStateFragment<FeedState>() {
     private var _feedBinding: FragmentFeedBinding? = null
@@ -140,6 +143,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         val factory = FeedViewModel.getFactory(requireContext(), groupId)
         viewModel = ViewModelProvider(this, factory)[FeedViewModel::class.java]
         viewModel.stateLiveData.observe(viewLifecycleOwner) { it?.let(::handleResult) }
+        // ZenPipe: build the edition as soon as the intention prompt is confirmed
+        ZenIntentPrompt.setOnConfirmedListener { viewModel.zenRefresh() }
 
         groupAdapter = GroupieAdapter().apply {
             setOnItemClickListener(listenerStreamItem)
@@ -171,6 +176,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
     override fun onResume() {
         super.onResume()
         updateRelativeTimeViews()
+        // ZenPipe: a new hour may have started
+        viewModel.zenRefresh()
 
         if (updateListViewModeOnResume) {
             updateListViewModeOnResume = false
@@ -212,6 +219,8 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         activity.supportActionBar?.subtitle = groupName
 
         inflater.inflate(R.menu.menu_feed_fragment, menu)
+        // ZenPipe: the edition decides what is shown, the visibility filter is not needed
+        menu.findItem(R.id.menu_item_feed_toggle_played_items)?.isVisible = false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -301,6 +310,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         // Ensure that all animations are canceled
         tryGetNewItemsLoadedButton()?.clearAnimation()
 
+        ZenIntentPrompt.setOnConfirmedListener(null)
         feedBinding.itemsList.adapter = null
         _feedBinding = null
         super.onDestroyView()
@@ -402,11 +412,63 @@ class FeedFragment : BaseStateFragment<FeedState>() {
 
         override fun onItemLongClick(item: Item<*>, view: View): Boolean {
             if (item is StreamItem && !isRefreshing) {
-                showInfoItemDialog(item.streamWithState.stream.toStreamInfoItem())
+                showZenActions(item)
                 return true
             }
             return false
         }
+    }
+
+    /** ZenPipe: triage actions for an edition entry. */
+    private fun showZenActions(item: StreamItem) {
+        val stream = item.streamWithState.stream
+        AlertDialog.Builder(requireContext())
+            .setTitle(stream.title)
+            .setItems(
+                arrayOf(
+                    getString(R.string.zen_later),
+                    getString(R.string.zen_dismiss),
+                    getString(R.string.zen_more_options)
+                )
+            ) { _, which ->
+                when (which) {
+                    0 -> saveForLater(stream)
+                    1 -> viewModel.zenHandled(stream.url, "dismiss")
+                    else -> showInfoItemDialog(stream.toStreamInfoItem())
+                }
+            }
+            .show()
+    }
+
+    private fun saveForLater(stream: org.schabi.newpipe.database.stream.model.StreamEntity) {
+        val appContext = requireContext().applicationContext
+        disposables.add(
+            Single.fromCallable { ZenWatchLater.add(appContext, stream) }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    { result ->
+                        when (result) {
+                            is ZenWatchLater.Result.Added -> {
+                                viewModel.zenHandled(stream.url, "later")
+                                android.widget.Toast.makeText(
+                                    appContext,
+                                    R.string.zen_later_added,
+                                    android.widget.Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            is ZenWatchLater.Result.Full ->
+                                android.widget.Toast.makeText(
+                                    appContext,
+                                    getString(R.string.zen_later_full, result.max),
+                                    android.widget.Toast.LENGTH_LONG
+                                ).show()
+                        }
+                    },
+                    { throwable -> Log.e(TAG, "Unable to save for later", throwable) }
+                )
+        )
     }
 
     @SuppressLint("StringFormatMatches")
@@ -421,7 +483,9 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         // This need to be saved in a variable as the update occurs async
         val oldOldestSubscriptionUpdate = oldestSubscriptionUpdate
 
-        groupAdapter.updateAsync(loadedState.items, false) {
+        val adapterItems: List<Item<*>> = loadedState.items +
+            listOfNotNull(loadedState.zenEnd?.let { ZenEndCardItem(it) })
+        groupAdapter.updateAsync(adapterItems, false) {
             oldOldestSubscriptionUpdate?.run {
                 highlightNewItemsAfter(oldOldestSubscriptionUpdate)
             }
@@ -449,7 +513,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         }
         oldestSubscriptionUpdate = loadedState.oldestUpdate
 
-        if (loadedState.items.isEmpty()) {
+        if (loadedState.items.isEmpty() && loadedState.zenEnd == null) {
             showEmptyState()
         } else {
             hideLoading()
@@ -565,7 +629,7 @@ class FeedFragment : BaseStateFragment<FeedState>() {
         var doCheck = true
 
         for (i in 0 until groupAdapter.itemCount) {
-            val item = groupAdapter.getItem(i) as StreamItem
+            val item = groupAdapter.getItem(i) as? StreamItem ?: continue
 
             var typeface = Typeface.DEFAULT
             var backgroundSupplier = { ctx: Context ->

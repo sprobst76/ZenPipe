@@ -11,7 +11,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.preference.PreferenceManager
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.functions.Function6
+import io.reactivex.rxjava3.functions.Function7
 import io.reactivex.rxjava3.processors.BehaviorProcessor
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.time.OffsetDateTime
@@ -27,6 +27,7 @@ import org.schabi.newpipe.local.feed.service.FeedEventManager.Event.IdleEvent
 import org.schabi.newpipe.local.feed.service.FeedEventManager.Event.ProgressEvent
 import org.schabi.newpipe.local.feed.service.FeedEventManager.Event.SuccessResultEvent
 import org.schabi.newpipe.util.DEFAULT_THROTTLE_TIMEOUT
+import org.schabi.newpipe.zen.ZenFeedProvider
 
 class FeedViewModel(
     private val application: Application,
@@ -52,6 +53,20 @@ class FeedViewModel(
         .startWithItem(initialShowFutureItems)
         .distinctUntilChanged()
 
+    private val zenFeed = ZenFeedProvider(application, feedDatabaseManager)
+
+    // ZenPipe: re-evaluates the edition (new hour, item dismissed) without a feed event
+    private val zenTick = BehaviorProcessor.createDefault(0L)
+
+    fun zenRefresh() = zenTick.onNext(System.nanoTime())
+
+    fun zenHandled(url: String, reason: String) {
+        Schedulers.io().scheduleDirect {
+            zenFeed.markHandled(url, reason)
+            zenRefresh()
+        }
+    }
+
     private val mutableStateLiveData = MutableLiveData<FeedState>()
     val stateLiveData: LiveData<FeedState> = mutableStateLiveData
 
@@ -63,39 +78,43 @@ class FeedViewModel(
             showFutureItemsFlowable,
             feedDatabaseManager.notLoadedCount(groupId),
             feedDatabaseManager.oldestSubscriptionUpdate(groupId),
+            zenTick,
 
-            Function6 {
+            Function7 {
                     t1: FeedEventManager.Event,
                     t2: Boolean,
                     t3: Boolean,
                     t4: Boolean,
                     t5: Long,
-                    t6: List<OffsetDateTime?>
+                    t6: List<OffsetDateTime?>,
+                    _: Long
                 ->
-                return@Function6 CombineResultEventHolder(t1, t2, t3, t4, t5, t6.firstOrNull())
+                return@Function7 CombineResultEventHolder(t1, t2, t3, t4, t5, t6.firstOrNull())
             }
         )
         .throttleLatest(DEFAULT_THROTTLE_TIMEOUT, TimeUnit.MILLISECONDS)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .map { (event, showPlayedItems, showPartiallyPlayedItems, showFutureItems, notLoadedCount, oldestUpdate) ->
-            val streamItems = if (event is SuccessResultEvent || event is IdleEvent) {
-                feedDatabaseManager
-                    .getStreams(groupId, showPlayedItems, showPartiallyPlayedItems, showFutureItems)
-                    .blockingGet(arrayListOf())
+            // ZenPipe: the feed shows a finite edition instead of the whole database
+            val zen = if (event is SuccessResultEvent || event is IdleEvent) {
+                zenFeed.compute(groupId)
             } else {
-                arrayListOf()
+                null
             }
 
-            CombineResultDataHolder(event, streamItems, notLoadedCount, oldestUpdate)
+            CombineResultDataHolder(event, zen?.items ?: arrayListOf(), notLoadedCount, oldestUpdate, zen)
         }
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { (event, listFromDB, notLoadedCount, oldestUpdate) ->
+        .subscribe { (event, listFromDB, notLoadedCount, oldestUpdate, zen) ->
+            val zenItems = listFromDB.map { e ->
+                StreamItem(e).also { it.zenPick = zen?.picks?.get(e.stream.url) }
+            }
             mutableStateLiveData.postValue(
                 when (event) {
-                    is IdleEvent -> FeedState.LoadedState(listFromDB.map { e -> StreamItem(e) }, oldestUpdate, notLoadedCount, listOf())
+                    is IdleEvent -> FeedState.LoadedState(zenItems, oldestUpdate, notLoadedCount, listOf(), zen?.end)
                     is ProgressEvent -> FeedState.ProgressState(event.currentProgress, event.maxProgress, event.progressMessage)
-                    is SuccessResultEvent -> FeedState.LoadedState(listFromDB.map { e -> StreamItem(e) }, oldestUpdate, notLoadedCount, event.itemsErrors)
+                    is SuccessResultEvent -> FeedState.LoadedState(zenItems, oldestUpdate, notLoadedCount, event.itemsErrors, zen?.end)
                     is ErrorResultEvent -> FeedState.ErrorState(event.error)
                 }
             )
@@ -123,7 +142,8 @@ class FeedViewModel(
         val t1: FeedEventManager.Event,
         val t2: List<StreamWithState>,
         val t3: Long,
-        val t4: OffsetDateTime?
+        val t4: OffsetDateTime?,
+        val t5: ZenFeedProvider.Result?
     )
 
     fun setSaveShowPlayedItems(showPlayedItems: Boolean) {

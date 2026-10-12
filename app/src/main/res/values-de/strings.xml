@@ -877,4 +877,19 @@
     <string name="zen_intent_not_now">Doch nicht</string>
     <string name="zen_shorts_blocked">Shorts sind in ZenPipe nicht verfügbar</string>
     <string name="zen_copy_link">Link kopieren</string>
+    <string name="zen_reason_group">%1$d Min. · Gruppe %2$s</string>
+    <string name="zen_reason_minutes">%1$d Min.</string>
+    <string name="zen_feed_done">Du bist durch.</string>
+    <string name="zen_feed_next">Nächste Ausgabe um %1$s.</string>
+    <string name="zen_feed_next_tomorrow">Tageslimit erreicht. Nächste Ausgabe ab %1$s.</string>
+    <plurals name="zen_feed_leftover">
+        <item quantity="one">%1$d weiteres Video wartet.</item>
+        <item quantity="other">%1$d weitere Videos warten.</item>
+    </plurals>
+    <string name="zen_later">Später ansehen</string>
+    <string name="zen_dismiss">Verwerfen</string>
+    <string name="zen_more_options">Weitere Optionen…</string>
+    <string name="zen_later_added">Für später gemerkt</string>
+    <string name="zen_later_full">Später-Liste ist voll (%1$d)</string>
+    <string name="zen_later_playlist_name">Später ansehen</string>
 </resources>

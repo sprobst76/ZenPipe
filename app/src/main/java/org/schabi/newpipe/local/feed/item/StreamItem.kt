@@ -34,6 +34,9 @@ data class StreamItem(
     private val stream: StreamEntity = streamWithState.stream
     private val stateProgressTime: Long? = streamWithState.stateProgressMillis
 
+    /** ZenPipe: why this item is in the edition (length, group). */
+    var zenPick: org.schabi.newpipe.zen.ZenFeedPlanner.Pick? = null
+
     /**
      * Will be executed at the end of the [StreamItem.bind] (with (ListStreamItemBinding,Int)).
      * Can be used e.g. for highlighting a item.
@@ -117,6 +120,17 @@ data class StreamItem(
     }
 
     private fun getStreamInfoDetailLine(context: Context): String {
+        val detail = getStreamInfoDetailLineBase(context)
+        val pick = zenPick ?: return detail
+        val reason = if (pick.groupName != null) {
+            context.getString(R.string.zen_reason_group, pick.minutes, pick.groupName)
+        } else {
+            context.getString(R.string.zen_reason_minutes, pick.minutes)
+        }
+        return if (detail.isEmpty()) reason else Localization.concatenateStrings(reason, detail)
+    }
+
+    private fun getStreamInfoDetailLineBase(context: Context): String {
         var viewsAndDate = ""
         val viewCount = stream.viewCount
         if (viewCount != null && viewCount >= 0) {

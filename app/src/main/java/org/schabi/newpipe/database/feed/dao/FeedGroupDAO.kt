@@ -17,6 +17,18 @@ abstract class FeedGroupDAO {
     @Query("SELECT * FROM feed_group ORDER BY sort_order ASC")
     abstract fun getAll(): Flowable<List<FeedGroupEntity>>
 
+    /** ZenPipe: best (lowest sort order) feed group per feed stream, used as priority. */
+    @Query(
+        """
+        SELECT f.stream_id AS streamId, g.name AS groupName, MIN(g.sort_order) AS sortOrder
+        FROM feed f
+        INNER JOIN feed_group_subscription_join j ON j.subscription_id = f.subscription_id
+        INNER JOIN feed_group g ON g.uid = j.group_id
+        GROUP BY f.stream_id
+        """
+    )
+    abstract fun getZenGroupRanks(): List<org.schabi.newpipe.zen.ZenGroupRank>
+
     @Query("SELECT * FROM feed_group WHERE uid = :groupId")
     abstract fun getGroup(groupId: Long): Maybe<FeedGroupEntity>
 

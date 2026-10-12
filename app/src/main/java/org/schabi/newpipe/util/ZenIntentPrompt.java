@@ -24,6 +24,19 @@ public final class ZenIntentPrompt {
     private static long lastAskedAt = -1;
     private static long backgroundedAt = -1;
     private static boolean dialogShowing = false;
+    // ZenPipe: true once the user confirmed the latest prompt of this process. The feed edition
+    // is only built then, so "Never mind" never uses up any of the daily cap.
+    private static boolean confirmed = false;
+    private static Runnable onConfirmedListener = null;
+
+    public static boolean isConfirmed() {
+        return confirmed && !dialogShowing;
+    }
+
+    // Called (main thread) when the user confirmed a prompt; used by the feed to build its edition.
+    public static void setOnConfirmedListener(final Runnable listener) {
+        onConfirmedListener = listener;
+    }
 
     private ZenIntentPrompt() { }
 
@@ -73,18 +86,22 @@ public final class ZenIntentPrompt {
     private static void show(final Activity activity) {
         lastAskedAt = SystemClock.elapsedRealtime();
         dialogShowing = true;
+        confirmed = false;
 
         final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setTitle(R.string.zen_intent_title)
                 .setMessage(R.string.zen_intent_message)
                 .setCancelable(false)
-                .setPositiveButton(R.string.zen_intent_continue, null)
+                .setPositiveButton(R.string.zen_intent_continue, (d, which) -> confirmed = true)
                 .setNegativeButton(R.string.zen_intent_not_now,
                         (d, which) -> activity.finishAffinity())
                 .create();
         dialog.setOnDismissListener(d -> {
             dialogShowing = false;
             lastAskedAt = SystemClock.elapsedRealtime();
+            if (confirmed && onConfirmedListener != null) {
+                onConfirmedListener.run();
+            }
         });
         dialog.show();
 
