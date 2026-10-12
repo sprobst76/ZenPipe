@@ -85,7 +85,6 @@ import org.schabi.newpipe.settings.UpdateSettingsFragment;
 import org.schabi.newpipe.settings.migration.MigrationManager;
 import org.schabi.newpipe.util.Constants;
 import org.schabi.newpipe.util.DeviceUtils;
-import org.schabi.newpipe.util.KioskTranslator;
 import org.schabi.newpipe.util.Localization;
 import org.schabi.newpipe.util.NavigationHelper;
 import org.schabi.newpipe.util.PeertubeHelper;
@@ -123,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int ITEM_ID_SUBSCRIPTIONS = -1;
     private static final int ITEM_ID_FEED = -2;
     private static final int ITEM_ID_BOOKMARKS = -3;
-    private static final int ITEM_ID_DOWNLOADS = -4;
-    private static final int ITEM_ID_HISTORY = -5;
+    private static final int ITEM_ID_SEARCH = -4;
     private static final int ITEM_ID_SETTINGS = 0;
     private static final int ITEM_ID_DONATION = 1;
     private static final int ITEM_ID_ABOUT = 2;
@@ -285,35 +283,15 @@ public class MainActivity extends AppCompatActivity {
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_tabs_group, ITEM_ID_BOOKMARKS, ORDER, R.string.tab_bookmarks)
                 .setIcon(R.drawable.ic_bookmark);
+        // ZenPipe: search entry; downloads, history and kiosks are intentionally not offered
         drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_tabs_group, ITEM_ID_DOWNLOADS, ORDER, R.string.downloads)
-                .setIcon(R.drawable.ic_file_download);
-        drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_tabs_group, ITEM_ID_HISTORY, ORDER, R.string.action_history)
-                .setIcon(R.drawable.ic_history);
-
-        //Kiosks
-        final int currentServiceId = ServiceHelper.getSelectedServiceId(this);
-        final StreamingService service = NewPipe.getService(currentServiceId);
-
-        int kioskMenuItemId = 0;
-
-        for (final String ks : service.getKioskList().getAvailableKiosks()) {
-            drawerLayoutBinding.navigation.getMenu()
-                    .add(R.id.menu_kiosks_group, kioskMenuItemId, 0, KioskTranslator
-                            .getTranslatedKioskName(ks, this))
-                    .setIcon(KioskTranslator.getKioskIcon(ks));
-            kioskMenuItemId++;
-        }
+                .add(R.id.menu_tabs_group, ITEM_ID_SEARCH, ORDER, R.string.search)
+                .setIcon(R.drawable.ic_search);
 
         //Settings and About
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_options_about_group, ITEM_ID_SETTINGS, ORDER, R.string.settings)
                 .setIcon(R.drawable.ic_settings);
-        drawerLayoutBinding.navigation.getMenu()
-                .add(R.id.menu_options_about_group, ITEM_ID_DONATION, ORDER,
-                        R.string.donation_title)
-                .setIcon(R.drawable.volunteer_activism_ic);
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_options_about_group, ITEM_ID_ABOUT, ORDER, R.string.tab_about)
                 .setIcon(R.drawable.ic_info_outline);
@@ -362,11 +340,9 @@ public class MainActivity extends AppCompatActivity {
             case ITEM_ID_BOOKMARKS:
                 NavigationHelper.openBookmarksFragment(getSupportFragmentManager());
                 break;
-            case ITEM_ID_DOWNLOADS:
-                NavigationHelper.openDownloads(this);
-                break;
-            case ITEM_ID_HISTORY:
-                NavigationHelper.openStatisticFragment(getSupportFragmentManager());
+            case ITEM_ID_SEARCH:
+                NavigationHelper.openSearchFragment(getSupportFragmentManager(),
+                        ServiceHelper.getSelectedServiceId(this), "");
                 break;
         }
     }
@@ -553,11 +529,6 @@ public class MainActivity extends AppCompatActivity {
             sharedPrefEditor.putBoolean(Constants.KEY_MAIN_PAGE_CHANGE, false).apply();
             NavigationHelper.openMainActivity(this);
         }
-
-        final boolean isHistoryEnabled = sharedPreferences.getBoolean(
-                getString(R.string.enable_watch_history_key), true);
-        drawerLayoutBinding.navigation.getMenu().findItem(ITEM_ID_HISTORY)
-                .setVisible(isHistoryEnabled);
     }
 
     @Override

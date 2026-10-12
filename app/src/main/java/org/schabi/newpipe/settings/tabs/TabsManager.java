@@ -30,7 +30,12 @@ public final class TabsManager {
     public List<Tab> getTabs() {
         final String savedJson = sharedPreferences.getString(savedTabsKey, null);
         try {
-            return TabsJsonHelper.getTabsFromJson(savedJson);
+            // ZenPipe: kiosk (trending/live/...) and blank tabs are never shown
+            final List<Tab> tabs = new java.util.ArrayList<>(
+                    TabsJsonHelper.getTabsFromJson(savedJson));
+            tabs.removeIf(t -> t instanceof Tab.KioskTab || t instanceof Tab.DefaultKioskTab
+                    || t instanceof Tab.BlankTab || t instanceof Tab.HistoryTab);
+            return tabs.isEmpty() ? getDefaultTabs() : tabs;
         } catch (final TabsJsonHelper.InvalidJsonException e) {
             Toast.makeText(context, R.string.saved_tabs_invalid_json, Toast.LENGTH_SHORT).show();
             return getDefaultTabs();
