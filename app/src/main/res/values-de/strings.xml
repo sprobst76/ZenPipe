@@ -894,4 +894,22 @@
     <string name="zen_later_playlist_name">Später ansehen</string>
     <string name="zen_list_end">Das war das Neueste. Nutze die Suche, um mehr zu finden.</string>
     <string name="zen_search_refine">Suche verfeinern</string>
+    <string name="zen_pause_title">Mach eine Pause</string>
+    <string name="zen_pause_message">Du hast ein Video nach %1$d Min. abgebrochen. Das nächste Video startet, wenn die Pause vorbei ist. Stöbern und Suchen bleiben möglich.</string>
+    <string name="zen_pause_over">Die Pause ist vorbei. Du kannst wieder ein Video starten.</string>
+    <string name="zen_pause_back">Zurück</string>
+    <string name="zen_pause_ok">OK</string>
+    <string name="zen_pause_toast">Die Pause nach einem abgebrochenen Video läuft noch</string>
+    <string name="zen_later_resume_action">Später fortsetzen</string>
+    <string name="zen_later_resume_saved">Position gemerkt, keine Pause. Heute noch %1$d x „Später fortsetzen“.</string>
+    <string name="zen_later_resume_none">Heute kein „Später fortsetzen“ mehr. Schließen startet eine Pause.</string>
+    <string name="zen_close_title">Video jetzt schließen?</string>
+    <string name="zen_close_message">Du hast %1$d Min. geschaut. Beim Schließen folgt eine Pause von %2$s, bevor das nächste Video startet.</string>
+    <string name="zen_close_later_left">„Später fortsetzen“ merkt die Position ohne Pause (heute noch %1$d).</string>
+    <string name="zen_close_keep">Weiterschauen</string>
+    <string name="zen_close_anyway">Trotzdem schließen</string>
+    <plurals name="zen_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minuten</item>
+    </plurals>
 </resources>

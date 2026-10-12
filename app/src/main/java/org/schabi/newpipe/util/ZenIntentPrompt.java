@@ -32,6 +32,9 @@ public final class ZenIntentPrompt {
     // is only built then, so "Never mind" never uses up any of the daily cap.
     private static boolean confirmed = false;
     private static Runnable onConfirmedListener = null;
+    // a shared-link playback that arrived while a prompt was already open waits for its answer
+    private static Runnable pendingProceed = null;
+    private static Runnable pendingDeclined = null;
 
     public static boolean isConfirmed() {
         return confirmed && !isDialogShowing();
@@ -90,7 +93,9 @@ public final class ZenIntentPrompt {
             return;
         }
         if (isDialogShowing()) {
-            onDeclined.run(); // another prompt is open; never stack them
+            // another prompt is open: never stack them, the answer to it decides
+            pendingProceed = onProceed;
+            pendingDeclined = onDeclined;
             return;
         }
         show(activity, onDeclined, onProceed);
@@ -132,6 +137,12 @@ public final class ZenIntentPrompt {
                     confirmed = false;
                     lastAskedAt = -1;
                     onDeclined.run();
+                    if (pendingDeclined != null) {
+                        final Runnable declined = pendingDeclined;
+                        pendingProceed = null;
+                        pendingDeclined = null;
+                        declined.run();
+                    }
                 })
                 .create();
         dialog.setOnDismissListener(d -> {
@@ -139,6 +150,12 @@ public final class ZenIntentPrompt {
                 lastAskedAt = SystemClock.elapsedRealtime();
                 if (onProceed != null) {
                     onProceed.run();
+                }
+                if (pendingProceed != null) {
+                    final Runnable proceed = pendingProceed;
+                    pendingProceed = null;
+                    pendingDeclined = null;
+                    proceed.run();
                 }
                 if (onConfirmedListener != null) {
                     onConfirmedListener.run();

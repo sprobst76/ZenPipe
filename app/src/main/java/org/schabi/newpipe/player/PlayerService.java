@@ -170,6 +170,18 @@ public final class PlayerService extends MediaBrowserServiceCompat {
             return START_NOT_STICKY;
         }
 
+        // ZenPipe: safety net - a new playback must not start during the mandatory pause even if
+        // an entry point forgot to ask ZenPause.blockStart() (the pause screen is shown instead)
+        final var zenIntentType = androidx.core.content.IntentCompat.getSerializableExtra(intent,
+                Player.PLAYER_INTENT_TYPE, PlayerIntentType.class);
+        if ((zenIntentType == PlayerIntentType.AllOthers
+                || zenIntentType == PlayerIntentType.Enqueue
+                || zenIntentType == PlayerIntentType.EnqueueNext)
+                && org.schabi.newpipe.zen.ZenPause.blockForService(this)) {
+            destroyPlayerAndStopService();
+            return START_NOT_STICKY;
+        }
+
         final PlayerType oldPlayerType = player.getPlayerType();
         player.handleIntent(intent);
         player.handleIntentPost(oldPlayerType);

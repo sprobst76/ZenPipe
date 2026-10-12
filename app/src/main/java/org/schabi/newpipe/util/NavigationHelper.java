@@ -119,6 +119,13 @@ public final class NavigationHelper {
                 .putExtra(Player.RESUME_PLAYBACK, false);
     }
 
+    // zen: url of the video a queue would start with (for the pause gate)
+    @Nullable
+    private static String zenUrl(@Nullable final PlayQueue queue) {
+        final PlayQueueItem item = queue == null ? null : queue.getItem();
+        return item == null ? null : item.getUrl();
+    }
+
     /* PLAY */
     public static void playOnMainPlayer(final AppCompatActivity activity,
                                         @NonNull final PlayQueue playQueue) {
@@ -147,6 +154,9 @@ public final class NavigationHelper {
         if (!PermissionHelper.isPopupEnabledElseAsk(context)) {
             return;
         }
+        if (org.schabi.newpipe.zen.ZenPause.blockStart(context, zenUrl(queue))) {
+            return; // zen: mandatory pause is running
+        }
 
         Toast.makeText(context, R.string.popup_playing_toast, Toast.LENGTH_SHORT).show();
 
@@ -160,6 +170,9 @@ public final class NavigationHelper {
     public static void playOnBackgroundPlayer(final Context context,
                                               final PlayQueue queue,
                                               final boolean resumePlayback) {
+        if (org.schabi.newpipe.zen.ZenPause.blockStart(context, zenUrl(queue))) {
+            return; // zen: mandatory pause is running
+        }
         Toast.makeText(context, R.string.background_player_playing_toast, Toast.LENGTH_SHORT)
                 .show();
 
@@ -176,6 +189,10 @@ public final class NavigationHelper {
                                        final PlayerType playerType) {
         if (playerType == PlayerType.POPUP && !PermissionHelper.isPopupEnabledElseAsk(context)) {
             return;
+        }
+        if (!PlayerHolder.getInstance().isPlayerOpen()
+                && org.schabi.newpipe.zen.ZenPause.blockStart(context, zenUrl(queue))) {
+            return; // zen: enqueueing starts a player when none is open
         }
 
         Toast.makeText(context, R.string.enqueued, Toast.LENGTH_SHORT).show();

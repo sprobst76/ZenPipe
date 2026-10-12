@@ -929,4 +929,22 @@
     <string name="zen_later_playlist_name">Watch later</string>
     <string name="zen_list_end">That\'s the latest. Use search to find more.</string>
     <string name="zen_search_refine">Refine your search</string>
+    <string name="zen_pause_title">Take a pause</string>
+    <string name="zen_pause_message">You stopped a video after %1$d min. The next video can start when the pause is over. Browsing and search stay available.</string>
+    <string name="zen_pause_over">The pause is over. You can start a video again.</string>
+    <string name="zen_pause_back">Back</string>
+    <string name="zen_pause_ok">OK</string>
+    <string name="zen_pause_toast">Pause after an aborted video is still running</string>
+    <string name="zen_later_resume_action">Resume later</string>
+    <string name="zen_later_resume_saved">Position saved, no pause. %1$d \"resume later\" left today.</string>
+    <string name="zen_later_resume_none">No \"resume later\" left today. Closing the video starts a pause.</string>
+    <string name="zen_close_title">Close the video now?</string>
+    <string name="zen_close_message">You watched %1$d min. Closing now starts a pause of %2$s before the next video.</string>
+    <string name="zen_close_later_left">\"Resume later\" keeps your position without a pause (%1$d left today).</string>
+    <string name="zen_close_keep">Keep watching</string>
+    <string name="zen_close_anyway">Close anyway</string>
+    <plurals name="zen_minutes">
+        <item quantity="one">%d minute</item>
+        <item quantity="other">%d minutes</item>
+    </plurals>
 </resources>

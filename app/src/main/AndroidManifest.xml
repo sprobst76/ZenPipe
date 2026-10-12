@@ -90,6 +90,12 @@
             android:launchMode="singleTask" />
 
         <activity
+            android:name=".zen.ZenPauseActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:label="@string/zen_pause_title" />
+
+        <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
             android:label="@string/settings" />

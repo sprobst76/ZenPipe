@@ -696,6 +696,10 @@ public final class Player implements PlaybackListener, Listener {
         }
 
         org.schabi.newpipe.zen.ZenPlayback.setPlaying(false);
+        // ZenPipe: closing the player before the end of a video is an abort (mandatory pause)
+        org.schabi.newpipe.zen.ZenPause.onClosed(context,
+                exoPlayerIsNull() ? -1 : simpleExoPlayer.getCurrentPosition(),
+                exoPlayerIsNull() ? -1 : simpleExoPlayer.getDuration());
         saveStreamProgressState();
         setRecovery();
         stopActivityBinding();
@@ -1005,6 +1009,12 @@ public final class Player implements PlaybackListener, Listener {
                                   final int duration,
                                   final int bufferPercent) {
         if (isPrepared) {
+            org.schabi.newpipe.zen.ZenPause.onProgress(context, currentProgress, duration,
+                    currentState == STATE_PLAYING);
+            if (org.schabi.newpipe.zen.ZenPause.needsKind(context)) {
+                getCurrentStreamInfo().ifPresent(info ->
+                        org.schabi.newpipe.zen.ZenPause.onStreamInfo(context, info, isAudioOnly));
+            }
             UIs.call(ui -> ui.onUpdateProgress(currentProgress, duration, bufferPercent));
             notifyProgressUpdateToListeners(currentProgress, duration, bufferPercent);
         }
@@ -1153,9 +1163,11 @@ public final class Player implements PlaybackListener, Listener {
             Log.d(TAG, "changeState() called with: state = [" + state + "]");
         }
         currentState = state;
-        // ZenPipe: own playback state (used by the intention prompt)
+        // ZenPipe: own playback state (used by the intention prompt) and playing time (pause)
         org.schabi.newpipe.zen.ZenPlayback.setPlaying(
                 state == STATE_PLAYING || state == STATE_BUFFERING);
+        org.schabi.newpipe.zen.ZenPause.onPlaying(context, state == STATE_PLAYING,
+                exoPlayerIsNull() ? -1 : simpleExoPlayer.getCurrentPosition());
         switch (state) {
             case STATE_BLOCKED:
                 onBlocked();
@@ -1244,6 +1256,7 @@ public final class Player implements PlaybackListener, Listener {
             return;
         }
 
+        org.schabi.newpipe.zen.ZenPause.onCompleted(context);
         UIs.call(PlayerUi::onCompleted);
 
         if (playQueue.getIndex() < playQueue.size() - 1) {
@@ -1679,6 +1692,7 @@ public final class Player implements PlaybackListener, Listener {
                 || !currentItem.getUrl().equals(item.getUrl());
 
         currentItem = item;
+        org.schabi.newpipe.zen.ZenPause.onItem(context, item.getUrl(), item.getDuration() * 1000L);
 
         if (playQueueIndex != playQueue.getIndex()) {
             // wrong window (this should be impossible, as this method is called with

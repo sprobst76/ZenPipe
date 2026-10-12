@@ -521,8 +521,10 @@ public final class VideoDetailFragment
         binding.overlayThumbnail.setOnClickListener(overlayListener);
         binding.overlayMetadataLayout.setOnClickListener(overlayListener);
         binding.overlayButtonsLayout.setOnClickListener(overlayListener);
-        binding.overlayCloseButton.setOnClickListener(v -> bottomSheetBehavior
-                .setState(BottomSheetBehavior.STATE_HIDDEN));
+        // zen: closing a video that would cause a pause asks first (resume later / close anyway)
+        binding.overlayCloseButton.setOnClickListener(v ->
+                org.schabi.newpipe.zen.ZenPause.confirmClose(activity, () -> bottomSheetBehavior
+                        .setState(BottomSheetBehavior.STATE_HIDDEN)));
         binding.overlayPlayQueueButton.setOnClickListener(v -> openPlayQueue(requireContext()));
         binding.overlayPlayPauseButton.setOnClickListener(v -> {
             if (playerIsNotStopped()) {
@@ -1078,6 +1080,9 @@ public final class VideoDetailFragment
         if (!PermissionHelper.isPopupEnabledElseAsk(activity)) {
             return;
         }
+        if (org.schabi.newpipe.zen.ZenPause.blockStart(activity, url)) {
+            return; // zen: mandatory pause is running
+        }
 
         // See UI changes while remote playQueue changes
         if (!isPlayerAvailable()) {
@@ -1156,6 +1161,9 @@ public final class VideoDetailFragment
     }
 
     private void openNormalBackgroundPlayer(final boolean append) {
+        if (org.schabi.newpipe.zen.ZenPause.blockStart(activity, url)) {
+            return; // zen: mandatory pause is running
+        }
         // See UI changes while remote playQueue changes
         if (!isPlayerAvailable()) {
             playerHolder.startService(false, this);
@@ -1171,6 +1179,9 @@ public final class VideoDetailFragment
     }
 
     private void openMainPlayer() {
+        if (org.schabi.newpipe.zen.ZenPause.blockStart(requireContext(), url)) {
+            return; // zen: mandatory pause is running
+        }
         if (!isPlayerServiceAvailable()) {
             playerHolder.startService(autoPlayEnabled, this);
             return;

@@ -96,6 +96,9 @@ open class App :
         // Initialize settings first because other initializations can use its values
         NewPipeSettings.initSettings(this)
 
+        // ZenPipe: a playback session left open by a killed process counts as an aborted video
+        org.schabi.newpipe.zen.ZenPause.recover(this)
+
         NewPipe.init(
             getDownloader(),
             Localization.getPreferredLocalization(this),
