@@ -663,13 +663,16 @@ public class RouterActivity extends AppCompatActivity {
             return;
         }
 
+        // zen: playback started from a shared link (video/background/popup/enqueue) never passes
+        // MainActivity, so the intention prompt has to be asked here
         final Intent intent = new Intent(this, FetcherService.class);
         final Choice choice = new Choice(currentService.getServiceId(), currentLinkType,
                 currentUrl, selectedChoiceKey);
         intent.putExtra(FetcherService.KEY_CHOICE, choice);
-        startService(intent);
-
-        finish();
+        org.schabi.newpipe.util.ZenIntentPrompt.gate(this, () -> {
+            startService(intent);
+            finish();
+        }, this::finish);
     }
 
     private boolean canHandleChoiceLikeShowInfo(final String selectedChoiceKey) {

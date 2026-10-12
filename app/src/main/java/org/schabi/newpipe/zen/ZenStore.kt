@@ -63,7 +63,18 @@ object Zen {
     }
 
     @JvmStatic
-    fun clock(context: Context) = ZenClock(store(context))
+    fun clock(context: Context) = ZenClock(store(context), bootId = { bootCount(context) })
+
+    /** Device reboot counter (API 24+), -1 if unavailable. */
+    @JvmStatic
+    fun bootCount(context: Context): Int = try {
+        android.provider.Settings.Global.getInt(context.contentResolver, "boot_count", -1)
+    } catch (e: Exception) {
+        -1
+    }
+
+    @JvmStatic
+    fun countdown(context: Context, name: String) = ZenCountdown(store(context), name, bootId = { bootCount(context) })
 
     @JvmStatic
     fun log(context: Context) = ZenLog(store(context), clock(context))

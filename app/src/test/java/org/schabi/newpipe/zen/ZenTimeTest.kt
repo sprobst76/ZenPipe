@@ -86,6 +86,92 @@ class ZenTimeTest {
     }
 
     @Test
+    fun `reboot detected by boot counter even if uptime is larger than before`() {
+        val store = MemoryZenStore()
+        val f = Fake(1_000_000_000L, 60_000L) // anchored 1 min after boot
+        var boot = 7
+        fun c() = ZenClock(store, { f.wall }, { f.mono }, null, { boot })
+        assertFalse(c().now().tampered)
+        // device restarted; the clock ran on normally, 3 h later the new uptime is 5 min
+        boot = 8
+        f.mono = 300_000L
+        f.wall = 1_000_000_000L + 3 * 3_600_000L
+        val r = c().now()
+        assertTrue(r.rebooted)
+        assertFalse(r.tampered)
+        assertEquals(f.wall, r.trustedMillis)
+    }
+
+    @Test
+    fun `same boot with changed clock stays tampering even with boot counter`() {
+        val store = MemoryZenStore()
+        val f = Fake(1_000_000_000L, 60_000L)
+        fun c() = ZenClock(store, { f.wall }, { f.mono }, null, { 7 })
+        c().now()
+        f.mono += 10_000
+        f.wall += 10_000 + 3_600_000
+        val r = c().now()
+        assertTrue(r.tampered)
+        assertFalse(r.rebooted)
+    }
+
+    @Test
+    fun `reboot with large forward gap is logged`() {
+        val store = MemoryZenStore()
+        val f = Fake(1_000_000_000L, 60_000L)
+        val logged = ArrayList<String>()
+        var boot = 1
+        fun c() = ZenClock(store, { f.wall }, { f.mono }, { t, _ -> logged.add(t) }, { boot })
+        c().now()
+        boot = 2
+        f.mono = 5_000L
+        f.wall += 20 * 3_600_000L
+        c().now()
+        assertTrue(logged.contains("clock_reboot_gap"))
+    }
+
+    @Test
+    fun `countdown shrinks with uptime within one boot`() {
+        val store = MemoryZenStore()
+        val f = Fake(0, 10_000L)
+        val cd = ZenCountdown(store, "t", { f.mono }, { 1 })
+        cd.start(60_000)
+        f.mono += 20_000
+        assertEquals(40_000L, cd.remainingMs())
+        f.mono += 50_000
+        assertEquals(0L, cd.remainingMs())
+        assertFalse(cd.isRunning())
+    }
+
+    @Test
+    fun `countdown ignores the wall clock and the time the device was off`() {
+        val store = MemoryZenStore()
+        val f = Fake(1_000_000_000L, 100_000L)
+        var boot = 1
+        val cd = { ZenCountdown(store, "t", { f.mono }, { boot }) }
+        cd().start(10 * 60_000L)
+        f.mono += 60_000
+        assertEquals(9 * 60_000L, cd().remainingMs())
+        // clock set 1 day forward, device restarted: only the new uptime counts
+        f.wall += 24 * 3_600_000L
+        boot = 2
+        f.mono = 30_000L
+        assertEquals(9 * 60_000L - 30_000L, cd().remainingMs())
+        f.mono += 60_000
+        assertEquals(9 * 60_000L - 90_000L, cd().remainingMs())
+    }
+
+    @Test
+    fun `countdown without boot counter detects reboot by uptime going back`() {
+        val store = MemoryZenStore()
+        val f = Fake(0, 500_000L)
+        val cd = ZenCountdown(store, "t", { f.mono })
+        cd.start(5 * 60_000L)
+        f.mono = 10_000L // reboot
+        assertEquals(5 * 60_000L - 10_000L, cd.remainingMs())
+    }
+
+    @Test
     fun `log keeps order and caps entries`() {
         val f = Fake(1_000L, 1L)
         val c = clock(f)

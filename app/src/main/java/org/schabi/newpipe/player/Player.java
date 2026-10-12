@@ -695,6 +695,7 @@ public final class Player implements PlaybackListener, Listener {
             Log.d(TAG, "destroy() called");
         }
 
+        org.schabi.newpipe.zen.ZenPlayback.setPlaying(false);
         saveStreamProgressState();
         setRecovery();
         stopActivityBinding();
@@ -1152,6 +1153,9 @@ public final class Player implements PlaybackListener, Listener {
             Log.d(TAG, "changeState() called with: state = [" + state + "]");
         }
         currentState = state;
+        // ZenPipe: own playback state (used by the intention prompt)
+        org.schabi.newpipe.zen.ZenPlayback.setPlaying(
+                state == STATE_PLAYING || state == STATE_BUFFERING);
         switch (state) {
             case STATE_BLOCKED:
                 onBlocked();
