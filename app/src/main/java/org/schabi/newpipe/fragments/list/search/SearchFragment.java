@@ -1084,7 +1084,7 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
 
         if (infoListAdapter.getItemsList().isEmpty()) {
             if (!result.getRelatedItems().isEmpty()) {
-                infoListAdapter.addInfoItemList(result.getRelatedItems());
+                infoListAdapter.addInfoItemList(zenWithoutShorts(result.getRelatedItems()));
             } else {
                 infoListAdapter.clearStreamItemList();
                 showEmptyState();
@@ -1093,6 +1093,20 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
         }
 
         super.handleResult(result);
+    }
+
+    // ZenPipe: drop short-form videos (Shorts) from search results.
+    private static List<? extends InfoItem> zenWithoutShorts(
+            final List<? extends InfoItem> items) {
+        final List<InfoItem> filtered = new java.util.ArrayList<>();
+        for (final InfoItem item : items) {
+            if (!(item instanceof org.schabi.newpipe.extractor.stream.StreamInfoItem
+                    && ((org.schabi.newpipe.extractor.stream.StreamInfoItem) item)
+                    .isShortFormContent())) {
+                filtered.add(item);
+            }
+        }
+        return filtered;
     }
 
     private void handleSearchSuggestion() {
@@ -1129,7 +1143,7 @@ public class SearchFragment extends BaseListFragment<SearchInfo, ListExtractor.I
     @Override
     public void handleNextItems(final ListExtractor.InfoItemsPage<?> result) {
         showListFooter(false);
-        infoListAdapter.addInfoItemList(result.getItems());
+        infoListAdapter.addInfoItemList(zenWithoutShorts(result.getItems()));
 
         if (!result.getErrors().isEmpty()) {
             // nextPage should be non-null at this point, because it refers to the page
