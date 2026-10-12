@@ -329,3 +329,11 @@ Begründung der Reihenfolge: Phase 0 schließt Seitentüren, die alle späteren 
 - Ob Shorts im RSS-Schnellmodus wirklich im Feed landen (L5).
 - Ob `isShortFormContent` in YouTube-Suchergebnissen zuverlässig gesetzt ist (Suche-Patch).
 - Ob Kiosk-Links (z. B. `youtube.com/feed/trending`) über `RouterActivity` geöffnet werden können [Vermutung: nein, der Router behandelt nur Stream/Kanal/Playlist].
+
+
+## Update Phase 1 Teil 1 (2026-10-12)
+- **Zen-Grundgeruest (Z6/Z9-Basis): ERLEDIGT, verifiziert** – Paket `zen`, Prefs `zen_state`, Backup-Ausschluss, Zen-Tag, Uhr-Erkennung (Teil), Protokoll, feste Zeitzone. Time-Lock selbst (Z6) weiter offen.
+- **Z2 Feed mit Ende: ERLEDIGT (Kern), auf dem Geraet verifiziert** – siehe `.planning/STATE.md` (Ausgabe 15/60 min, Deckel 30 verschiedene, Laengenfokus, Abschlusskarte, Neustart wuerfelt nicht neu, Absichtsabfrage-Gate). Offen: Stichwortfilter (Z16), implizite Signale, Timer ueber Stundengrenze, Gruppen-Prioritaet am Geraet.
+- **Z11 Spaeter-Liste: ERLEDIGT** (max 10, Ablauf 30 Tage, Long-Press-Aktion im Feed); Umgehung ueber "Weitere Optionen -> Zur Playlist hinzufuegen" bewusst akzeptiert (W25).
+- **Kanalseiten 15 / Suche 2 Seiten: ERLEDIGT, verifiziert** (15 distinct Titel gezaehlt, Footer "Refine your search" nach 2 Seiten).
+- Musik: Feed schliesst Musik per Heuristik aus (Z12 nur teilweise).
