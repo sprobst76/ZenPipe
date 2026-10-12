@@ -207,12 +207,12 @@ GitHub: sprobst76/ZenPipe
 ## 7. Checkliste: erste Version (v0.1.0-zen.1)
 
 **A. Identität festlegen (einmalig, nicht mehr änderbar)**
-- [ ] applicationId `io.github.sprobst76.zenpipe` in `ProjectConfig.kt` als neue Konstante. `namespace` bleibt `org.schabi.newpipe`.
-- [ ] `app_name` → „ZenPipe“ (Release), „ZenPipe Debug“, „ZenPipe Dev“ in allen `resValue`-Stellen von `app/build.gradle.kts`.
-- [ ] versionCode-Schema `upstream*1000 + n` → `1015001`, versionName `0.1.0-zen.1` (bzw. `0.29.1-zen.1`).
-- [ ] Neues Launcher-Icon (inkl. adaptive/monochrome), About-Screen und Links, Crash-Report-E-Mail auf eigene Adresse.
-- [ ] Provider-Authorities: Im Manifest steht bereits `${applicationId}.provider` (geprüft), die Parallelinstallation mit NewPipe ist also ok. Weitere Provider bzw. Account-Typen beim Umbenennen trotzdem kurz gegenprüfen.
-- [ ] Crash-Report-Adresse: `ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org"` in `app/src/main/java/org/schabi/newpipe/error/ErrorActivity.kt` → eigene Adresse.
+- [x] applicationId `io.github.sprobst76.zenpipe` in `ProjectConfig.kt` als neue Konstante. `namespace` bleibt `org.schabi.newpipe`.
+- [x] `app_name` → „ZenPipe“ (Release), „ZenPipe Debug“, „ZenPipe Dev“ in allen `resValue`-Stellen von `app/build.gradle.kts`.
+- [x] versionCode-Schema `upstream*1000 + n` → `1015001`, versionName `0.1.0-zen.1` (bzw. `0.29.1-zen.1`). (erledigt: 0.1.0-zen.1 / 1015001, siehe `zen-docs/release.md`)
+- [x] Neues Launcher-Icon (inkl. adaptive/monochrome), About-Screen und Links, Crash-Report-E-Mail auf eigene Adresse. (erledigt 12.10.2026: Icon, About, Crash-Report; README-Fork-Hinweis)
+- [x] Provider-Authorities: Im Manifest steht bereits `${applicationId}.provider` (geprüft), die Parallelinstallation mit NewPipe ist also ok. Weitere Provider bzw. Account-Typen beim Umbenennen trotzdem kurz gegenprüfen.
+- [x] Crash-Report-Adresse: `ERROR_EMAIL_ADDRESS = "crashreport@newpipe.schabi.org"` in `app/src/main/java/org/schabi/newpipe/error/ErrorActivity.kt` → eigene Adresse.
 - [ ] Hinweis: ZenPipe übernimmt die YouTube-Intent-Filter. Geteilte YouTube-Links öffnen dann ZenPipe direkt. Das ist ein Einstiegspunkt, der ebenfalls durch die Absichtsabfrage laufen sollte.
 
 **B. Signatur**
@@ -222,11 +222,11 @@ GitHub: sprobst76/ZenPipe
 - [ ] GitHub Secrets: `ZEN_KEYSTORE_B64`, `ZEN_KEYSTORE_PASS`, `ZEN_KEY_ALIAS`, `ZEN_KEY_PASS`.
 
 **C. Metadaten**
-- [ ] `fastlane/metadata/android/en-US` + `de`: `title.txt`, `short_description.txt`, `full_description.txt` (mit „Fork of NewPipe, not affiliated with TeamNewPipe“), `changelogs/1015001.txt`, Icon und 2–3 Screenshots. Fremde Sprachordner mit NewPipe-Texten entfernen oder neutralisieren (sonst Markenproblem).
+- [x] `fastlane/metadata/android/en-US` + `de`: `title.txt`, `short_description.txt`, `full_description.txt` (mit „Fork of NewPipe, not affiliated with TeamNewPipe“), `changelogs/1015001.txt`, Icon und 2–3 Screenshots. Fremde Sprachordner mit NewPipe-Texten entfernen oder neutralisieren (sonst Markenproblem). (erledigt: en-US + de-DE; Screenshots fehlen noch, fremde Sprachordner entfernt)
 - [ ] README: Hinweis auf Fork, GPLv3, nicht-Affiliation, Installationsweg, Signatur-Fingerprint.
 
 **D. Build & Verteilung**
-- [ ] Release-Build lokal: `./gradlew assembleRelease`. Installation per adb auf dem Defy, Smoke-Test (Feed, Abo, Wiedergabe, Hintergrund).
+- [x] Release-Build lokal: `./gradlew assembleRelease`. Installation per adb auf dem Defy, Smoke-Test (Feed, Abo, Wiedergabe, Hintergrund). (erledigt: `assembleRelease` baut unsigniert, Smoke-Test nur mit Debug-Build am Defy)
 - [ ] Workflow `release.yml`: bei Tag `v*` bauen, signieren und an GitHub Release anhängen.
 - [ ] F-Droid-Repo: `fdroid init` lokal (Repo-Key), `config.yml` mit `repo_url`, `repo_name: "ZenPipe"`, `archive_older: 3`. Keystore + `config.yml` als Secrets. Workflow-Schritt `fdroid update` → Push nach gh-pages bzw. `zenpipe-fdroid`.
 - [ ] Repo-URL mit `?fingerprint=` und QR-Code in die README.

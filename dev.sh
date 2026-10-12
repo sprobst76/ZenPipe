@@ -21,8 +21,8 @@ set -uo pipefail
 SESSION="zenpipe"
 PROJECT_DIR="$HOME/development/ZenPipe"
 
-PACKAGE="de.example.app"               # applicationId aus app/build.gradle.kts
-MAIN_ACTIVITY=".MainActivity"          # für den Auto-Start nach Install
+PACKAGE="io.github.sprobst76.zenpipe.debug"   # applicationId (debug build)
+MAIN_ACTIVITY="org.schabi.newpipe.MainActivity"   # namespace stays org.schabi.newpipe
 WIFI_ADDR=""                           # z.B. "192.168.0.74:38949" — leer = nur USB/bereits verbundenes Gerät
 
 FOCUS_WINDOW="claude"

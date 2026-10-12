@@ -11,10 +11,11 @@ Kommunikation Deutsch; Code, Commits, technische Doku Englisch.
 - NewPipeExtractor unverändert einbinden.
 - GPLv3 beachten: Fork bleibt Open Source.
 - Verteilung: GitHub-Releases / eigenes F-Droid-Repo, nicht Play Store.
-- Nicht denselben Package-Namen wie NewPipe verwenden (Parallelinstallation); applicationId klären.
+- applicationId `io.github.sprobst76.zenpipe` (erledigt, parallel zu NewPipe installierbar). Kein „NewPipe“ im App-Namen; keine Anfragen an NewPipe-Server (Update-Check aus, Crash-Reports nur an ZenPipe-GitHub).
 
 ## Operations
-- `./dev.sh` / `./stop.sh`: tmux-Dev-Loop (Build → Install → Logcat). Vorher CONFIG-Block (PACKAGE, MAIN_ACTIVITY) anpassen, sobald der Fork existiert.
+- `./dev.sh` / `./stop.sh`: tmux-Dev-Loop (Build → Install → Logcat); CONFIG ist auf `io.github.sprobst76.zenpipe.debug` + `org.schabi.newpipe.MainActivity` gesetzt.
+- Paketnamen: Release `io.github.sprobst76.zenpipe`, Debug `io.github.sprobst76.zenpipe.debug` (Namespace/Package im Code bleibt `org.schabi.newpipe`). Alte Debug-App `org.schabi.newpipe.debug.zen` auf dem Defy ist Altlast (enthält Test-Abos). Versionsschema, Icon-Generator, Fastlane: `zen-docs/release.md`.
 - Gerät: Motorola Defy per WiFi-ADB; Status mit `~/development/WorkflowAnalyser/scripts/adb-device-check.sh`.
 - Release: Skill `/android-release` + `android-release-preflight.sh`.
 
