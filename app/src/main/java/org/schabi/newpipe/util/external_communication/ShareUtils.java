@@ -83,6 +83,12 @@ public final class ShareUtils {
      * @param url     the url to browse
      **/
     public static void openUrlInBrowser(@NonNull final Context context, final String url) {
+        // zen: do not hand YouTube links to a browser (recommendation feed behind the link),
+        // copy the link instead
+        if (isYoutubeUrl(url)) {
+            copyToClipboard(context, url);
+            return;
+        }
         // Target a generic http://, so we are sure to get a browser and not e.g. the yt app.
         // Note that this requires the `http` schema to be added to `<queries>` in the manifest.
         final Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://"));
@@ -106,6 +112,19 @@ public final class ShareUtils {
         }
     }
 
+    private static boolean isYoutubeUrl(final String url) {
+        if (url == null) {
+            return false;
+        }
+        final String host = Uri.parse(url).getHost();
+        if (host == null) {
+            return false;
+        }
+        final String h = host.toLowerCase(java.util.Locale.ROOT);
+        return h.equals("youtu.be") || h.equals("youtube.com") || h.endsWith(".youtube.com")
+                || h.endsWith(".youtube-nocookie.com");
+    }
+
     /**
      * Open a url with the system default app using {@link Intent#ACTION_VIEW}, showing a toast in
      * case of failure.
@@ -114,8 +133,17 @@ public final class ShareUtils {
      * @param url     the url to open
      */
     public static void openUrlInApp(@NonNull final Context context, final String url) {
-        openIntentInApp(context, new Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (isYoutubeUrl(url)) {
+            // zen: never hand YouTube links to the official YouTube app, handle them in-app
+            intent.setPackage(context.getPackageName());
+            if (!tryOpenIntentInApp(context, intent)) {
+                copyToClipboard(context, url);
+            }
+            return;
+        }
+        openIntentInApp(context, intent);
     }
 
     /**

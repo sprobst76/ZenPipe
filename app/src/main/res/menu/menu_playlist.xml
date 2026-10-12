@@ -26,7 +26,7 @@
     <item
         android:id="@+id/menu_item_openInBrowser"
         android:orderInCategory="2"
-        android:title="@string/open_in_browser"
+        android:title="@string/zen_copy_link"
         app:showAsAction="never" />
 
     <item

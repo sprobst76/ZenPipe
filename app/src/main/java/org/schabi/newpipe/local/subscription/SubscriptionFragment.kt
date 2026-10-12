@@ -281,7 +281,7 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
     private fun showLongTapDialog(selectedItem: ChannelInfoItem) {
         val commands = arrayOf(
             getString(R.string.share),
-            getString(R.string.open_in_browser),
+            getString(R.string.zen_copy_link),
             getString(R.string.unsubscribe)
         )
 

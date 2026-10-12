@@ -910,4 +910,6 @@
     <string name="zen_intent_continue">Continue</string>
     <string name="zen_intent_continue_wait">Continue (%1$d)</string>
     <string name="zen_intent_not_now">Never mind</string>
+    <string name="zen_shorts_blocked">Shorts are not available in ZenPipe</string>
+    <string name="zen_copy_link">Copy link</string>
 </resources>

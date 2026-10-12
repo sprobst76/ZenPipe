@@ -875,4 +875,6 @@
     <string name="zen_intent_continue">Weiter</string>
     <string name="zen_intent_continue_wait">Weiter (%1$d)</string>
     <string name="zen_intent_not_now">Doch nicht</string>
+    <string name="zen_shorts_blocked">Shorts sind in ZenPipe nicht verfügbar</string>
+    <string name="zen_copy_link">Link kopieren</string>
 </resources>

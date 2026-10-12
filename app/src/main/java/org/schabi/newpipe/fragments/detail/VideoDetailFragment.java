@@ -2182,7 +2182,7 @@ public final class VideoDetailFragment
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle(R.string.select_quality_external_players);
-        builder.setNeutralButton(R.string.open_in_browser, (dialog, i) ->
+        builder.setNeutralButton(R.string.zen_copy_link, (dialog, i) ->
                 ShareUtils.openUrlInBrowser(requireActivity(), url));
 
         final List<VideoStream> videoStreamsForExternalPlayers =
@@ -2246,7 +2246,7 @@ public final class VideoDetailFragment
 
             new AlertDialog.Builder(activity)
                     .setTitle(R.string.select_audio_track_external_players)
-                    .setNeutralButton(R.string.open_in_browser, (dialog, i) ->
+                    .setNeutralButton(R.string.zen_copy_link, (dialog, i) ->
                             ShareUtils.openUrlInBrowser(requireActivity(), url))
                     .setSingleChoiceItems(trackNames, selectedAudioStream, null)
                     .setNegativeButton(R.string.cancel, null)

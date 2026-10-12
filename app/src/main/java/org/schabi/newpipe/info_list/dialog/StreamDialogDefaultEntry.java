@@ -134,7 +134,7 @@ public enum StreamDialogDefaultEntry {
                     })
     ),
 
-    OPEN_IN_BROWSER(R.string.open_in_browser, (fragment, item) ->
+    OPEN_IN_BROWSER(R.string.zen_copy_link, (fragment, item) ->
             ShareUtils.openUrlInBrowser(fragment.requireContext(), item.getUrl())),
 
 
