@@ -1,0 +1,5 @@
+Erste ZenPipe-Entwicklungsversion (basiert auf NewPipe 0.29.1).
+• Eigene Identität: ZenPipe, läuft neben NewPipe, neues Icon
+• Feed mit Ende, Tages-Deckel, kein Autoplay/Kommentare/Ähnliches/Shorts
+• Absichtsabfrage, Pflichtpause nach frühem Abbruch, Zen-Einstellungen mit 24-h-Sperre
+• Absturzberichte gehen an GitHub (ZenPipe) statt an NewPipe, Update-Prüfung abgeschaltet

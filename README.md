@@ -1,3 +1,24 @@
+<h1 align="center">ZenPipe</h1>
+
+**ZenPipe** is a calm, privacy-friendly YouTube client for Android: a feed with an end, no autoplay,
+no comments, an intention check before watching. It is a **fork of [NewPipe](https://newpipe.net)**
+(GPLv3) and is **not affiliated with or endorsed by TeamNewPipe**. It installs next to NewPipe
+(`io.github.sprobst76.zenpipe`) and never contacts NewPipe's update or crash-report servers.
+
+- Concept and rules: [`zen-docs/`](zen-docs/) (rules: [`zen-docs/rules.md`](zen-docs/rules.md), release identity: [`zen-docs/release.md`](zen-docs/release.md))
+- Bugs / feedback: https://github.com/sprobst76/ZenPipe/issues
+- Install: not yet published (own F-Droid repo / GitHub releases are planned).
+
+### Privacy
+
+ZenPipe has no account, no analytics and no tracking. Crash reports are never sent automatically;
+you can copy them and decide yourself whether to share them (e.g. as a GitHub issue). Like NewPipe it
+talks directly to the video services (YouTube etc.) from your device.
+
+*The remainder of this file is the original NewPipe README, kept for attribution and upstream merges.*
+
+---
+
 <p align="center"><a href="https://newpipe.net"><img src="assets/new_pipe_icon_5.png" width="150"></a></p> 
 <h2 align="center"><b>NewPipe</b></h2>
 <h4 align="center">A libre lightweight streaming front-end for Android.</h4>

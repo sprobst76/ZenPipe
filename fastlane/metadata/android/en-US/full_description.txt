@@ -1,1 +1,19 @@
-NewPipe does not use any Google framework libraries, or the YouTube API. It only parses the website in order to gain the information it needs. Therefore this app can be used on devices without Google Services installed. Also, you don't need a YouTube account to use NewPipe, and it's FLOSS.
+ZenPipe is a calm, privacy-friendly YouTube client for Android: watch what you decided to watch, then stop. It is a fork of NewPipe with a different goal: mindful viewing instead of an endless feed.
+
+<b>What is different from NewPipe</b>
+• A feed with an end: a limited number of unseen videos from your subscriptions per edition, a daily cap, no infinite scrolling.
+• No autoplay, no auto-queue, no related videos, no comments, no Shorts.
+• An intention check before you start watching: a short pause to decide what you want to watch and when you are done.
+• A mandatory break after you abort a video early, so skipping around does not become a habit.
+• Zen settings that are protected by a 24-hour lock: loosening the rules takes a day, tightening them is immediate.
+• Everything stays on your device: no account, no analytics, no crash reports sent automatically.
+
+<b>What you keep from NewPipe</b>
+• No Google services and no YouTube API: the app parses the website, so it works without Google Play Services.
+• Subscriptions without an account, local playlists, background and popup playback, downloads.
+• Free software under the GPLv3.
+
+<b>Not affiliated</b>
+ZenPipe is an independent fork of NewPipe (https://newpipe.net) and is not affiliated with or endorsed by TeamNewPipe. ZenPipe installs next to NewPipe and does not use NewPipe's update or crash-report servers.
+
+Source code and issues: https://github.com/sprobst76/ZenPipe

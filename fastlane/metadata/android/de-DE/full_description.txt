@@ -1,0 +1,19 @@
+ZenPipe ist ein ruhiger, datenschutzfreundlicher YouTube-Client für Android: Schau, was du dir vorgenommen hast, und höre dann auf. Es ist ein Fork von NewPipe mit anderem Ziel: bewusstes Schauen statt endlosem Feed.
+
+<b>Was anders ist als bei NewPipe</b>
+• Ein Feed mit Ende: pro Ausgabe nur eine begrenzte Zahl ungesehener Videos deiner Abos, ein Tages-Deckel, kein endloses Scrollen.
+• Kein Autoplay, keine automatische Warteschlange, keine ähnlichen Videos, keine Kommentare, keine Shorts.
+• Eine Absichtsabfrage vor dem Schauen: ein kurzer Moment, um zu entscheiden, was du schauen willst und wann du fertig bist.
+• Eine Pflichtpause nach einem frühen Abbruch, damit Herumspringen nicht zur Gewohnheit wird.
+• Zen-Einstellungen mit 24-Stunden-Sperre: Lockern der Regeln dauert einen Tag, Verschärfen gilt sofort.
+• Alles bleibt auf deinem Gerät: kein Konto, keine Analyse, keine automatisch gesendeten Absturzberichte.
+
+<b>Was von NewPipe bleibt</b>
+• Keine Google-Dienste und keine YouTube-API: Die App liest die Webseite aus und funktioniert daher ohne Google Play Services.
+• Abos ohne Konto, lokale Playlists, Hintergrund- und Popup-Wiedergabe, Downloads.
+• Freie Software unter der GPLv3.
+
+<b>Keine Verbindung zu NewPipe</b>
+ZenPipe ist ein unabhängiger Fork von NewPipe (https://newpipe.net) und steht in keiner Verbindung zu TeamNewPipe und wird von diesem nicht unterstützt. ZenPipe lässt sich neben NewPipe installieren und nutzt weder dessen Update- noch dessen Absturzbericht-Server.
+
+Quellcode und Fehlermeldungen: https://github.com/sprobst76/ZenPipe

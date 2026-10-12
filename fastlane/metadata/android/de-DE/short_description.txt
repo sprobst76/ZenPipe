@@ -1,0 +1,1 @@
+Bewusst YouTube schauen: Feed mit Ende, kein Autoplay. Ein Fork von NewPipe.

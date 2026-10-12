@@ -1,1 +1,1 @@
-A free lightweight YouTube frontend for Android.
+Mindful YouTube viewing: a feed with an end, no autoplay. A fork of NewPipe.
