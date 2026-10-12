@@ -229,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        org.schabi.newpipe.util.ZenIntentPrompt.onActivityStarted(this);
         sharedPrefEditor.putBoolean(KEY_IS_IN_BACKGROUND, false).apply();
         Log.d(TAG, "App moved to foreground");
     }
@@ -236,6 +237,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        org.schabi.newpipe.util.ZenIntentPrompt.onActivityStopped();
         sharedPrefEditor.putBoolean(KEY_IS_IN_BACKGROUND, true).apply();
         Log.d(TAG, "App moved to background");
     }
@@ -806,15 +808,21 @@ public class MainActivity extends AppCompatActivity {
 
                         final boolean switchingPlayers = intent.getBooleanExtra(
                                 VideoDetailFragment.KEY_SWITCHING_PLAYERS, false);
+                        if (playQueue == null && !switchingPlayers) {
+                            // ZenPipe: external/shared link -> ask for the intention
+                            org.schabi.newpipe.util.ZenIntentPrompt.onExternalLink(this);
+                        }
                         NavigationHelper.openVideoDetailFragment(
                                 getApplicationContext(), getSupportFragmentManager(),
                                 serviceId, url, title, playQueue, switchingPlayers);
                         break;
                     case CHANNEL:
+                        org.schabi.newpipe.util.ZenIntentPrompt.onExternalLink(this);
                         NavigationHelper.openChannelFragment(getSupportFragmentManager(),
                                 serviceId, url, title);
                         break;
                     case PLAYLIST:
+                        org.schabi.newpipe.util.ZenIntentPrompt.onExternalLink(this);
                         NavigationHelper.openPlaylistFragment(getSupportFragmentManager(),
                                 serviceId, url, title);
                         break;

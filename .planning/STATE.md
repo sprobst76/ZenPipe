@@ -11,8 +11,14 @@
 ## Verifiziert (Defy ZY32CVNR2B, Logcat ohne FATAL)
 - Drawer-Eintraege per uiautomator; Feed als Startseite; Video-Detailseite ohne Kommentare/Related, startet nicht automatisch; Dialog-Countdown (Continue (2) disabled), Weiter schliesst Dialog, Doch nicht beendet App.
 
+## Update 2026-10-12 (Verifikation + Absichtsabfrage)
+- Unit-Tests: `./gradlew testDebugUnitTest` (gesamte Suite) gruen, keine Anpassungen noetig.
+- Einstellungen "Video und Audio" + "Inhalt" auf dem Defy geoeffnet (uiautomator + Screenshot): rendern ohne Crash, keine toten Eintraege, Logcat ohne FATAL.
+- Shorts in Suchergebnissen ausgeblendet (`SearchFragment.zenWithoutShorts`, `StreamInfoItem.isShortFormContent()`); Suche auf dem Defy ohne Fehler (Positiv-Fall mit echtem Short nicht gezielt geprueft).
+- `ZenIntentPrompt` erweitert: zusaetzlich bei externen/geteilten Links (`MainActivity.handleIntent`, Stream/Kanal/Playlist ohne PlayQueue) und bei Rueckkehr nach >5 min im Hintergrund (`MainActivity.onStart/onStop`). Cooldown 5 min seit letzter Frage; kein Dialog bei laufender Wiedergabe (`AudioManager.isMusicActive`). Auf dem Defy mit temporaer 15 s/20 s Schwellen getestet: Link im Cooldown -> kein Dialog, nach Cooldown -> Dialog; kurzer Hintergrund (8 s) -> kein Dialog, langer (25 s) -> Dialog; bei laufender Wiedergabe -> kein Dialog. Commit enthaelt 5 min.
+- Autoplay bleibt dauerhaft AUS (Entscheidung): Link-Oeffnen zeigt Auswahldialog, Video startet erst nach Play-Tipp.
+
 ## Offen
-- Absichtsabfrage nicht bei geteilten Links (RouterActivity) und nicht bei Rueckkehr aus dem Hintergrund (nur Prozessstart); Eingabe der Absicht wird nicht gespeichert.
-- Autoplay=NEVER: Link-Oeffnen zeigt Auswahldialog, Video startet erst auf Play-Tipp.
-- Einstellungs-Screens (Video/Audio, Inhalt) nach Entfernen der Schalter nicht manuell durchgeklickt; Unit-Tests (`testDebugUnitTest`) nicht gelaufen.
-- Branding/applicationId/Signierung, Shorts in Suchergebnissen, Tageslimit etc. spaeter.
+- Absicht (Freitext) wird nicht gespeichert (nicht gewuenscht).
+- Der RouterActivity-Auswahldialog erscheint vor der Absichtsabfrage (Dialog kommt erst in MainActivity).
+- Branding/applicationId/Signierung, Tageslimit etc. spaeter.
