@@ -11,5 +11,8 @@ const val NEWPIPE_VERSION_SDK_TARGET = 35
 const val NEWPIPE_VERSION_CODE = 1015
 const val NEWPIPE_VERSION_NAME = "0.29.1"
 
+// ZenPipe: Kotlin/Java namespace stays "org.schabi.newpipe" (keeps upstream merges clean),
+// only the installed application id differs from NewPipe.
 const val NEWPIPE_APPLICATION_ID_OLD = "org.schabi.newpipe"
+const val ZENPIPE_APPLICATION_ID = "io.github.sprobst76.zenpipe"
 const val NEWPIPE_APPLICATION_ID_NEW = "net.newpipe.app"

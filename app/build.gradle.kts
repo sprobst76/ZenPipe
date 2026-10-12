@@ -39,8 +39,8 @@ configure<ApplicationExtension> {
     namespace = NEWPIPE_APPLICATION_ID_OLD
 
     defaultConfig {
-        applicationId = NEWPIPE_APPLICATION_ID_OLD
-        resValue("string", "app_name", "NewPipe")
+        applicationId = ZENPIPE_APPLICATION_ID
+        resValue("string", "app_name", "ZenPipe")
         minSdk {
             version = release(NEWPIPE_VERSION_SDK_MIN)
         }
@@ -60,20 +60,16 @@ configure<ApplicationExtension> {
         debug {
             isDebuggable = true
 
-            // suffix the app id and the app name with git branch name
-            if (normalizedWorkingBranch.isEmpty() || workingBranch in defaultBranches) {
-                applicationIdSuffix = ".debug"
-                resValue("string", "app_name", "NewPipe Debug")
-            } else {
-                applicationIdSuffix = ".debug.$normalizedWorkingBranch"
-                resValue("string", "app_name", "NewPipe $workingBranch")
-            }
+            // ZenPipe: fixed debug suffix (independent of the git branch), so debug and
+            // release builds are installable in parallel and never collide with NewPipe.
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "ZenPipe Debug")
         }
 
         release {
             System.getProperty("packageSuffix")?.let { suffix ->
                 applicationIdSuffix = suffix
-                resValue("string", "app_name", "NewPipe $suffix")
+                resValue("string", "app_name", "ZenPipe $suffix")
             }
             isMinifyEnabled = true
             isShrinkResources = true
@@ -91,10 +87,10 @@ configure<ApplicationExtension> {
             // suffix the app id and the app name with git branch name
             if (normalizedWorkingBranch.isEmpty() || workingBranch in defaultBranches) {
                 applicationIdSuffix = ".continuous"
-                resValue("string", "app_name", "NewPipe Continuous")
+                resValue("string", "app_name", "ZenPipe Continuous")
             } else {
                 applicationIdSuffix = ".continuous.$normalizedWorkingBranch"
-                resValue("string", "app_name", "NewPipe $workingBranch")
+                resValue("string", "app_name", "ZenPipe $workingBranch")
             }
         }
     }
