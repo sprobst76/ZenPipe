@@ -115,6 +115,17 @@ configure<ApplicationExtension> {
 
     androidResources {
         generateLocaleConfig = true
+        // ZenPipe: ship English (default) and German only. The ~100 inherited NewPipe
+        // translations still say "NewPipe" and would break the fork's naming.
+        localeFilters += listOf("en", "de")
+        // Same for the Compose resources of :shared (About screen etc.), which end up in assets.
+        val sharedResources = rootProject.file("shared/src/commonMain/composeResources")
+        val foreignLocales = sharedResources.listFiles { f ->
+            f.isDirectory && f.name.startsWith("values-") && f.name != "values-de"
+        }?.map { it.name }.orEmpty()
+        if (foreignLocales.isNotEmpty()) {
+            ignoreAssetsPatterns += foreignLocales.map { "!$it" }
+        }
     }
 
     buildFeatures {

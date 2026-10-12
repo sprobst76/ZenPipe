@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="navigate_back">Zurück</string>
-    <string name="title_activity_about">Über NewPipe</string>
+    <string name="title_activity_about">Über ZenPipe</string>
     <string name="tab_about">Über &amp; FAQ</string>
     <string name="tab_licenses">Lizenzen</string>
-    <string name="donation_title">Spenden</string>
+    <string name="donation_title">NewPipe unterstützen</string>
     <string name="view_on_github">Auf GitHub ansehen</string>
     <string name="read_full_license">Lizenz lesen</string>
     <string name="faq_title">Häufig gestellte Fragen</string>
@@ -13,18 +13,18 @@
     <string name="done">Fertig</string>
     <string name="title_licenses">Drittanbieter-Lizenzen</string>
     <string name="license">Von %1$s unter %2$s</string>
-    <string name="app_description">Freies und schlankes Streaming für Android.</string>
+    <string name="app_description">Bewusstes Streaming für Android. ZenPipe ist ein Fork von NewPipe und steht in keiner Verbindung zu TeamNewPipe.</string>
     <string name="contribution_title">Beitragen</string>
-    <string name="contribution_encouragement">Ob Ideen, Übersetzungen, Design-Änderungen, Code-Aufräumen oder richtig große Code-Änderungen — Hilfe ist immer willkommen. Je mehr geholfen wird, desto besser wird NewPipe!</string>
-    <string name="donation_encouragement">NewPipe wird von Freiwilligen entwickelt, die ihre Freizeit dafür verwenden, dir die beste Nutzungserfahrung zu bieten. Gib etwas zurück, indem du den Entwicklern hilfst, NewPipe noch weiter zu verbessern, während sie sich an einer Tasse Kaffee erfreuen.</string>
+    <string name="contribution_encouragement">Ob Ideen, Übersetzungen, Design-Änderungen, Code-Aufräumen oder richtig große Code-Änderungen — Hilfe ist immer willkommen. Je mehr geholfen wird, desto besser wird ZenPipe!</string>
+    <string name="donation_encouragement">ZenPipe baut auf NewPipe auf, das von Freiwilligen in ihrer Freizeit entwickelt wird. Wenn du etwas zurückgeben möchtest, unterstütze bitte das ursprüngliche NewPipe-Projekt.</string>
     <string name="give_back">Zurückgeben</string>
-    <string name="website_title">Website</string>
-    <string name="website_encouragement">Besuche die NewPipe-Website für weitere Informationen und Neuigkeiten.</string>
-    <string name="privacy_policy_title">NewPipes Datenschutzerklärung</string>
-    <string name="privacy_policy_encouragement">Dem NewPipe-Projekt ist Datenschutz sehr wichtig. Daher sammelt die App keinerlei Daten ohne deine Zustimmung.\nNewPipes Datenschutzerklärung erläutert ausführlich, welche Daten beim Senden eines Absturzberichts übermittelt und gespeichert werden.</string>
+    <string name="website_title">NewPipe-Website</string>
+    <string name="website_encouragement">Besuche die Website von NewPipe, dem Projekt, auf dem ZenPipe basiert.</string>
+    <string name="privacy_policy_title">Datenschutz</string>
+    <string name="privacy_policy_encouragement">ZenPipe sammelt keine Daten und enthält keine Analyse-Werkzeuge. Absturzberichte werden nie automatisch gesendet: Du kannst sie kopieren und selbst entscheiden, ob du sie teilst.</string>
     <string name="read_privacy_policy">Datenschutzerklärung lesen</string>
-    <string name="app_license_title">NewPipes Lizenz</string>
-    <string name="app_license">NewPipe ist freie Copyleft-Software: Du kannst sie nach Belieben benutzen, untersuchen, mit anderen teilen und verbessern. Insbesondere kannst du sie unter den von der Free Software Foundation veröffentlichten Bedingungen der GNU General Public License, in der Version 3 der Lizenz oder (nach deiner Wahl) jeder späteren Version, weitergeben und/oder verändern.</string>
+    <string name="app_license_title">Lizenz von ZenPipe</string>
+    <string name="app_license">ZenPipe ist ein Fork von NewPipe (von den NewPipe-Mitwirkenden, https://newpipe.net). Wie NewPipe ist es freie Copyleft-Software: Du kannst sie nach Belieben benutzen, untersuchen, mit anderen teilen und verbessern. Insbesondere kannst du sie unter den von der Free Software Foundation veröffentlichten Bedingungen der GNU General Public License, entweder Version 3 oder (nach deiner Wahl) jeder späteren Version, weiterverbreiten und/oder verändern.</string>
     <string name="faq_description">Wenn du Probleme bei der Verwendung der App hast, lies bitte die Antworten auf häufig gestellte Fragen!</string>
     <string name="faq">Auf der Website ansehen</string>
     <string name="settings">Einstellungen</string>

@@ -107,8 +107,8 @@ fun LicensePageContent(
                         .wrapContentWidth(Alignment.End),
                     onClick = {
                         licenseToShow = License(
-                            name = "NewPipe",
-                            website = "https://newpipe.net/",
+                            name = "ZenPipe (fork of NewPipe)",
+                            website = "https://github.com/sprobst76/ZenPipe",
                             spdxID = "GPL-3.0-or-later"
                         )
                         shouldShowLicenseDialog = true

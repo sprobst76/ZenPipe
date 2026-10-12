@@ -49,7 +49,7 @@ dens = {"mdpi": 1, "hdpi": 1.5, "xhdpi": 2, "xxhdpi": 3, "xxxhdpi": 4}
 for name, f in dens.items():
     # adaptive foreground (108dp canvas, ring inside 66dp safe zone)
     fs = round(108 * f)
-    save(ring(fs, 0.245, 0.07, FG), f"mipmap-{name}/ic_launcher_foreground.png")
+    save(ring(fs, 0.205, 0.06, FG), f"mipmap-{name}/ic_launcher_foreground.png")
     # legacy launcher icon (rounded square, 48dp-ish)
     ls = round(48 * f) if name != "mdpi" else 48
     big = ls * SS
@@ -65,11 +65,11 @@ for name, f in dens.items():
 
 # Android TV banner 320x180
 banner = Image.new("RGBA", (320, 180), BG)
-banner.alpha_composite(ring(180, 0.27, 0.06, FG), (70 - 30, 0))
+banner.alpha_composite(ring(180, 0.27, 0.06, FG), (0, 0))
 d = ImageDraw.Draw(banner)
 for fp in ("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"):
     if os.path.exists(fp):
-        d.text((150, 90), "ZenPipe", fill=FG, font=ImageFont.truetype(fp, 34), anchor="lm")
+        d.text((175, 92), "ZenPipe", fill=FG, font=ImageFont.truetype(fp, 34), anchor="lm")
         break
 save(banner.convert("RGB"), "mipmap-xhdpi/newpipe_tv_banner.png")
 
