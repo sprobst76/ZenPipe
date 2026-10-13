@@ -34,11 +34,16 @@ class ZenFeedState(
         val nextEditionMillis: Long?
     )
 
+    /**
+     * [createdAt]: creation time of a new edition (default [nowMillis]); an edition whose content
+     * was prepared first gets the time the preparation started, so the hourly rhythm stays.
+     */
     @Synchronized
     fun view(
         nowMillis: Long,
         allowCreate: Boolean,
         rules: ZenFeedPlanner.ContentRules = ZenFeedPlanner.ContentRules.OFF,
+        createdAt: Long = nowMillis,
         candidates: () -> List<ZenFeedPlanner.Candidate>
     ): View {
         val day = ZenDay.dayOf(nowMillis, zone).toString()
@@ -46,11 +51,9 @@ class ZenFeedState(
             store.put(KEY_DAY to day, KEY_DAY_URLS to "")
         }
         var edition = load()
-        val capReached = counted().size >= ZenSettings.dailyCap()
-        val due = edition == null || edition.day != day ||
-            (!capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS)
-        if (allowCreate && due) {
-            edition = createEdition(nowMillis, day, edition, rules, candidates)
+        if (allowCreate && isDue(nowMillis)) {
+            val at = if (createdAt <= nowMillis && ZenDay.dayOf(createdAt, zone).toString() == day) createdAt else nowMillis
+            edition = createEdition(nowMillis, at, day, edition, rules, candidates)
         }
         val handled = handled()
         val open = edition?.picks?.filter { it.url !in handled } ?: emptyList()
@@ -63,8 +66,20 @@ class ZenFeedState(
         return View(edition, open, capNow, next)
     }
 
+    /** Whether a new edition would be built now (new day, none yet, or the interval passed below the cap). */
+    @Synchronized
+    fun isDue(nowMillis: Long): Boolean {
+        val day = ZenDay.dayOf(nowMillis, zone).toString()
+        val edition = load() ?: return true
+        if (edition.day != day) return true
+        val counted = if (store.getString(KEY_DAY, null) == day) counted() else emptySet()
+        val capReached = counted.size >= ZenSettings.dailyCap()
+        return !capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS
+    }
+
     private fun createEdition(
         now: Long,
+        createdAt: Long,
         day: String,
         previous: Edition?,
         rules: ZenFeedPlanner.ContentRules,
@@ -82,7 +97,7 @@ class ZenFeedState(
         )
         // no data yet: do not seal an empty edition, retry on the next call
         if (sel.picks.isEmpty()) return previous
-        val e = Edition(now, day, sel.picks, sel.eligibleCount - sel.picks.size)
+        val e = Edition(createdAt, day, sel.picks, sel.eligibleCount - sel.picks.size)
         save(e)
         val all = (counted.toList() + e.picks.map { it.url }).distinct()
         store.put(KEY_DAY_URLS to all.joinToString("\n"))

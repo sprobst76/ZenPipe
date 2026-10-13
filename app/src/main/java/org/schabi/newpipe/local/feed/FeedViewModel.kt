@@ -60,6 +60,13 @@ class FeedViewModel(
 
     fun zenRefresh() = zenTick.onNext(System.nanoTime())
 
+    // ZenPipe: a due edition being prepared by the content recognition reports progress and its end
+    private val zenPrepListener = Runnable { zenRefresh() }
+
+    init {
+        org.schabi.newpipe.zen.ZenEditionPrep.shared.addListener(zenPrepListener)
+    }
+
     fun zenHandled(url: String, reason: String) {
         Schedulers.io().scheduleDirect {
             zenFeed.markHandled(url, reason)
@@ -127,6 +134,7 @@ class FeedViewModel(
     override fun onCleared() {
         super.onCleared()
         combineDisposable.dispose()
+        org.schabi.newpipe.zen.ZenEditionPrep.shared.removeListener(zenPrepListener)
     }
 
     private data class CombineResultEventHolder(

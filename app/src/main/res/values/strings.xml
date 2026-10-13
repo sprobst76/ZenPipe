@@ -916,6 +916,8 @@
     <string name="zen_reason_minutes">%1$d min</string>
     <string name="zen_feed_done">You\'re done.</string>
     <string name="zen_feed_next">Next edition at %1$s.</string>
+    <string name="zen_feed_preparing">Preparing the next edition …</string>
+    <string name="zen_feed_preparing_progress">Content recognition is sorting the new videos (%1$d of %2$d).</string>
     <string name="zen_feed_next_tomorrow">Daily limit reached. Next edition from %1$s.</string>
     <plurals name="zen_feed_leftover">
         <item quantity="one">%1$d more video is waiting.</item>
