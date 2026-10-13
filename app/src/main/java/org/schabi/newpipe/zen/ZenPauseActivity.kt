@@ -6,6 +6,7 @@ import android.os.Looper
 import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import org.schabi.newpipe.R
@@ -58,9 +59,25 @@ class ZenPauseActivity : AppCompatActivity() {
             setText(R.string.zen_pause_back)
             setOnClickListener { finish() }
         }
+        // one quote per pause (zen-docs/sprueche.md), below the countdown; wraps, never pushes the
+        // buttons away (the whole screen scrolls if a long quote does not fit)
+        val quote = TextView(this).apply {
+            textSize = 17f
+            gravity = Gravity.CENTER
+            setTypeface(typeface, android.graphics.Typeface.ITALIC)
+            setLineSpacing(0f, 1.15f)
+            setPadding(0, pad, 0, 0)
+            text = ZenQuotes.of(this@ZenPauseActivity)
+                .forPause(ZenPause.pauseSeq(this@ZenPauseActivity), ZenQuotes.builtIn(this@ZenPauseActivity))
+            visibility = if (text.isNullOrEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+        }
         root.addView(title)
         root.addView(message)
         root.addView(countdown)
+        root.addView(
+            quote,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        )
         root.addView(
             back,
             LinearLayout.LayoutParams(
@@ -68,7 +85,12 @@ class ZenPauseActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = pad * 2 }
         )
-        setContentView(root)
+        setContentView(
+            ScrollView(this).apply {
+                isFillViewport = true
+                addView(root)
+            }
+        )
     }
 
     override fun onResume() {

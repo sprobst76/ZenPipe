@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pause quotes (English). Generated from zen-docs/sprueche.md by zen-docs/gen_sprueche.py, do not edit. -->
+<resources>
+    <string-array name="zen_quotes">
+        <item>For nowhere either with more quiet or more freedom from trouble does a man retire than into his own soul.\n— Marcus Aurelius, Meditations IV.3</item>
+        <item>Occupy thyself with few things, says the philosopher, if thou wouldst be tranquil.\n— Marcus Aurelius, Meditations IV.24</item>
+        <item>If thou art pained by any external thing, it is not this thing that disturbs thee, but thy own judgement about it.\n— Marcus Aurelius, Meditations VIII.47</item>
+        <item>Let not future things disturb thee, for thou wilt come to them, if it shall be necessary, having with thee the same reason which now thou usest for present things.\n— Marcus Aurelius, Meditations VII.8</item>
+        <item>Such as are thy habitual thoughts, such also will be the character of thy mind; for the soul is dyed by the thoughts.\n— Marcus Aurelius, Meditations V.16</item>
+        <item>Look within. Within is the fountain of good, and it will ever bubble up, if thou wilt ever dig.\n— Marcus Aurelius, Meditations VII.59</item>
+        <item>The present is the only thing of which a man can be deprived, if it is true that this is the only thing which he has.\n— Marcus Aurelius, Meditations II.14</item>
+        <item>Claim yourself for yourself.\n— after Seneca, Letters to Lucilius 1</item>
+        <item>While we put things off, life runs past.\n— after Seneca, Letters to Lucilius 1</item>
+        <item>The first sign of a settled mind is that it can stay in one place and linger with itself.\n— after Seneca, Letters to Lucilius 2</item>
+        <item>Whoever is everywhere is nowhere.\n— after Seneca, Letters to Lucilius 2</item>
+        <item>We suffer more often in imagination than in reality.\n— after Seneca, Letters to Lucilius 13</item>
+        <item>It is your mind you need to change, not the sky above you.\n— after Seneca, Letters to Lucilius 28</item>
+        <item>What good is silence all around if the feelings within are roaring?\n— after Seneca, Letters to Lucilius 56</item>
+        <item>Men are disturbed not by the things which happen, but by the opinions about the things.\n— Epictetus, Enchiridion 5</item>
+        <item>Seek not that the things which happen should happen as you wish; but wish the things which happen to be as they are, and you will have a tranquil flow of life.\n— Epictetus, Enchiridion 8</item>
+        <item>Of things some are in our power, and others are not.\n— Epictetus, Enchiridion 1</item>
+        <item>Who can make the muddy water clear? Let it be still, and it will gradually become clear.\n— Laozi, Tao Te Ching 15</item>
+        <item>The journey of a thousand li commenced with a single step.\n— Laozi, Tao Te Ching 64</item>
+        <item>Thirty spokes unite in the one nave; but it is on the empty space that the use of the wheel depends.\n— Laozi, Tao Te Ching 11</item>
+        <item>The five colours blind the eye; the five notes deafen the ear.\n— after Laozi, Tao Te Ching 12</item>
+        <item>Who knows when to stop is free from danger.\n— after Laozi, Tao Te Ching 44</item>
+        <item>He who knows other men is discerning; he who knows himself is intelligent.\n— Laozi, Tao Te Ching 33</item>
+        <item>The old pond. A frog jumps in, the sound of water.\n— after Bashō (1686)</item>
+        <item>Stillness. The cicadas\' voices seep into the rocks.\n— after Bashō, The Narrow Road to the Deep North</item>
+        <item>The thief left it behind: the moon in the window.\n— after Ryōkan</item>
+        <item>Sitting quietly, doing nothing, spring comes, and the grass grows by itself.\n— after the Zenrin kushū</item>
+        <item>Put on your clothes, eat your meal, and when you are tired, lie down.\n— after Linji (Record of Linji)</item>
+        <item>When I dance, I dance; when I sleep, I sleep.\n— after Montaigne, Essays III.13</item>
+        <item>All of our unhappiness comes from one thing: not knowing how to stay quietly in a room.\n— after Pascal, Pensées 139</item>
+        <item>Our life is frittered away by detail. … Simplify, simplify.\n— Thoreau, Walden</item>
+        <item>Time is but the stream I go a-fishing in.\n— Thoreau, Walden</item>
+        <item>Be patient toward all that is unsolved in your heart, and try to love the questions themselves.\n— after Rilke, Letters to a Young Poet</item>
+        <item>Take one deep breath. The video isn\'t going anywhere.</item>
+        <item>Look out of the window for a moment.</item>
+        <item>Feel your feet on the ground.</item>
+        <item>Nothing needs to happen right now.</item>
+        <item>Let your shoulders drop.</item>
+        <item>Maybe a glass of water would be nice now.</item>
+        <item>A pause is part of the day, too.</item>
+        <item>What can you hear right now, if you listen closely?</item>
+        <item>Let your eyes rest on something far away.</item>
+        <item>Stand up and stretch for a moment, if you like.</item>
+        <item>You aren\'t missing anything right now.</item>
+        <item>Silence is part of the programme, too.</item>
+        <item>How are you right now, honestly?</item>
+        <item>A moment of nothing. That\'s enough.</item>
+        <item>Your mind is allowed to idle for a while.</item>
+        <item>Boredom is often where a good idea begins.</item>
+        <item>Let what you have seen settle for a while.</item>
+        <item>What was the nicest thing you saw today, away from any screen?</item>
+        <item>Put your phone face down for a moment.</item>
+        <item>Notice the air flowing in and out.</item>
+        <item>Let your forehead and jaw soften.</item>
+        <item>The world outside moves at its own pace.</item>
+        <item>You can simply be here now.</item>
+        <item>Is there someone you\'d like to send a short message to?</item>
+        <item>The next few minutes are yours.</item>
+        <item>Give your eyes something green to look at.</item>
+        <item>How does your body feel right now?</item>
+        <item>A quiet moment is not a lost moment.</item>
+        <item>What would you really like to do next?</item>
+        <item>Name five things you can see right now.</item>
+        <item>Walk a few steps, if you feel like it.</item>
+        <item>A quick look at the sky is enough.</item>
+        <item>Notice how you are sitting or lying right now.</item>
+        <item>Thoughts come and go. You don\'t have to follow any of them.</item>
+        <item>There is nothing to do here right now.</item>
+        <item>The pause is not an obstacle. It is a space.</item>
+        <item>Maybe an open window would feel good right now.</item>
+        <item>What can you smell right now?</item>
+        <item>The good things will still be there after the pause.</item>
+        <item>Rub your hands together until they are warm.</item>
+        <item>Rest needs no reason.</item>
+        <item>You are more than whatever you are watching.</item>
+        <item>No progress bar, no hurry.</item>
+        <item>Let your gaze soften.</item>
+        <item>Listen for a sound that is far away.</item>
+        <item>A moment without a screen is a moment for you.</item>
+        <item>Maybe it\'s time for a cup of tea.</item>
+        <item>Which thought from the video would you like to keep?</item>
+        <item>Clouds are in no hurry either.</item>
+        <item>The pause has begun. There is nothing more to do for now.</item>
+        <item>How about three slow shoulder rolls?</item>
+        <item>What good thing is still ahead of you today?</item>
+        <item>The moment between two things is a moment, too.</item>
+        <item>Close your eyes for a few breaths.</item>
+        <item>Your eyes may rest now.</item>
+        <item>Not everything needs to be seen today.</item>
+        <item>This is a good moment to want nothing.</item>
+        <item>Breathe in for 4 seconds, out for 6. A few times.</item>
+        <item>Breathe in through your nose and slowly out through your mouth.</item>
+        <item>Three calm breaths. That\'s all it takes.</item>
+        <item>In for 4 seconds, hold for 4, out for 4, hold for 4.</item>
+        <item>Place a hand on your belly and feel it rise and fall.</item>
+        <item>Count slowly to five as you breathe out.</item>
+        <item>Let each breath out be a little longer than the breath in.</item>
+        <item>Breathing in: I am here. Breathing out: there is enough time.</item>
+        <item>One deep breath into your belly, then a long sigh.</item>
+    </string-array>
+</resources>

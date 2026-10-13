@@ -996,4 +996,14 @@
     <string name="zen_praxis_pl_confirm_message">„%1$s“ wird am %2$s (in 24 Stunden) zur Praxis-Playlist; bis dahin kannst du es abbrechen. Ihre Videos erscheinen dann im Tab Praxis, gehören nicht zur Feed-Ausgabe und ihren Grenzen, dürfen während einer Pflichtpause laufen, und ein vorzeitiger Abbruch löst keine Pause aus.</string>
     <string name="zen_praxis_pl_added_pending">%1$s wird am %2$s zur Praxis-Playlist</string>
     <string name="zen_praxis_state_playlist">Playlist</string>
+    <string name="zen_quotes_title">Eigene Pausensprüche</string>
+    <string name="zen_quotes_hint">Der Pausenbildschirm zeigt bei jeder Pause einen anderen Spruch, ohne Wiederholung, bis alle dran waren. Deine eigenen Sprüche werden daruntergemischt oder mit „Nur eigene“ allein gezeigt. Änderungen gelten sofort (keine Sperre).</string>
+    <string name="zen_quotes_none">Noch keine eigenen Sprüche.</string>
+    <string name="zen_quotes_add">Spruch hinzufügen</string>
+    <string name="zen_quotes_add_hint">z. B. Atme. Das Video kann warten.</string>
+    <string name="zen_quotes_save">Speichern</string>
+    <string name="zen_quotes_remove">Entfernen</string>
+    <string name="zen_quotes_not_added">Nicht hinzugefügt (leer, schon vorhanden oder Liste voll)</string>
+    <string name="zen_quotes_only_own_off">Nur eigene: aus</string>
+    <string name="zen_quotes_only_own_on">Nur eigene: an</string>
 </resources>

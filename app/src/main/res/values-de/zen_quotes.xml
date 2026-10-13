@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pause quotes (German). Generated from zen-docs/sprueche.md by zen-docs/gen_sprueche.py, do not edit. -->
+<resources>
+    <string-array name="zen_quotes">
+        <item>Nirgends zieht man sich ruhiger und ungestörter zurück als in die eigene Seele.\n— nach Marc Aurel, Selbstbetrachtungen IV 3</item>
+        <item>Beschäftige dich mit wenigem, wenn du ruhig sein willst.\n— nach Marc Aurel, Selbstbetrachtungen IV 24</item>
+        <item>Wenn dich etwas Äußeres bedrückt, ist es nicht die Sache selbst, die dich stört, sondern dein Urteil darüber.\n— nach Marc Aurel, Selbstbetrachtungen VIII 47</item>
+        <item>Lass dich vom Kommenden nicht beunruhigen. Du wirst ihm, wenn nötig, mit derselben Vernunft begegnen, die dir jetzt hilft.\n— nach Marc Aurel, Selbstbetrachtungen VII 8</item>
+        <item>Wie deine gewohnten Gedanken sind, so wird dein Geist; die Seele nimmt die Farbe der Gedanken an.\n— nach Marc Aurel, Selbstbetrachtungen V 16</item>
+        <item>Schau nach innen. Dort ist die Quelle des Guten, und sie sprudelt immer wieder, wenn du nur immer wieder gräbst.\n— nach Marc Aurel, Selbstbetrachtungen VII 59</item>
+        <item>Nur die Gegenwart kann dir genommen werden, denn nur sie hast du wirklich.\n— nach Marc Aurel, Selbstbetrachtungen II 14</item>
+        <item>Gehöre dir selbst.\n— nach Seneca, Briefe an Lucilius 1</item>
+        <item>Während man aufschiebt, eilt das Leben vorbei.\n— nach Seneca, Briefe an Lucilius 1</item>
+        <item>Das erste Zeichen eines geordneten Geistes: dass er verweilen und bei sich selbst bleiben kann.\n— nach Seneca, Briefe an Lucilius 2</item>
+        <item>Wer überall ist, ist nirgends.\n— nach Seneca, Briefe an Lucilius 2</item>
+        <item>Wir leiden öfter in der Vorstellung als in der Wirklichkeit.\n— nach Seneca, Briefe an Lucilius 13</item>
+        <item>Nicht den Ort musst du wechseln, sondern deinen Sinn.\n— nach Seneca, Briefe an Lucilius 28</item>
+        <item>Was nützt die Stille ringsum, wenn es innen tost?\n— nach Seneca, Briefe an Lucilius 56</item>
+        <item>Nicht die Dinge beunruhigen die Menschen, sondern ihre Meinungen über die Dinge.\n— nach Epiktet, Handbüchlein 5</item>
+        <item>Verlange nicht, dass die Dinge geschehen, wie du willst, sondern wünsche sie, wie sie geschehen, und dein Leben wird ruhig fließen.\n— nach Epiktet, Handbüchlein 8</item>
+        <item>Manches liegt in unserer Macht, anderes nicht.\n— nach Epiktet, Handbüchlein 1</item>
+        <item>Wer kann trübes Wasser klären? Lass es ruhen, dann wird es nach und nach klar.\n— nach Laozi, Daodejing 15</item>
+        <item>Eine Reise von tausend Meilen beginnt mit einem einzigen Schritt.\n— nach Laozi, Daodejing 64</item>
+        <item>Dreißig Speichen treffen sich in der Nabe; doch erst der leere Raum macht das Rad brauchbar.\n— nach Laozi, Daodejing 11</item>
+        <item>Die fünf Farben machen das Auge blind, die fünf Töne das Ohr taub.\n— nach Laozi, Daodejing 12</item>
+        <item>Wer weiß, wann es genug ist, gerät nicht in Gefahr.\n— nach Laozi, Daodejing 44</item>
+        <item>Wer andere kennt, ist klug; wer sich selbst kennt, ist weise.\n— nach Laozi, Daodejing 33</item>
+        <item>Der alte Teich. Ein Frosch springt hinein, das Geräusch des Wassers.\n— nach Bashō (1686)</item>
+        <item>Stille. Die Stimme der Zikaden dringt in die Felsen.\n— nach Bashō, Auf schmalen Pfaden durchs Hinterland</item>
+        <item>Der Dieb ließ es zurück: den Mond im Fenster.\n— nach Ryōkan</item>
+        <item>Still sitzen, nichts tun. Der Frühling kommt, und das Gras wächst von selbst.\n— nach dem Zenrin kushū</item>
+        <item>Zieh dich an, iss dein Essen, und wenn du müde bist, leg dich hin.\n— nach Linji (Linji lu)</item>
+        <item>Wenn ich tanze, tanze ich; wenn ich schlafe, schlafe ich.\n— nach Montaigne, Essais III 13</item>
+        <item>Alles Unglück der Menschen kommt daher, dass sie nicht ruhig in einem Zimmer bleiben können.\n— nach Pascal, Gedanken 139</item>
+        <item>Unser Leben verzettelt sich in Einzelheiten. Vereinfache, vereinfache.\n— nach Thoreau, Walden</item>
+        <item>Die Zeit ist nur der Bach, in dem ich fischen gehe.\n— nach Thoreau, Walden</item>
+        <item>… Geduld zu haben gegen alles Ungelöste in Ihrem Herzen und zu versuchen, die Fragen selbst liebzuhaben.\n— Rilke, Briefe an einen jungen Dichter</item>
+        <item>Atme einmal tief durch. Das Video läuft nicht weg.</item>
+        <item>Schau für einen Moment aus dem Fenster.</item>
+        <item>Spür deine Füße auf dem Boden.</item>
+        <item>Nichts muss jetzt passieren.</item>
+        <item>Lass die Schultern sinken.</item>
+        <item>Vielleicht ist jetzt ein Glas Wasser schön.</item>
+        <item>Eine Pause ist auch ein Teil des Tages.</item>
+        <item>Was hörst du gerade, wenn du genau hinhörst?</item>
+        <item>Lass die Augen auf etwas in der Ferne ruhen.</item>
+        <item>Steh kurz auf und streck dich, wenn du magst.</item>
+        <item>Du verpasst gerade nichts.</item>
+        <item>Die Stille gehört auch zum Programm.</item>
+        <item>Wie geht es dir gerade, ganz ehrlich?</item>
+        <item>Einen Moment lang nichts. Das reicht.</item>
+        <item>Dein Kopf darf auch mal leer laufen.</item>
+        <item>Aus Langeweile wird oft eine gute Idee.</item>
+        <item>Lass das Gesehene ein wenig nachklingen.</item>
+        <item>Was war heute das Schönste, das du gesehen hast, abseits jedes Bildschirms?</item>
+        <item>Leg das Handy für einen Moment mit dem Display nach unten.</item>
+        <item>Bemerke, wie die Luft ein- und ausströmt.</item>
+        <item>Lass Stirn und Kiefer weich werden.</item>
+        <item>Die Welt draußen hat ihr eigenes Tempo.</item>
+        <item>Du darfst jetzt einfach hier sein.</item>
+        <item>Gibt es jemanden, dem du gern kurz schreiben würdest?</item>
+        <item>Die nächsten Minuten gehören dir.</item>
+        <item>Gönn deinen Augen etwas Grünes.</item>
+        <item>Wie fühlt sich dein Körper gerade an?</item>
+        <item>Ein ruhiger Moment ist kein verlorener Moment.</item>
+        <item>Was möchtest du als Nächstes wirklich tun?</item>
+        <item>Zähl fünf Dinge, die du gerade sehen kannst.</item>
+        <item>Geh ein paar Schritte, wenn dir danach ist.</item>
+        <item>Ein kurzer Blick in den Himmel genügt.</item>
+        <item>Spür, wie du gerade sitzt oder liegst.</item>
+        <item>Gedanken kommen und gehen. Du musst keinem folgen.</item>
+        <item>Hier gibt es gerade nichts zu tun.</item>
+        <item>Die Pause ist kein Hindernis, sondern ein Raum.</item>
+        <item>Vielleicht tut ein offenes Fenster gerade gut.</item>
+        <item>Was riechst du gerade?</item>
+        <item>Das Gute wartet auch nach der Pause noch auf dich.</item>
+        <item>Reib die Hände aneinander, bis sie warm sind.</item>
+        <item>Ruhe braucht keinen Grund.</item>
+        <item>Du bist mehr als das, was du gerade anschaust.</item>
+        <item>Kein Fortschrittsbalken, keine Eile.</item>
+        <item>Lass den Blick weich werden.</item>
+        <item>Lausch einem Geräusch, das weit weg ist.</item>
+        <item>Ein Moment ohne Bildschirm ist ein Moment für dich.</item>
+        <item>Vielleicht ist jetzt Zeit für einen Tee.</item>
+        <item>Welchen Gedanken aus dem Video möchtest du behalten?</item>
+        <item>Auch Wolken haben keine Eile.</item>
+        <item>Die Pause hat begonnen. Mehr ist gerade nicht zu tun.</item>
+        <item>Wie wären drei langsame Schulterkreise?</item>
+        <item>Was liegt heute noch Schönes vor dir?</item>
+        <item>Der Moment zwischen zwei Dingen ist auch ein Moment.</item>
+        <item>Schließ für ein paar Atemzüge die Augen.</item>
+        <item>Deine Augen dürfen sich jetzt ausruhen.</item>
+        <item>Nicht alles muss heute noch gesehen werden.</item>
+        <item>Gerade ist ein guter Moment, um nichts zu wollen.</item>
+        <item>4 Sekunden ein, 6 Sekunden aus. Ein paar Mal.</item>
+        <item>Atme durch die Nase ein und langsam durch den Mund aus.</item>
+        <item>Drei ruhige Atemzüge. Mehr braucht es nicht.</item>
+        <item>4 Sekunden ein, 4 halten, 4 aus, 4 halten.</item>
+        <item>Leg eine Hand auf den Bauch und spür, wie er sich hebt und senkt.</item>
+        <item>Zähl beim Ausatmen langsam bis fünf.</item>
+        <item>Lass das Ausatmen etwas länger sein als das Einatmen.</item>
+        <item>Einatmen: Ich bin hier. Ausatmen: Es ist genug Zeit.</item>
+        <item>Ein tiefer Atemzug in den Bauch, dann ein langes Seufzen.</item>
+    </string-array>
+</resources>

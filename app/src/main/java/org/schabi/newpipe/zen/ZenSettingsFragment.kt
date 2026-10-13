@@ -187,6 +187,83 @@ class ZenSettingsFragment : Fragment() {
         )
         renderPraxis(snap)
         renderSleep()
+        renderQuotes()
+    }
+
+    /** Own pause quotes: add/remove and "only own quotes" (comfort, no lock). */
+    private fun renderQuotes() {
+        val quotes = ZenQuotes.of(requireContext())
+        val own = quotes.custom()
+        content.addView(
+            text(getString(R.string.zen_quotes_title), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        content.addView(text(getString(R.string.zen_quotes_hint), 12f))
+        if (own.isEmpty()) content.addView(text(getString(R.string.zen_quotes_none)))
+        own.forEach { q ->
+            val box = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(8), 0, dp(4))
+            }
+            box.addView(text(q, 15f), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            box.addView(
+                Button(requireContext()).apply {
+                    setText(R.string.zen_quotes_remove)
+                    setOnClickListener {
+                        quotes.removeCustom(q)
+                        render()
+                    }
+                }
+            )
+            content.addView(box)
+        }
+        val buttons = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL }
+        buttons.addView(
+            Button(requireContext()).apply {
+                setText(R.string.zen_quotes_add)
+                isEnabled = own.size < ZenQuotes.MAX_CUSTOM
+                setOnClickListener { addQuoteDialog(quotes) }
+            }
+        )
+        buttons.addView(
+            Button(requireContext()).apply {
+                setText(if (quotes.onlyCustom()) R.string.zen_quotes_only_own_on else R.string.zen_quotes_only_own_off)
+                isEnabled = own.isNotEmpty() || quotes.onlyCustom()
+                setOnClickListener {
+                    quotes.setOnlyCustom(!quotes.onlyCustom())
+                    render()
+                }
+            }
+        )
+        content.addView(buttons)
+    }
+
+    private fun addQuoteDialog(quotes: ZenQuotes) {
+        val input = android.widget.EditText(requireContext()).apply {
+            setHint(R.string.zen_quotes_add_hint)
+            minLines = 2
+            filters = arrayOf(android.text.InputFilter.LengthFilter(ZenQuotes.MAX_LENGTH))
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        }
+        val frame = android.widget.FrameLayout(requireContext()).apply {
+            val p = dp(20)
+            setPadding(p, dp(8), p, 0)
+            addView(input)
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.zen_quotes_add)
+            .setView(frame)
+            .setPositiveButton(R.string.zen_quotes_save) { _, _ ->
+                if (!quotes.addCustom(input.text.toString())) {
+                    Toast.makeText(requireContext(), R.string.zen_quotes_not_added, Toast.LENGTH_SHORT).show()
+                }
+                render()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
     }
 
     /** Sleep timer: the duration offered first in the player (comfort, no lock). */

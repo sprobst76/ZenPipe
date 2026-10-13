@@ -1031,4 +1031,14 @@
     <string name="zen_praxis_pl_confirm_message">\"%1$s\" becomes a practice playlist on %2$s (in 24 hours); you can cancel it until then. Its videos then appear in the Practice tab, are not part of the feed edition or its limits, may play during a mandatory pause and stopping them early starts no pause.</string>
     <string name="zen_praxis_pl_added_pending">%1$s becomes a practice playlist on %2$s</string>
     <string name="zen_praxis_state_playlist">Playlist</string>
+    <string name="zen_quotes_title">Own pause quotes</string>
+    <string name="zen_quotes_hint">The pause screen shows a different quote for every pause, without repeats until all have been shown. Your own quotes are mixed in, or shown alone with \"Only own quotes\". Changes apply at once (no lock).</string>
+    <string name="zen_quotes_none">No own quotes yet.</string>
+    <string name="zen_quotes_add">Add quote</string>
+    <string name="zen_quotes_add_hint">e.g. Breathe. The video can wait.</string>
+    <string name="zen_quotes_save">Save</string>
+    <string name="zen_quotes_remove">Remove</string>
+    <string name="zen_quotes_not_added">Not added (empty, already in the list or list full)</string>
+    <string name="zen_quotes_only_own_off">Only own quotes: off</string>
+    <string name="zen_quotes_only_own_on">Only own quotes: on</string>
 </resources>

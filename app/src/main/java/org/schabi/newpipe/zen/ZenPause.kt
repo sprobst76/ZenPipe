@@ -370,6 +370,10 @@ class ZenPauseEngine(
     @Synchronized
     fun lastPausePlayedMs() = store.getLong(K_PAUSE_PLAYED, 0)
 
+    /** Counts started pauses (identifies "this pause", e.g. for its quote). */
+    @Synchronized
+    fun pauseSeq() = store.getLong(K_PAUSE_SEQ, 0)
+
     // ---------------------------------------------------------------- internals
 
     private fun accumulate() {
@@ -426,7 +430,7 @@ class ZenPauseEngine(
         val length = ZenPauseRules.pauseLengthMs(playedMs)
         val running = countdown.remainingMs()
         countdown.start(maxOf(length, running))
-        store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs)
+        store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs, K_PAUSE_SEQ to pauseSeq() + 1)
         log("pause_start", "$detail lengthMs=$length")
         return Outcome.Paused(playedMs, length)
     }
@@ -440,6 +444,7 @@ class ZenPauseEngine(
         private const val K_KIND = "ps_kind"
         private const val K_PAUSE_ON = "pause_on"
         private const val K_PAUSE_PLAYED = "pause_played"
+        private const val K_PAUSE_SEQ = "pause_seq"
         private const val K_LATER_DAY = "later_day"
         private const val K_LATER_COUNT = "later_count"
     }
@@ -559,6 +564,10 @@ object ZenPause {
 
     @JvmStatic
     fun playedMs(context: Context) = engine(context).lastPausePlayedMs()
+
+    /** Identifies the current (or last) pause. */
+    @JvmStatic
+    fun pauseSeq(context: Context) = engine(context).pauseSeq()
 
     /**
      * Call before a video/audio playback is started by the user. Returns true if it must NOT start:

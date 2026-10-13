@@ -70,6 +70,22 @@ Die Klassifikation passiert während der Wiedergabe, sobald die StreamInfo vorli
 Am Gerät geprüft: Rick-Astley-Video -> Kategorie Music -> `abort_exempt`; Blender-Film (Film & Animation) und LastWeekTonight
 (Entertainment) -> Video.
 
+## Pausenspruch (2026-10-13, Nutzerwunsch)
+- Der Pausenbildschirm zeigt unter dem Countdown einen kurzen Spruch (kursiv, zentriert, bricht um; bei sehr langen Sprüchen
+  scrollt der ganze Bildschirm, Countdown und „Zurück“ bleiben bedienbar). Inhalt: `zen-docs/sprueche.md` (99 Einträge je
+  Sprache: 33 gemeinfreie, belegte Zitate mit Stelle, 57 eigene Sätze, 9 Atemhinweise), daraus erzeugt
+  `res/values{,-de}/zen_quotes.xml` per `python3 zen-docs/gen_sprueche.py`. Sprache = App-Sprache (Ressourcen).
+- **Auswahl** (`ZenQuotes`): ein Spruch **pro Pause** (Pausennummer `pause_seq`, wird bei jedem `pause_start` hochgezählt), also
+  derselbe Spruch, wenn man während derselben Pause den Bildschirm mehrmals sieht, und ein anderer bei der nächsten Pause (auch
+  wenn ein weiterer Abbruch eine laufende Pause verlängert). Zufällig unter den in dieser Runde noch nicht gezeigten; sind alle
+  durch, beginnt eine neue Runde, ohne den zuletzt gezeigten direkt zu wiederholen. Sprüche werden über ihren Text identifiziert:
+  Sprachwechsel = neuer Vorrat, die Runde der anderen Sprache beginnt beim Zurückwechseln neu.
+- **Eigene Sprüche** (Einstellungen > Zen > „Eigene Pausensprüche“): hinzufügen (Dialog, max. 300 Zeichen, max. 100 Einträge,
+  keine Dubletten), entfernen, Schalter „Nur eigene“ (an + leere Liste = eingebaute Sprüche). **Keine Lockerung**: wirkt sofort,
+  keine 24-h-Sperre, kein Bestätigungsdialog (Entscheidung: ein Spruch macht die Pause weder kürzer noch leichter umgehbar).
+  Eigene Sprüche werden ohne Quellenzeile gezeigt.
+- Zustand in `zen_state` (`qt_*`, `pause_seq`), nicht Teil von Export/Import/Reset/Auto-Backup. Tests: `ZenQuotesTest`.
+
 ## Offen
 - Prozentsatz/Min/Max sind Konstanten (`ZenPauseRules`), bis die Zen-Einstellungen (Phase 2) sie hinter der Sperre konfigurierbar machen.
 - Während der Pause entsteht weiter eine Feed-Ausgabe, wenn man den Feed öffnet (W14 aus dem Review ist noch nicht umgesetzt).
