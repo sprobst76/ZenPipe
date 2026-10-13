@@ -1,6 +1,6 @@
 # Spec: Lokaler Inhalts-Klassifikator (Praxis/Bildung/Aktuelles/Ton) in ZenPipe
 
-Stand: 2026-10-13. **Status: Analyse und Spec (nicht gebaut).** Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
+Stand: 2026-10-13. **Status: AP 1–3 umgesetzt (Abschnitt 10), AP 4–7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
 Abschnitt 8 listet die nötigen Änderungen an `rules.md`. Quelle des Klassifikators: Projekt YoutubeManager, übergeben als
 `resources/zen-android.zip`, `zen-handoff.zip`, `zen-rules.zip` (**ungetrackt, wird nicht committet**).
 
@@ -452,3 +452,77 @@ Summe ≈ 6–8 Tage. AP 1 ist auch ohne die anderen nützlich (prüfbar ohne Ge
 - **E7 ONNX Runtime:** (a) Maven-AAR mit entferntem Telemetrie-Provider und Netzprüfung am Gerät **[Empfehlung]**; (b) eigener
   Minimal-Build aus Quellen (kleiner, F-Droid-fähig, 2–4 Tage); (c) reiner Kotlin-Encoder.
 - **E8 Schwellen der Plausibilitätsprüfung:** (a) 30/60 % als Start, nach Stichprobe 6.3 nachziehen **[Empfehlung]**.
+
+## 10. Umsetzung AP 1–3 (2026-10-13)
+
+Commits auf `zen`: `zen: classifier core (tokenizer, text builder, heads, rules)`, `zen: onnx runtime and opt-in model
+download`, `zen: ci emulator for API 23 on x86_64`, `zen: classification cache and worker`. Code in
+`app/src/main/java/org/schabi/newpipe/zen/classify/`. Noch **keine Wirkung** auf Feed, Markieren oder Bildung (AP 4–7).
+
+### 10.1 Bausteine
+- **Kern (AP 1):** `UnigramTokenizer`, `TextBuilder` (Kategorie-ID → deutscher Name als Konstante, englischer
+  Extraktor-Name → ID, YouTube-HTML → Text per jsoup), `Heads`, `ZenRules` (Regelstand v5), `ZenPipeline` mit
+  `Encoder`-Schnittstelle, `ZenBase64` (eigene Implementierung, API 23 + JVM-Tests), Code-Point-Schleifen statt
+  `String.codePoints()`.
+- **ORT + Download (AP 2):** `onnxruntime-android` 1.31.0 nur von Maven Central (`exclusiveContent` in
+  `settings.gradle.kts`), `tools:overrideLibrary`, Telemetrie-Provider per `tools:node="remove"` entfernt +
+  `setTelemetry(false)` vor jeder Session (`OrtEncoder`), `abiFilters` arm64-v8a (Debug + x86_64),
+  `useLegacyPackaging`, `-keep class ai.onnxruntime.** { *; }`. Modell = **ein Zip** (`encoder_int8.onnx`, `tokenizer.bin`,
+  `vocab_map.json`, `heads.json`, `NOTICE`), gebaut mit `zen-docs/tools/make_classifier_bundle.py` (deterministisch,
+  gibt SHA-256/Größe aus). `ZenModelInstaller`: SHA-256 beim Schreiben, nur bekannte flache Dateinamen (kein Zip-Slip),
+  Austausch erst nach vollständigem Entpacken, Ablage `noBackupFilesDir/zen_classifier/model/`, Marker
+  `installed.properties`. `ZenClassifierModel`: URL/SHA-256 als Platzhalter (**TODO AP 0**, Download bis dahin
+  ausgegraut, Status „noch nicht veröffentlicht“); Debug-Builds können eine lokale Testquelle nutzen (`cls_debug_url`,
+  `cls_debug_sha` in `zen_state`, Klartext nur zu 127.0.0.1/localhost über `src/debug`-Netzwerkkonfiguration).
+  Einstellungen > Zen > „Inhalts-Erkennung (lokal)“: Status, Herunterladen (Bestätigung, Fortschritt, Abbrechen),
+  Löschen, Lizenzen (eigene Hinweise + ORT-ThirdPartyNotices vollständig, `res/raw/`).
+- **Cache + Worker (AP 3):** `ZenClassCache` (eigene SQLite-Datei `noBackupFilesDir/zen_class_cache.db`, Schlüssel
+  `serviceId:url`, Kategorien, Ton, Top-Themen/-Formate, Stufe T/D, Modellversion, 30 Tage nach letztem Zugriff;
+  neu berechnet bei Modellwechsel oder wenn statt T jetzt Details vorliegen), `ZenClassifier` (ein Hintergrund-Thread,
+  lazy, 60 s Leerlauf → schließen, 4 Threads / 2 während eigener Wiedergabe, Fehler → Session zu, `class_error`, Status
+  „defekt“), `ZenClassifyWorker` (WorkManager, unique KEEP, Akku nicht niedrig; nach Feed-Aktualisierung, App-Start mit
+  installiertem Modell, nach Installation; nur Titel+Kanal, Batches à 50, jedes Ergebnis sofort gespeichert,
+  `class_run`), Stufe D aus `ZenPause.onStreamInfo` und `VideoDetailFragment.handleResult` (5 s verzögert, nie während
+  des Player-Starts, keine Zusatzanfrage). Prüfansicht „Eingeordnete Videos“ (letzte 100, Kategorien · Ton · Gewicht ·
+  Stufe + „warum“) in allen Builds; Selbsttest nur in Debug-Builds.
+
+### 10.2 Messwerte
+| Messung | Wert |
+|---|---|
+| Unit-Tests | gesamt 307 grün; neu: `ZenRulesTest` (200 Regel-Goldfälle + Feed-Deckel), `ZenTokenizerTest` (synthetischer Tokenizer, erfundene Texte mit IDs aus der Python-Referenz, Textbau, Kategorie-Tabelle, HTML, Base64), `ZenModelInstallerTest` (8), `ZenClassCacheTest` (6), `ZenGoldenTest` |
+| `golden.json` lokal (`ZEN_GOLDEN_DIR`, Kopf + Regeln auf Referenz-Embedding, 256 Tokens) | Token-IDs 40/40, Kategorien 40/40, Ton 40/40 |
+| Rundung | Bundle-Kotlin rundete anders als Python `round` (Goldfall 13: 0,889 statt 0,888) → `BigDecimal` HALF_EVEN; betrifft nur den gespeicherten Wert |
+| APK Release (unsigniert, arm64) | **19,9 MB** (19.886.876 B; vorher 6,8 MB); `libonnxruntime.so` 34,2 MB → 12,9 MB komprimiert |
+| APK Debug (arm64 + x86_64) | 60,2 MB |
+| Modell-Zip | 35,4 MB (35.432.218 B), installiert 42,6 MB |
+| Download am Defy (lokale Testquelle, `adb reverse`) | ~2 s; falsche SHA-256 → abgelehnt, nichts installiert (`class_model_failed`); richtige → `class_model_installed` |
+| Laden (Defy, Debug) | Tokenizer 391–460 ms, Karte + Köpfe 138–166 ms, Encoder 653–705 ms (≈ 1,2–1,3 s) |
+| Zeit pro Video (4 Threads, ≤ 128 Tokens) | Titel + Kanal (17–26 Tokens) **110–125 ms**; mit Beschreibung (59–79 Tokens) 187–213 ms; Median 123 ms |
+| Selbsttest gegen Python-Referenz (ORT 1.31 PC, 10 erfundene Videos) | Texte 10/10, Tokenzahl 10/10, Kategorien 10/10, Ton 10/10, Kosinus ≥ 0,99990 |
+| Speicher (`dumpsys meminfo`) | PSS 176 → 285 MB mit Session (+109 MB; Native Heap +55 MB, Java Heap +26 MB); nach 60 s Leerlauf geschlossen: Native Heap wieder 40 MB |
+| Wiedergabe | Klassifikation während Hintergrund-Wiedergabe lädt mit 2 Threads (Log `threads 2`) |
+| Telemetrie/Netz | Provider fehlt im gemergten Manifest (Debug + Release) und in `dumpsys package`; kein `ORTTelemetry`-Log; `/proc/net/tcp*` der App-UID: keine neue Verbindung während Laden + Rechnen; `libonnxruntime` nach Kaltstart nicht geladen (`/proc/<pid>/maps`) |
+| Kaltstart Debug (`am start -W`) | 3,9–4,2 s, ORT wird beim Start nicht geladen |
+| Defekt-Fall | Encoder abgeschnitten → `ORT_INVALID_PROTOBUF`, `class_error`, Status „Defekt – bitte neu herunterladen“, App läuft weiter; „Neu herunterladen“ repariert |
+
+### 10.3 Abweichungen von dieser Spec
+1. Modell als **ein** Zip-Asset statt Einzeldateien; `vocab_map.json` bleibt JSON (eigenes Base64), `yt_categories.json`
+   ist Code-Konstante.
+2. ORT nur aus Maven Central (Gradle bekam von `dl.google.com` per HTTP/1.1 Timeouts; zugleich Lieferketten-Schutz).
+3. CI-Emulator API 23 auf x86_64 (Debug-APK hat kein 32-bit-x86 mehr).
+4. Cache mit `SQLiteOpenHelper` statt Room (keine Migrationen, eine Tabelle).
+5. Prüfansicht in **allen** Builds (Stichprobe 6.3 läuft mit Stefans echten Abos), Selbsttest nur Debug.
+6. Löschen des Modells ist derzeit frei (es gibt noch keine Schalter, 4.7); mit AP 4 wird es zur Lockerung, solange
+   ein Schalter aktiv ist.
+7. Thread-Wechsel 4 ↔ 2 lädt den Encoder neu (~0,7 s); geöffnete Videos werden 5 s verzögert eingeordnet.
+8. AboutLibraries-Export nicht neu erzeugt (bringt große fremde Upstream-Änderungen); Lizenzen stattdessen unter
+   Einstellungen > Zen > Lizenzen. Fastlane/F-Droid-Beschreibung erst, wenn das Modell veröffentlicht ist.
+
+### 10.4 Offen
+- **AP 0:** Release-Asset `model-e5s-1` hochladen, `DOWNLOAD_SHA256`/`DOWNLOAD_BYTES` in `ZenClassifierModel` setzen
+  (Skript gibt beides aus), ggf. Kurztext-Köpfe; Satz in Fastlane-Beschreibung.
+- Worker-Erstlauf mit echtem Feed am Gerät (Dauer, `batterystats`, Temperatur): in der Debug-App gab es 0 Kandidaten
+  (nur Test-Abo, dessen neues Video angeschaut ist). Zeit pro Video ist aus dem Selbsttest bekannt.
+- Release-Build am Gerät (Keep-Regeln nur statisch geprüft: ORT-Klassen im Dex vorhanden), Ruckeln bei Wiedergabe mit
+  2 Threads (nur Log), Kategorie-Namen des Extraktors in anderer Inhaltssprache, HTML-Beschreibung gegen Server-Text.
+

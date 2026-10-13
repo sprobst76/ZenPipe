@@ -1,6 +1,6 @@
 # State
 
-- Stand: 2026-10-13
+- Stand: 2026-10-13 (zuletzt: Inhalts-Erkennung AP 1–3)
 - Phase: MVP + Phase 0/1 + Phase 2 Teil 1 (Zen-Einstellungen mit 24-h-Sperre) + Verteilbarkeit 1/2 + Praxis-Kanäle + Praxis-Playlists/Kette/Pause-Ausnahme + Sleep-Timer umgesetzt (Branch `zen`), auf Motorola Defy teilweise verifiziert (s. u.)
 
 ## Erledigt (je ein Commit `zen:`)
@@ -131,3 +131,13 @@ Vorgehen: Praxis-Playlist „One-Minute Meditations with NYU …“ per Long-Pre
 - Verifiziert: `assembleDebug runCheckstyle testDebugUnitTest` grün (neu `ZenFeaturesTest`). Defy: kein Pop-up in Long-Press/Detailseite/Playlist/Teilen/Warteschlange/Einstellungen/Suche; Home während Video -> AudioTrack `paused`, Benachrichtigung weg (gespeichertes Minimieren war „Hintergrund“); „Hintergrund“ + Home -> Ton läuft weiter (`started`, Benachrichtigung da). Design-Screenshots Hell/Dunkel vorher/nachher (Scratchpad der Session). Logcat ohne ZenPipe-FATAL.
 - Nicht geprüft: Bildschirm aus im Video-Player (PIN-Sperre, nur mit Stefan; Code-Pfad = `onStop` wie Home), Schwarz-Theme, Kanalseite mit Abo-Knopf.
 - Gerät: Home-Taste öffnet am Defy die Launcher-Auswahl („Nur einmal“ bei 489,1283 tippen, nie „Immer“). Test-Prefs (`zs_*`, `cd_settings_*`) danach entfernt, Nachtmodus wieder `yes`.
+
+## Inhalts-Erkennung AP 1–3 (2026-10-13), Commits `zen:` (Spec `zen-docs/spec-klassifikator-integration.md` Abschnitt 10, Regeln `rules.md` „Inhalts-Erkennung“)
+- E1–E8 bestätigt (Download-Modell, nur arm64, Feed nur Titel+Kanal, ohne Kategorie Gewicht 1,0, ORT von Maven ohne Telemetrie, Schwellen 30/60 %).
+- AP 1 Kern (`zen/classify/`), AP 2 ORT 1.31.0 + Opt-in-Download (ein Zip, SHA-256, `noBackupFilesDir`; URL/SHA **Platzhalter bis AP 0**, Bundle-Skript `zen-docs/tools/make_classifier_bundle.py`), AP 3 Cache (`zen_class_cache.db`), `ZenClassifier`, `ZenClassifyWorker`, Stufe D aus Detailseite/Player, Prüfansicht, Debug-Selbsttest. CI-Emulator API 23 jetzt x86_64.
+- Verifiziert: `assembleDebug runCheckstyle testDebugUnitTest` grün (307 Tests), `assembleRelease` 19,9 MB (vorher 6,8). Defy: Download über lokale Testquelle (falsche SHA abgelehnt), Löschen, Defekt-Fall + Reparatur, Selbsttest 10/10 gleich Python-Referenz (Kosinus ≥ 0,99990), Laden ≈ 1,2 s, 110–125 ms/Video (Titel+Kanal), +109 MB PSS mit Session, 2 Threads bei Wiedergabe, keine neuen Sockets/kein ORT beim Start, deutsche Texte.
+- Tests mit echten Daten: `ZEN_GOLDEN_DIR` (golden.json, nur lokal) und `ZEN_MODEL_DIR` (tokenizer.bin) auf das entpackte Bundle zeigen lassen, sonst übersprungen.
+- Gerätetest-Tricks: Debug-Download aus lokaler Quelle: `python3 -m http.server 8765` im Ordner mit dem Zip, `adb reverse tcp:8765 tcp:8765`, in `zen_state` `cls_debug_url=http://127.0.0.1:8765/<zip>` + `cls_debug_sha=<sha256>` (App vorher `force-stop`); danach Schlüssel wieder entfernen. Defekt-Test: `run-as … truncate -s 1000000 no_backup/zen_classifier/model/encoder_int8.onnx` nach Leerlauf-Schließen.
+- Defy-Zustand danach: `zen_state` auf Sicherung zurückgesetzt (Ersteinrichtung offen, keine `cls_*`-Schlüssel), Sprache Systemstandard; **Modell bleibt in der Debug-App installiert** (Cache mit 2 Einträgen), Verlauf enthält das BBC-Testvideo (1:54 min).
+- Offen: AP 0 (Asset + SHA), Worker-Erstlauf mit echtem Feed (Debug-App hatte 0 Kandidaten), Release-Build am Gerät, AP 4–7.
+
