@@ -82,8 +82,9 @@ the store icon (open ring on calm green `#2E4A45`, ring `#F2EFE6`).
   changelog `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt` is missing; renames to
   `ZenPipe_v<versionName>.apk`, writes `.sha256`, creates the GitHub release with the changelog,
   a link to the source tree of the tag (GPLv3 §6), the SHA-256 and the certificate digest.
-- `.github/workflows/fdroid-repo.yml`: rebuilds the F-Droid repo on GitHub Pages; called by
-  `release.yml` after each release and manually runnable (see "F-Droid repository").
+- `.github/workflows/fdroid-repo.yml`: rebuilds the F-Droid repo on GitHub Pages; triggered by
+  `workflow_run` after each successful `Release` run (a reusable-workflow call could not read the
+  environment secrets) and manually runnable (see "F-Droid repository").
 - `.github/workflows/ci.yml`: build + unit tests + emulator tests on push/PR to `zen`; artifact
   `ZenPipe-continuous`.
 - Removed upstream files: `FUNDING.yml` (TeamNewPipe donations), `build-release-apk.yml`

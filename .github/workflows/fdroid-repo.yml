@@ -17,7 +17,11 @@ name: F-Droid repo
 #                             instead of publishing an index signed with a different key
 
 on:
-  workflow_call:
+  # runs after every successful Release; a reusable-workflow call (workflow_call) cannot read the
+  # environment secrets of the 'fdroid-repo' environment, workflow_run can
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
     inputs:
       publish:
@@ -40,6 +44,7 @@ env:
 
 jobs:
   repo:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     environment: fdroid-repo
     permissions:

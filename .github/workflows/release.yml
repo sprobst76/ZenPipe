@@ -7,8 +7,8 @@ name: Release
 #   ZENPIPE_KEY_ALIAS          key alias (e.g. zenpipe)
 #   ZENPIPE_KEY_PASSWORD       key password
 # Without these secrets the workflow fails; it never publishes an unsigned APK.
-# Afterwards the job fdroid-repo (fdroid-repo.yml, environment "fdroid-repo") rebuilds the
-# F-Droid repo on GitHub Pages from the release APKs.
+# Afterwards the workflow fdroid-repo.yml (triggered by workflow_run, environment "fdroid-repo")
+# rebuilds the F-Droid repo on GitHub Pages from the release APKs.
 
 on:
   push:
@@ -125,9 +125,3 @@ jobs:
             --title "ZenPipe $TAG" \
             --notes-file "$RUNNER_TEMP/notes.md" \
             --verify-tag
-
-  fdroid-repo:
-    needs: release
-    uses: ./.github/workflows/fdroid-repo.yml
-    permissions:
-      contents: write
