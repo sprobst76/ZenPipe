@@ -157,3 +157,63 @@ NewPipe ist `GPL-3.0-or-later` ([fdroiddata](https://gitlab.com/fdroid/fdroiddat
 - youtube-dl/Uberspace: [netzpolitik.org](https://netzpolitik.org/2024/entscheidung-des-olg-hamburg-youtube-dl-org-bleibt-gesperrt/) · [heise](https://heise.de/-10179284) · [LTO](https://www.lto.de/recht/hintergruende/h/urheberrecht-youtube-musik-videos-download-haftung-uberspace-youtube-dl)
 - Android Developer Verification: [Open-Source-Registrierung](https://developer.android.com/developer-verification/guides/open-source-app-registration) · [FAQ](https://developer.android.com/developer-verification/guides/faq) · [Übersicht](https://developer.android.com/developer-verification)
 - Namens-Treffer: [imazen/zenpipe](https://github.com/imazen/zenpipe) · [Zen Pipe (iOS)](https://apps.apple.com/us/app/zen-pipe/id560104506) · [ZenTube](https://chromewebstore.google.com/detail/ljnjkcelmlkcdcghffobikpjlefjaldh)
+
+---
+
+## 5. Vertiefte Markenpruefung (2026-10-13)
+
+**Kein Rechtsrat.** Das ist eine Recherche eines KI-Assistenten, keine Markenrecherche durch Anwalt oder Patentanwalt. Legende: **[Geprueft]** = am 13.10.2026 selbst abgerufen, mit Quelle · **[Nicht pruefbar]** = Register ohne JavaScript/Captcha nicht abfragbar, Stefan muss selbst suchen · **[Einschaetzung]** = eigene Schlussfolgerung.
+
+### 5.1 Register und Fundstellen
+
+| Quelle | Suchbegriff | Status / Ergebnis | Quelle / Link |
+|---|---|---|---|
+| TMview (EUIPO/DPMA/USPTO/WIPO) | zenpipe | **Nicht erneut abfragbar:** der abgerufene Link liefert nur eine JavaScript-Huelle bzw. `ECONNRESET`. Gilt weiter der Stand aus 1.1 (frueherer headless-Lauf, selbe Datumsangabe): kein EU-/DE-/US-Treffer fuer ZENPIPE, nur MX (Filed 02.10.2026) | https://www.tmdn.org/tmview/#/tmview/results?page=1&pageSize=30&criteria=F&basicSearch=zenpipe |
+| DPMAregister | Marke: `zenpipe`, dann `zen pipe`, `zen-pipe`; Klassen 9, 38, 41, 42 | **Nicht pruefbar:** Formular (Basisrecherche) per WebFetch nur als Maske lesbar, Suche braucht Browser/Session. Felder: Marke, Klasse(n), Datenbestand (national/EU/IR) | https://register.dpma.de/DPMAregister/marke/einsteiger |
+| EUIPO eSearch plus | `zenpipe` (Wortmarke, enthaelt) | **Nicht pruefbar** (JavaScript-App). Ersatz: TMview (deckt EUTM mit ab) | https://euipo.europa.eu/eSearch/ |
+| WIPO Global Brand Database | Brand name `zenpipe` | **Nicht pruefbar:** Seite liefert nur Captcha-Widget (altcha) und Weiterleitung, Ergebnisse werden clientseitig nachgeladen | https://branddb.wipo.int/ |
+| USPTO Trademark Search | `zenpipe` (Wordmark, Live+Dead) | **Nicht pruefbar** (JavaScript). Nur indirekter Hinweis, siehe Zeile ZenTek | https://tmsearch.uspto.gov/ |
+| Websuche "ZenPipe"/"Zen Pipe" trademark/Marke | siehe links | Keine Registereintraege in den Treffern. Funde siehe unten **[Geprueft]** | WebSearch 13.10.2026 |
+| **ZenPipe for Civil 3D** (ZenTek Consultants, Hackensack NJ / Vancouver BC) | zentekconsultants.net | **Neu gegenueber 1.2.** Kommerzielles Software-Tool (Zusatzkatalog fuer AutoCAD Civil 3D Pressure Networks), Ankuendigung 22.03.2023, kein ™/® auf der Seite. Klasse 9/42 (Software), aber voellig anderes Feld (Tiefbau-CAD). Registrierung bei USPTO/CIPO **nicht geprueft** | https://zentekconsultants.net/introducing-zenpipe-for-autocad-civil-3d/ |
+| Zenpipe (Webhosting, Malaysia) | zenpipe.com | Firmenname/Domain seit 2005 (siehe 1.2), Dienstleistung Hosting (Kl. 38/42). Marke nicht geprueft | https://www.zenpipe.com/ |
+| Zen-Pfeifenzubehoer (Rolling Paper Depot, zensmoke.com) | "Zen Pipe" | Tabak-/Raucherzubehoer, Klasse 34, "Zen" ist dort Marke von BBK Tobacco & Foods (laut Webseite). Andere Klasse, keine Verwechslung bei Software | https://zensmoke.com/pipe-cleaners/ |
+| Kick-Kanal `zenpipe88` | – | Streaming-Account, irrelevant | https://kick.com/zenpipe88 |
+| F-Droid | zenpipe | "does not have any apps matching" **[Geprueft]** | https://search.f-droid.org/?q=zenpipe&lang=en |
+| GitHub-Repos (API) | zenpipe | `dynamik-dev/zenpipe-php` (7 Sterne), `imazen/zenpipe` (3), `Zenika/zenpipe`, `svenaoki/zenpipe`, `dynamik-dev/zenpipe`, `nkumar212/ZenPipeMini-*` (2017), zwei `zenpipeline-*`. Alles Bibliotheken/Spielwiese, kein Android-/YouTube-Bezug **[Geprueft]** | https://api.github.com/search/repositories?q=zenpipe |
+| **GitHub-Organisation `zenpipe`** | github.com/zenpipe | **Existiert**, angelegt 11.05.2025, 0 oeffentliche Repos, ohne Beschreibung (Namensplatzhalter fremder Person). Fuer uns nur relevant, falls wir eine Org `zenpipe` wollten: **nicht verfuegbar** (aktuell `sprobst76/ZenPipe` ok) **[Geprueft]** | https://api.github.com/orgs/zenpipe |
+| Android-/NewPipe-Fork-Suche | "ZenPipe" app android / NewPipe fork | Kein Treffer fuer eine gleichnamige Android-App oder einen Fork **[Geprueft]** (die frueher gefundenen Play-Eintraege waren 404, siehe 1.2) | WebSearch 13.10.2026 |
+| NewPipe e.V. Markenrichtlinie | – | Wortmarke "NewPipe" ist EU-Marke. Abgeleitete Projekte sollen **eigene Marke/Identitaet** entwickeln. Webseiten Dritter muessen klar sagen, dass sie *weder mit TeamNewPipe verbunden noch von ihm gebilligt* sind. Unoffizielle Builds: Commit/Version nennen, "unofficial". Logo und der Bestandteil "Pipe" sind **nicht** geregelt. Hinweis: Frist fuer bestehende Forks mit "NewPipe" im Namen war 30.04.2025 **[Geprueft]** | https://newpipe-ev.de/policy/trademark/ |
+| YouTube API Services Branding Guidelines | – | Verboten: den Namen YouTube oder Abkuerzung/Variante ("YT", "You-Tube") im Namen der App/des Produkts; beschreibend "app for YouTube" ist erlaubt. Gilt formal fuer API-Clients; ZenPipe nutzt die API nicht, die Regel ist trotzdem eine gute Leitlinie. "ZenPipe" enthaelt kein YouTube-Element **[Geprueft]** | https://developers.google.com/youtube/branding |
+
+### 5.2 Bewertung des Kollisionsrisikos (Einschaetzung, kein Rechtsrat)
+
+- **EU/DE/US, gleiche Branche (Video-/Streaming-Apps, Kl. 9/38/41):** kein bekannter Konflikt. Das schliesst aber nicht aus, dass TMview/DPMA/USPTO etwas zeigen, was ich nicht abfragen konnte. Die Direktabfragen (DPMA, EUIPO, WIPO, USPTO) bleiben offen (Checkliste unten).
+- **ZenTek "ZenPipe for Civil 3D" (Kl. 9/42, USA/Kanada):** identischer Name, Softwareklasse, aber anderer Markt (Tiefbau-CAD, B2B, Windows/AutoCAD). Verwechslungsgefahr zu einer Android-App fuer YouTube-Streaming gering. Relevant erst, falls ZenTek die Marke in EU/DE anmeldet oder ZenPipe sehr bekannt wird. Praktisch: Unterlassungsforderung unwahrscheinlich, aber nicht ausgeschlossen. **Niedrig bis mittel.**
+- **Zenpipe Web Hosting (MY):** Domain/Firma, anderes Feld, Sitz ausserhalb EU. **Niedrig.**
+- **Mexiko-Anmeldung ZENPIPE (Kl. 9, 02.10.2026):** gilt nur in MX. Verteilung ueber GitHub/F-Droid ist weltweit abrufbar, aber MX-Markenrecht wirkt nur gegen Nutzung dort. **Niedrig**, beobachten (Inhaberin unbekannt, Zweck unbekannt).
+- **"Zen" schwach, "Pipe" beschreibend:** Das Gesamtzeichen ist schutzfaehig genug fuer Kollisionen, aber der Spielraum anderer Inhaber ist klein. Zusammen mit den "…Pipe"-Forks (PipePipe, BravePipe) ist ein Einspruch von TeamNewPipe unwahrscheinlich, da deren Marke nur "NewPipe" betrifft.
+- **Gesamt: niedrig bis mittel**, solange ZenPipe privat, nicht kommerziell und nur ueber GitHub/eigenes F-Droid-Repo verteilt wird. Das Risiko steigt, wenn ZenPipe in grossen Stores erscheint, monetarisiert wird oder die Marke eines Dritten in EU/DE eingetragen wird.
+
+### 5.3 Empfehlung
+
+1. **Name "ZenPipe" behalten: ja.** Keine gefundene Kollision rechtfertigt einen Wechsel jetzt. Reserve bleibt StillPipe (siehe 1.4).
+2. **Eigene Markenanmeldung: nicht noetig, derzeit nicht ratsam.** Kosten (DPMA ca. 290 EUR fuer 3 Klassen, EUIPO hoeher; Gebuehren **nicht geprueft**), schwache Unterscheidungskraft ("Zen"), und eine Anmeldung kann Aufmerksamkeit (z. B. von ZenTek) wecken. Neu bewerten, wenn ZenPipe wirtschaftlich genutzt wird.
+3. **Absicherungen:**
+   - Domain `zenpipe.de` (und ggf. `.app`) registrieren, falls eine Projektseite gewuenscht ist (RDAP-Stand aus 1.2: frei, vor Kauf neu pruefen). `.com`/`.org` sind vergeben.
+   - GitHub: Org `zenpipe` ist vergeben. Bei `sprobst76/ZenPipe` bleiben (kein Problem), keine Org mit aehnlichem Namen anlegen, die verwechselt werden kann.
+   - **Disclaimer** in README, Fastlane-Beschreibung (full_description) und About-Screen beibehalten bzw. ergaenzen: "ZenPipe is an independent fork of NewPipe (GPLv3) and is not affiliated with or endorsed by TeamNewPipe/NewPipe e.V. or YouTube/Google." (Satz fuer YouTube/Google fehlt vermutlich noch, bitte pruefen.) Auf Release-Seiten Version/Commit nennen und "unofficial build" schreiben, wie es die Richtlinie fuer Builds verlangt.
+   - Kein "YouTube"/"YT" im Namen, Titel, Icon; "for YouTube" nur beschreibend. Kein YouTube-Logo.
+   - Eigene Logo/Icon (Ring) beibehalten, nicht an das NewPipe-Logo anlehnen.
+4. **Beobachten:** Mexiko-Anmeldung ZENPIPE und ZenTek ("ZenPipe for Civil 3D") gelegentlich neu pruefen (siehe Checkliste), vor dem ersten oeffentlichen Release mindestens einmal.
+
+### 5.4 Checkliste fuer Stefan (nur im Browser pruefbar)
+
+- [ ] **DPMAregister:** https://register.dpma.de/DPMAregister/marke/einsteiger, Feld "Marke": `zenpipe`, danach `zen pipe`; Datenbestand: national + Unionsmarken + IR ankreuzen. Zweiter Durchgang mit Klassen 9, 38, 41, 42 (und `*zenpipe*`). Treffer mit Inhaber/Status notieren.
+- [ ] **EUIPO eSearch plus:** https://euipo.europa.eu/eSearch/ , Wortmarke `zenpipe` (Bedingung "contains"), dazu `zen pipe`.
+- [ ] **WIPO Global Brand Database:** https://branddb.wipo.int/ , Captcha loesen, Brand name `zenpipe` (nur Marken, auch "Dead" ansehen), Land MX/US/EM/DE.
+- [ ] **USPTO:** https://tmsearch.uspto.gov/ , `zenpipe` (Live und Dead), Klassen 9/42. Besonders: Inhaber **ZenTek Consultants / ZENTEK LLC**.
+- [ ] **TMview** im Browser: https://www.tmdn.org/tmview/ , `zenpipe` plus `zen pipe`, pruefen, ob Treffer aus 1.1 noch stimmen (MX-Anmeldung, ZERPIPE).
+- [ ] **Mexiko (optional):** IMPI-Marcia-Eintrag ZENPIPE (Martha Martinez Fuentes, 02.10.2026) kurz ansehen: Klasse/Waren.
+- [ ] **Domain:** `zenpipe.de` und `zenpipe.app` bei einem Registrar nochmals pruefen und ggf. registrieren.
+- [ ] **Disclaimer:** In README/About/Fastlane pruefen, dass "nicht verbunden mit NewPipe/YouTube" ausdruecklich drinsteht.
+- [ ] Ergebnis (Treffer ja/nein, Datum) hier unter 5.1 nachtragen.
