@@ -60,7 +60,9 @@ class ZenSettingsLock(
         val undoRemainingMs: Long,
         val pending: Map<String, Int>,
         val praxis: List<ZenPraxisChannel> = emptyList(),
-        val praxisPending: List<ZenPraxisChannel> = emptyList()
+        val praxisPending: List<ZenPraxisChannel> = emptyList(),
+        val exempt: List<ZenClassExempt> = emptyList(),
+        val exemptPending: List<ZenClassExempt> = emptyList()
     )
 
     private fun kEff(k: String) = "zs_$k"
@@ -100,11 +102,12 @@ class ZenSettingsLock(
         return readPending()
     }
 
-    /** Pending changes (settings and practice channels) take effect once the lock countdown has run out. */
+    /** Pending changes (settings, practice channels, exceptions) take effect once the lock countdown has run out. */
     private fun applyDue() {
         val pend = readPending()
         val pxPend = readPraxis(K_PX_PEND)
-        if (pend.isEmpty() && pxPend.isEmpty()) return
+        val exPend = readExempt(K_EX_PEND)
+        if (pend.isEmpty() && pxPend.isEmpty() && exPend.isEmpty()) return
         if (lockCd.remainingMs() > 0) return
         pend.forEach { (k, v) -> store.put(kEff(k) to v, kPend(k) to null) }
         if (pxPend.isNotEmpty()) {
@@ -112,6 +115,12 @@ class ZenSettingsLock(
             val merged = eff + pxPend.filter { p -> eff.none { it.key == p.key } }
             store.put(K_PX to ZenPraxisChannel.encodeList(merged), K_PX_PEND to null)
             pxPend.forEach { log?.invoke("praxis_activated", "url=${it.url} name=${it.name}") }
+        }
+        if (exPend.isNotEmpty()) {
+            val eff = readExempt(K_EX)
+            val merged = eff + exPend.filter { p -> eff.none { it.key == p.key } }
+            store.put(K_EX to ZenClassExempt.encodeList(merged), K_EX_PEND to null)
+            exPend.forEach { log?.invoke("class_exempt_activated", "key=${it.key}") }
         }
         clearUndo()
         if (pend.isNotEmpty()) {
@@ -163,7 +172,9 @@ class ZenSettingsLock(
             undoCd.remainingMs(),
             readPending(),
             readPraxis(K_PX),
-            readPraxis(K_PX_PEND)
+            readPraxis(K_PX_PEND),
+            readExempt(K_EX),
+            readExempt(K_EX_PEND)
         )
     }
 
@@ -242,13 +253,15 @@ class ZenSettingsLock(
         applyDue()
         val pend = readPending()
         val pxPend = readPraxis(K_PX_PEND)
-        if (pend.isEmpty() && pxPend.isEmpty()) return false
-        store.put(*pend.keys.map { kPend(it) to null }.toTypedArray(), K_PX_PEND to null)
+        val exPend = readExempt(K_EX_PEND)
+        if (pend.isEmpty() && pxPend.isEmpty() && exPend.isEmpty()) return false
+        store.put(*pend.keys.map { kPend(it) to null }.toTypedArray(), K_PX_PEND to null, K_EX_PEND to null)
         clearUndo()
         if (pend.isNotEmpty()) {
             log?.invoke("settings_pending_cancelled", pend.entries.joinToString(",") { "${it.key}=${it.value}" })
         }
         pxPend.forEach { log?.invoke("praxis_pending_cancelled", "url=${it.url} name=${it.name}") }
+        exPend.forEach { log?.invoke("class_exempt_pending_cancelled", "key=${it.key}") }
         return true
     }
 
@@ -325,6 +338,68 @@ class ZenSettingsLock(
         return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
     }
 
+    // ---------------------------------------------------------------- classifier exceptions
+
+    private fun readExempt(key: String) = ZenClassExempt.decodeList(store.getString(key, null))
+
+    private fun exemptEntry(key: String, list: List<ZenClassExempt>): Pair<String, Any?> = key to if (list.isEmpty()) null else ZenClassExempt.encodeList(list)
+
+    /** Active exceptions of the content recognition (pending ones that are due are activated first). */
+    @Synchronized
+    fun exemptions(): List<ZenClassExempt> {
+        applyDue()
+        return readExempt(K_EX)
+    }
+
+    /**
+     * Adding an exception is a LOOSENING (the content recognition no longer pushes those videos
+     * back): same mechanics as [addPraxis] (rejected while locked, pending 24 h, starts the lock,
+     * cancel/undo); in the first-time setup it applies at once.
+     */
+    @Synchronized
+    fun addExempt(e: ZenClassExempt): Result {
+        applyDue()
+        val eff = readExempt(K_EX)
+        val pend = readExempt(K_EX_PEND)
+        if (eff.any { it.key == e.key } || pend.any { it.key == e.key }) return Result.NoChange
+        if (eff.size + pend.size >= ZenClassExempt.MAX_ENTRIES) return Result.Rejected(Reason.OUT_OF_RANGE, e.key)
+        if (isSetupMode()) {
+            store.put(exemptEntry(K_EX, eff + e))
+            log?.invoke("class_exempt_add", "key=${e.key} setup=true")
+            return Result.Applied(listOf(e.key), emptyList(), lockStarted = false, setupMode = true)
+        }
+        if (lockCd.remainingMs() > 0) return Result.Rejected(Reason.LOCKED, e.key)
+        saveUndo(ZenSettingDefs.all.associate { it.key to readEff(it) }, readPending(), true)
+        store.put(exemptEntry(K_EX_PEND, pend + e))
+        lockCd.start(lockMs)
+        undoCd.start(undoMs)
+        log?.invoke("class_exempt_add_pending", "key=${e.key}")
+        return Result.Applied(emptyList(), listOf(e.key), lockStarted = true, setupMode = false)
+    }
+
+    /** Removing is STRICTER: at once, also while locked, no lock; a pending one is cancelled. */
+    @Synchronized
+    fun removeExempt(key: String): Result {
+        applyDue()
+        val eff = readExempt(K_EX)
+        val pend = readExempt(K_EX_PEND)
+        val inEff = eff.firstOrNull { it.key == key }
+        val inPend = pend.firstOrNull { it.key == key }
+        if (inEff == null && inPend == null) return Result.NoChange
+        val setup = isSetupMode()
+        if (inEff == null) {
+            store.put(exemptEntry(K_EX_PEND, pend - inPend!!))
+            clearUndo()
+            log?.invoke("class_exempt_pending_cancelled", "key=$key")
+            return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
+        }
+        if (!setup) saveUndo(ZenSettingDefs.all.associate { it.key to readEff(it) }, readPending(), false)
+        store.put(exemptEntry(K_EX, eff - inEff), exemptEntry(K_EX_PEND, pend.filter { it.key != key }))
+        if (!setup) undoCd.start(undoMs)
+        log?.invoke("class_exempt_remove", "key=$key setup=$setup")
+        return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
+    }
+
     private fun saveUndo(eff: Map<String, Int>, pend: Map<String, Int>, startedLock: Boolean) {
         val e = eff.entries.joinToString(",") { "${it.key}=${it.value}" }
         val p = pend.entries.joinToString(",") { "${it.key}=${it.value}" }
@@ -332,13 +407,15 @@ class ZenSettingsLock(
             K_UNDO to "${if (startedLock) 1 else 0}|$e|$p",
             // always written (also empty) so an undo knows the practice state existed
             K_UNDO_PX to ZenPraxisChannel.encodeList(readPraxis(K_PX)),
-            K_UNDO_PX_PEND to ZenPraxisChannel.encodeList(readPraxis(K_PX_PEND))
+            K_UNDO_PX_PEND to ZenPraxisChannel.encodeList(readPraxis(K_PX_PEND)),
+            K_UNDO_EX to ZenClassExempt.encodeList(readExempt(K_EX)),
+            K_UNDO_EX_PEND to ZenClassExempt.encodeList(readExempt(K_EX_PEND))
         )
     }
 
     private fun clearUndo() {
         undoCd.clear()
-        store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null)
+        store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null, K_UNDO_EX to null, K_UNDO_EX_PEND to null)
     }
 
     private fun parse(s: String): Map<String, Int> = s.split(',').filter { '=' in it }.associate {
@@ -350,7 +427,7 @@ class ZenSettingsLock(
     fun undoRemainingMs(): Long {
         val r = undoCd.remainingMs()
         if (r <= 0 && store.getString(K_UNDO, null) != null) {
-            store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null)
+            store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null, K_UNDO_EX to null, K_UNDO_EX_PEND to null)
         }
         return r
     }
@@ -373,6 +450,8 @@ class ZenSettingsLock(
         }
         store.getString(K_UNDO_PX, null)?.let { entries.add(praxisEntry(K_PX, ZenPraxisChannel.decodeList(it))) }
         store.getString(K_UNDO_PX_PEND, null)?.let { entries.add(praxisEntry(K_PX_PEND, ZenPraxisChannel.decodeList(it))) }
+        store.getString(K_UNDO_EX, null)?.let { entries.add(exemptEntry(K_EX, ZenClassExempt.decodeList(it))) }
+        store.getString(K_UNDO_EX_PEND, null)?.let { entries.add(exemptEntry(K_EX_PEND, ZenClassExempt.decodeList(it))) }
         store.put(*entries.toTypedArray())
         if (startedLock) lockCd.clear()
         clearUndo()
@@ -388,5 +467,9 @@ class ZenSettingsLock(
         private const val K_UNDO_PX_PEND = "zs_undo_praxis_pending"
         private const val K_PX = "zs_praxis"
         private const val K_PX_PEND = "zp_praxis"
+        private const val K_EX = "zs_class_exempt"
+        private const val K_EX_PEND = "zp_class_exempt"
+        private const val K_UNDO_EX = "zs_undo_class_exempt"
+        private const val K_UNDO_EX_PEND = "zs_undo_class_exempt_pending"
     }
 }

@@ -398,4 +398,69 @@ class ZenSettingsLockTest {
         l.apply(mapOf(ZenSettingKeys.CLASS_FEED to 1))
         assertTrue(l.pending().isEmpty())
     }
+
+    @Test
+    fun `exception is a loosening, removing is immediate, undo restores`() {
+        val (e, l) = ready()
+        val kw = ZenClassExempt.keyword("  Gute   Nachrichten ")
+        val r = l.addExempt(kw) as ZenSettingsLock.Result.Applied
+        assertTrue(r.lockStarted)
+        assertTrue(l.exemptions().isEmpty())
+        assertEquals(listOf(kw.key), l.snapshot().exemptPending.map { it.key })
+        assertEquals("k:gute nachrichten", kw.key)
+        // while locked a second one is rejected, the same one is no change
+        val ch = ZenClassExempt.channel(0, "https://www.youtube.com/channel/UCx/", "History")
+        assertTrue(l.addExempt(ch) is ZenSettingsLock.Result.Rejected)
+        assertTrue(l.addExempt(ZenClassExempt.keyword("gute nachrichten")) is ZenSettingsLock.Result.NoChange)
+        // undo within 5 minutes removes the pending one and the lock
+        assertTrue(l.undo())
+        assertTrue(l.snapshot().exemptPending.isEmpty())
+        assertFalse(l.isLocked())
+        // add again, lock runs out: active
+        l.addExempt(kw)
+        e.mono += 24 * h + 1
+        assertEquals(listOf(kw.key), l.exemptions().map { it.key })
+        assertTrue(e.events.any { it.startsWith("class_exempt_activated") })
+        // removing: immediate, also while locked, no lock
+        l.addExempt(ch)
+        assertTrue(l.isLocked())
+        l.removeExempt(kw.key)
+        assertTrue(l.exemptions().isEmpty())
+        // removing a pending one cancels it, the lock keeps running
+        l.removeExempt(ch.key)
+        assertTrue(l.snapshot().exemptPending.isEmpty())
+        assertTrue(l.isLocked())
+    }
+
+    @Test
+    fun `exception in setup applies at once, cancel pending drops it`() {
+        val e = Env()
+        val l = e.lock()
+        assertTrue(l.isSetupMode())
+        l.addExempt(ZenClassExempt.keyword("positive news"))
+        assertEquals(1, l.exemptions().size)
+        l.completeSetup()
+        e.mono += 25 * h
+        l.addExempt(ZenClassExempt.keyword("good news"))
+        assertTrue(l.cancelPending())
+        assertTrue(l.snapshot().exemptPending.isEmpty())
+        assertEquals(1, l.exemptions().size)
+    }
+
+    @Test
+    fun `exceptions match channel keys and title keywords`() {
+        val ex = ZenClassExemptions(
+            listOf(
+                ZenClassExempt.channel(0, "https://www.youtube.com/channel/UCabc", "History"),
+                ZenClassExempt.keyword("Gute Nachrichten")
+            )
+        )
+        assertTrue(ex.matches(0, "https://m.youtube.com/channel/UCabc/", "Anything"))
+        assertFalse(ex.matches(1, "https://www.youtube.com/channel/UCabc", "Anything"))
+        assertTrue(ex.matches(0, "https://www.youtube.com/channel/UCzzz", "Endlich GUTE  nachrichten aus dem All"))
+        assertFalse(ex.matches(0, null, "Schlechte Nachrichten"))
+        assertEquals(1, ZenClassExempt.decodeList(ZenClassExempt.encodeList(listOf(ZenClassExempt.keyword("a\tb c")))).size)
+        assertFalse(ZenClassExempt.validKeyword(" ab "))
+        assertTrue(ZenClassExempt.validKeyword("abc"))
+    }
 }

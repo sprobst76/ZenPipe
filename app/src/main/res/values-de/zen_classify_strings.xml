@@ -62,4 +62,23 @@
     <string name="zen_check_warned">Inhalts-Erkennung: nur %1$d von %2$d neueren Videos wirken wie Praxis (trotzdem markiert).</string>
     <string name="zen_check_list_title">Neuere Videos und ihre Einordnung</string>
     <string name="zen_check_list_failed">konnte nicht eingeordnet werden</string>
+    <!-- AP 6: Ausnahmeliste -->
+    <string name="zen_exempt_title">Ausnahmen</string>
+    <string name="zen_exempt_hint">Kanäle oder Schlagwörter im Titel, bei denen die Inhalts-Erkennung nichts tun soll (z. B. ein Geschichtskanal, den sie als Politik liest, oder „gute Nachrichten“): Ihre Videos behalten ihren normalen Platz im Feed, und die Grenze für belastende Videos gilt nicht. Hinzufügen ist eine Lockerung (wirkt nach 24 Stunden), Entfernen gilt sofort.</string>
+    <string name="zen_exempt_none">Keine Ausnahmen.</string>
+    <string name="zen_exempt_kind_keyword">Schlagwort im Titel</string>
+    <string name="zen_exempt_kind_channel">Kanal</string>
+    <string name="zen_exempt_add_keyword">Schlagwort hinzufügen</string>
+    <string name="zen_exempt_add_channel">Kanal hinzufügen</string>
+    <string name="zen_exempt_keyword_hint">z. B. gute Nachrichten</string>
+    <string name="zen_exempt_keyword_invalid">Bitte mindestens %1$d Zeichen eingeben.</string>
+    <string name="zen_exempt_next">Weiter</string>
+    <string name="zen_exempt_no_subscriptions">Noch keine Abos.</string>
+    <string name="zen_exempt_long_press">Inhalts-Erkennung: Ausnahme für diesen Kanal</string>
+    <string name="zen_exempt_confirm_title">Ausnahme hinzufügen?</string>
+    <string name="zen_exempt_confirm_message">Die Inhalts-Erkennung stellt %1$s ab %2$s (in 24 Stunden) nicht mehr nach hinten; bis dahin kannst du es abbrechen.</string>
+    <string name="zen_exempt_added_pending">Ausnahme %1$s gilt ab %2$s</string>
+    <string name="zen_exempt_added_setup">Ausnahme hinzugefügt: %1$s (Ersteinrichtung: sofort aktiv)</string>
+    <string name="zen_exempt_locked">Zen-Einstellungen sind bis %1$s gesperrt. Eine Ausnahme hinzuzufügen ist eine Lockerung und geht erst danach wieder.</string>
+    <string name="zen_exempt_pending_line">Ausnahme: %1$s</string>
 </resources>

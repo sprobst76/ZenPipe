@@ -49,7 +49,7 @@ class ZenSettingsFragment : Fragment() {
     }
 
     private fun signatureOf(s: ZenSettingsLock.Snapshot) = "${s.setupMode}|${s.lockRemainingMs > 0}|${s.undoRemainingMs > 0}|${s.pending}|" +
-        "${s.praxis.map { it.key }}|${s.praxisPending.map { it.key }}"
+        "${s.praxis.map { it.key }}|${s.praxisPending.map { it.key }}|${s.exempt.map { it.key }}|${s.exemptPending.map { it.key }}"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         lock = Zen.settingsLock(requireContext())
@@ -142,12 +142,13 @@ class ZenSettingsFragment : Fragment() {
                 }
             )
         }
-        if (snap.pending.isNotEmpty() || snap.praxisPending.isNotEmpty()) {
+        if (snap.pending.isNotEmpty() || snap.praxisPending.isNotEmpty() || snap.exemptPending.isNotEmpty()) {
             val pendingText = (
                 snap.pending.entries.map { (k, v) ->
                     val d = ZenSettingDefs.get(k)!!
                     "${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, v)}"
-                } + snap.praxisPending.map { getString(R.string.zen_praxis_pending_line, it.name) }
+                } + snap.praxisPending.map { getString(R.string.zen_praxis_pending_line, it.name) } +
+                    snap.exemptPending.map { getString(R.string.zen_exempt_pending_line, it.label) }
                 ).joinToString("\n")
             content.addView(text(getString(R.string.zen_pending_title, fmtTime(snap.lockRemainingMs)), 14f, true))
             content.addView(text(pendingText))

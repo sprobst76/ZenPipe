@@ -102,6 +102,7 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
         content.addView(buttons)
         if (deleteBlocked) content.addView(text(activity.getString(R.string.zen_class_delete_blocked), 12f))
         if (status != ZenClassifierModel.Status.UNSUPPORTED) content.addView(text(activity.getString(R.string.zen_class_switches_hint), 12f))
+        if (status != ZenClassifierModel.Status.UNSUPPORTED) org.schabi.newpipe.zen.ZenClassExemptUi.render(activity, content, rerender)
         if (status == ZenClassifierModel.Status.INSTALLED) {
             val extra = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
             extra.addView(button(activity.getString(R.string.zen_class_review)) { showReview() })

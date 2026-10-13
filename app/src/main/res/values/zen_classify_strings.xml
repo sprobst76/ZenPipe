@@ -63,4 +63,23 @@
     <string name="zen_check_warned">Content recognition: only %1$d of %2$d newer videos look like practice (you chose to mark it anyway).</string>
     <string name="zen_check_list_title">Newer videos and their classification</string>
     <string name="zen_check_list_failed">could not be classified</string>
+    <!-- AP 6: exception list -->
+    <string name="zen_exempt_title">Exceptions</string>
+    <string name="zen_exempt_hint">Channels or title keywords the content recognition should leave alone (e.g. a history channel read as politics, or \"good news\"): their videos keep their normal place in the feed and the limit for distressing videos does not apply. Adding is a loosening (takes effect after 24 hours), removing applies immediately.</string>
+    <string name="zen_exempt_none">No exceptions.</string>
+    <string name="zen_exempt_kind_keyword">Keyword in the title</string>
+    <string name="zen_exempt_kind_channel">Channel</string>
+    <string name="zen_exempt_add_keyword">Add keyword</string>
+    <string name="zen_exempt_add_channel">Add channel</string>
+    <string name="zen_exempt_keyword_hint">e.g. good news</string>
+    <string name="zen_exempt_keyword_invalid">Please enter at least %1$d characters.</string>
+    <string name="zen_exempt_next">Next</string>
+    <string name="zen_exempt_no_subscriptions">No subscriptions yet.</string>
+    <string name="zen_exempt_long_press">Content recognition: exception for this channel</string>
+    <string name="zen_exempt_confirm_title">Add exception?</string>
+    <string name="zen_exempt_confirm_message">The content recognition will no longer push back %1$s from %2$s (in 24 hours); you can cancel it until then.</string>
+    <string name="zen_exempt_added_pending">Exception %1$s applies from %2$s</string>
+    <string name="zen_exempt_added_setup">Exception added: %1$s (first-time setup: active now)</string>
+    <string name="zen_exempt_locked">Zen settings are locked until %1$s. Adding an exception is a loosening and is possible again afterwards.</string>
+    <string name="zen_exempt_pending_line">Exception: %1$s</string>
 </resources>

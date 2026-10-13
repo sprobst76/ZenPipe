@@ -128,6 +128,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
         val ranks = db.database().feedGroupDAO().getZenGroupRanks().associateBy { it.streamId }
         val praxis = ZenPraxis.activeKeys()
         val praxisStreams = ZenPraxis.activePlaylistStreamKeys()
+        val exempt = ZenClassExemptions(ZenSettings.lock()?.exemptions() ?: emptyList())
         return db.getStreams(FeedGroupEntity.GROUP_ALL_ID, false, false, false)
             .blockingGet(arrayListOf()).mapNotNull {
                 val s = it.stream
@@ -145,7 +146,8 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
                     groupName = rank?.groupName,
                     praxis = praxis.isNotEmpty() && s.uploaderUrl?.let {
                         ZenPraxisChannel.keyOf(s.serviceId, it) in praxis
-                    } == true || ZenPraxisChannel.keyOf(s.serviceId, s.url) in praxisStreams
+                    } == true || ZenPraxisChannel.keyOf(s.serviceId, s.url) in praxisStreams,
+                    classExempt = !exempt.isEmpty() && exempt.matches(s.serviceId, s.uploaderUrl, s.title)
                 )
             }
     }

@@ -77,10 +77,16 @@ object ZenPraxisUi {
      */
     @JvmStatic
     fun showLongPress(activity: Activity, serviceId: Int, url: String, name: String, playlist: Boolean) {
+        // channels: also "exception for the content recognition" (spec 4.6), where it is available
+        val exempt = !playlist && org.schabi.newpipe.zen.classify.ZenClassifierModel.isSupported()
+        val items = listOfNotNull(
+            menuTitle(activity, serviceId, url, playlist),
+            if (exempt) activity.getString(R.string.zen_exempt_long_press) else null
+        )
         AlertDialog.Builder(activity)
             .setTitle(name)
-            .setItems(arrayOf(menuTitle(activity, serviceId, url, playlist))) { _, _ ->
-                onMenu(activity, serviceId, url, name, playlist) { }
+            .setItems(items.toTypedArray()) { _, which ->
+                if (which == 0) onMenu(activity, serviceId, url, name, playlist) { } else ZenClassExemptUi.addChannel(activity, serviceId, url, name)
             }
             .show()
     }
