@@ -28,7 +28,7 @@ body:
     attributes:
       label: Affected version
       description: "ZenPipe version (Settings > About)"
-      placeholder: "0.1.0-zen.1"
+      placeholder: "0.1.0-zen.2"
     validations:
       required: true
 

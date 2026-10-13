@@ -1,0 +1,6 @@
+Zweite ZenPipe-Entwicklungsversion.
+• Pausenbildschirm zeigt je Pause einen Spruch (gemeinfreie Quellen, eigene Sätze, Atemhinweise); eigene Sprüche in den Zen-Einstellungen
+• Praxis ist während der Pflichtpause erlaubt, alles andere bleibt pausiert
+• Praxis-Playlists, Kanäle und Playlists per langem Druck markieren
+• Sleep-Timer mit sanftem Ausblenden
+• Fixes: deutsche Texte, Warteschlange während der Pause, Kette stoppt vor Nicht-Praxis

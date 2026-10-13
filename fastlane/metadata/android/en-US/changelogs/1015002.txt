@@ -1,0 +1,6 @@
+Second ZenPipe development release.
+• Pause screen shows a quote per break (public-domain sources, own sentences, breathing hints); add your own quotes in the Zen settings
+• Practice is allowed during the mandatory break, everything else stays paused
+• Practice playlists, mark channels and playlists by long-press
+• Sleep timer with gentle fade-out
+• Fixes: German texts, queue during a break, autoplay chain stops before non-practice
