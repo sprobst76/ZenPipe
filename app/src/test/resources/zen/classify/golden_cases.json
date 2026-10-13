@@ -1,0 +1,3887 @@
+[
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.85,
+   "programmieren": 0.4
+  },
+  "formats": {
+   "tutorial_anleitung": 0.95
+  },
+  "tones": {
+   "neutral": 0.8311
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.9,
+   "selbstentwicklung_produktivitaet": 0.3
+  },
+  "formats": {
+   "vortrag_interview": 0.6,
+   "tutorial_anleitung": 0.4
+  },
+  "tones": {
+   "neutral": 0.6,
+   "positiv": 0.5,
+   "belastend": 0.02
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "psyche": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "hobby_sammeln_spiele": 0.7149,
+   "tech_gadgets_hardware": 0.3928
+  },
+  "formats": {
+   "review_test": 0.8524
+  },
+  "tones": {
+   "neutral": 0.8391
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.715
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "tech_gadgets_hardware": 0.95
+  },
+  "formats": {
+   "review_test": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.2965
+  },
+  "formats": {
+   "mitmach_praxis": 0.7574
+  },
+  "tones": {
+   "positiv": 0.7777,
+   "neutral": 0.3325
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "positiv",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.9107
+  },
+  "formats": {
+   "tutorial_anleitung": 0.4171,
+   "unterhaltung_vlog": 0.3138
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.911
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.9568,
+   "ernaehrung_abnehmen": 0.321
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5394
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "koerper": 0.957
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.9,
+   "schlaf_klang": 0.4
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.5055
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.5607
+  },
+  "tones": {
+   "neutral": 0.5039,
+   "positiv": 0.3204
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.7
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.97
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8,
+   "reaktion_kommentar": 0.4
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.97
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.3873,
+   "familie_kinder": 0.322
+  },
+  "formats": {
+   "vortrag_interview": 0.9699
+  },
+  "tones": {
+   "positiv": 0.6,
+   "neutral": 0.3,
+   "belastend": 0.03
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "bildung": 0.97
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "tech_gadgets_hardware": 0.8851
+  },
+  "formats": {
+   "review_test": 0.9018,
+   "news_aktuell": 0.3213
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "reaktion_kommentar": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.8885
+  },
+  "formats": {},
+  "tones": {
+   "neutral": 0.7487
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.888
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "office_pkm_software": 0.9,
+   "ki": 0.6
+  },
+  "formats": {
+   "tutorial_anleitung": 0.95
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.4712,
+   "ki": 0.3424
+  },
+  "formats": {
+   "erklaerung_analyse": 0.2759,
+   "tutorial_anleitung": 0.2574
+  },
+  "tones": {
+   "neutral": 0.8831
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.8243
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6644,
+   "doku_lang": 0.5378
+  },
+  "tones": {
+   "neutral": 0.9,
+   "positiv": 0.4,
+   "belastend": 0.3
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.824
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.9,
+   "ki": 0.85
+  },
+  "formats": {
+   "tutorial_anleitung": 0.95
+  },
+  "tones": {
+   "neutral": 0.8555
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9604
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7521
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.96
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.9
+  },
+  "formats": {
+   "tutorial_anleitung": 0.6,
+   "review_test": 0.3
+  },
+  "tones": {
+   "neutral": 0.8,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.93
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6,
+   "vortrag_interview": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.4,
+   "politik_nachrichten": 0.25
+  },
+  "formats": {
+   "reaktion_kommentar": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "office_pkm_software": 0.9097,
+   "selbstentwicklung_produktivitaet": 0.431
+  },
+  "formats": {
+   "tutorial_anleitung": 0.4727
+  },
+  "tones": {
+   "neutral": 0.5609,
+   "positiv": 0.2857
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.773
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.95
+  },
+  "formats": {
+   "news_aktuell": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.9563
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8689
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.15,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.869
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "finanzen_wirtschaft": 0.35,
+   "selbstentwicklung_produktivitaet": 0.3,
+   "sonstiges": 0.3
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6,
+   "tutorial_anleitung": 0.45
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.6348
+  },
+  "formats": {
+   "tutorial_anleitung": 0.357
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.15,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.2653
+  },
+  "formats": {},
+  "tones": {
+   "neutral": 0.7568
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.95,
+   "schlaf_klang": 0.85
+  },
+  "formats": {
+   "mitmach_praxis": 0.95,
+   "audio_musik": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.95,
+    "ruhe": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.55,
+   "wissenschaft": 0.4,
+   "haushalt_diy_vorsorge": 0.25
+  },
+  "formats": {
+   "vortrag_interview": 0.95
+  },
+  "tones": {
+   "belastend": 0.4497,
+   "neutral": 0.4408
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "belastend",
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.15
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.7473
+  },
+  "formats": {
+   "tutorial_anleitung": 0.5308
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.747
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "mobilitaet_kraft_training": 0.8,
+   "yoga": 0.7,
+   "gesundheit_medizin": 0.6
+  },
+  "formats": {
+   "mitmach_praxis": 0.8,
+   "tutorial_anleitung": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.8,
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.97
+  },
+  "formats": {
+   "news_aktuell": 0.6,
+   "tutorial_anleitung": 0.5,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "it_sicherheit_datenschutz": 0.9,
+   "ki": 0.85,
+   "ki_gesellschaft_ethik": 0.4
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9,
+   "news_aktuell": 0.35
+  },
+  "tones": {
+   "belastend": 0.5237,
+   "neutral": 0.4859
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "belastend",
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9
+  },
+  "formats": {
+   "reaktion_kommentar": 0.6,
+   "unterhaltung_vlog": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.9
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.9,
+   "office_pkm_software": 0.4,
+   "programmieren": 0.4
+  },
+  "formats": {
+   "news_aktuell": 0.6,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.3577
+  },
+  "formats": {},
+  "tones": {
+   "neutral": 0.6649,
+   "positiv": 0.363
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.97
+  },
+  "formats": {
+   "tutorial_anleitung": 0.95,
+   "mitmach_praxis": 0.4
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.7,
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.9,
+   "psyche_therapie": 0.4
+  },
+  "formats": {
+   "vortrag_interview": 0.6,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.7052
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.95,
+   "politik_nachrichten": 0.5
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7,
+   "reaktion_kommentar": 0.3
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.75,
+   "ernaehrung_abnehmen": 0.5
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7
+  },
+  "tones": {
+   "neutral": 0.6878
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "koerper": 0.75
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.8576,
+   "spiritualitaet_esoterik": 0.3364,
+   "meditation_hypnose": 0.2829
+  },
+  "formats": {
+   "mitmach_praxis": 0.949
+  },
+  "tones": {
+   "positiv": 0.85,
+   "neutral": 0.6,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.858
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.2542
+  },
+  "formats": {},
+  "tones": {
+   "neutral": 0.6,
+   "positiv": 0.5,
+   "belastend": 0.02
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9338
+  },
+  "formats": {
+   "mitmach_praxis": 0.8193
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.819
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.6693
+  },
+  "formats": {
+   "tutorial_anleitung": 0.4825
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "sonstiges": 0.5,
+   "foto_video_design": 0.3
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.95
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9,
+   "gesundheit_medizin": 0.5
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.8,
+   "tech_gadgets_hardware": 0.3
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5,
+   "reaktion_kommentar": 0.3
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ernaehrung_abnehmen": 0.7343
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5282,
+   "doku_lang": 0.396,
+   "reaktion_kommentar": 0.2607
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "koerper": 0.734
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.6,
+   "psyche_therapie": 0.3
+  },
+  "formats": {
+   "vortrag_interview": 0.9
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "office_pkm_software": 0.95
+  },
+  "formats": {
+   "tutorial_anleitung": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9907
+  },
+  "formats": {
+   "tutorial_anleitung": 0.8394,
+   "erklaerung_analyse": 0.2957
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.839
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "haushalt_diy_vorsorge": 0.7843
+  },
+  "formats": {
+   "erklaerung_analyse": 0.3234
+  },
+  "tones": {
+   "neutral": 0.593,
+   "positiv": 0.3473
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.8576,
+   "mobilitaet_kraft_training": 0.5137
+  },
+  "formats": {
+   "mitmach_praxis": 0.9268
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.858
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.8,
+   "linux_maker_smarthome": 0.5,
+   "programmieren": 0.5
+  },
+  "formats": {
+   "tutorial_anleitung": 0.95
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.9,
+   "psyche_therapie": 0.3
+  },
+  "formats": {
+   "vortrag_interview": 0.85
+  },
+  "tones": {
+   "neutral": 0.6695,
+   "positiv": 0.2553
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.3874
+  },
+  "formats": {
+   "reaktion_kommentar": 0.9301
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.8013,
+   "meditation_hypnose": 0.5625,
+   "schlaf_klang": 0.4273,
+   "atmen_breathwork": 0.3214
+  },
+  "formats": {
+   "audio_musik": 0.759,
+   "mitmach_praxis": 0.4546
+  },
+  "tones": {
+   "positiv": 0.85,
+   "neutral": 0.6,
+   "belastend": 0.05
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "positiv",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.55,
+   "mystery_internetkultur": 0.45
+  },
+  "formats": {
+   "doku_lang": 0.4,
+   "unterhaltung_vlog": 0.3
+  },
+  "tones": {
+   "neutral": 0.3923,
+   "belastend": 0.3374
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.702
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6013
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.702
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.9
+  },
+  "formats": {
+   "news_aktuell": 0.6,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.7002
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.7529
+  },
+  "formats": {
+   "tutorial_anleitung": 0.9031
+  },
+  "tones": {
+   "neutral": 0.7208
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.903
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "mobilitaet_kraft_training": 0.95
+  },
+  "formats": {
+   "mitmach_praxis": 0.6,
+   "tutorial_anleitung": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.9,
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.9658,
+   "haushalt_diy_vorsorge": 0.3789
+  },
+  "formats": {
+   "tutorial_anleitung": 0.7239
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.724
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "atmen_breathwork": 0.9969
+  },
+  "formats": {
+   "mitmach_praxis": 0.8519,
+   "tutorial_anleitung": 0.2741
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.852
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.4507
+  },
+  "formats": {},
+  "tones": {
+   "neutral": 0.7128
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "mobilitaet_kraft_training": 0.9097
+  },
+  "formats": {
+   "mitmach_praxis": 0.9011
+  },
+  "tones": {
+   "positiv": 0.6629,
+   "neutral": 0.4287
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.901
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "foto_video_design": 0.913,
+   "ki": 0.7492
+  },
+  "formats": {
+   "tutorial_anleitung": 0.4543
+  },
+  "tones": {
+   "neutral": 0.8319
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.754
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "atmen_breathwork": 0.8703
+  },
+  "formats": {
+   "mitmach_praxis": 0.755
+  },
+  "tones": {
+   "positiv": 0.7671,
+   "neutral": 0.3353
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.755
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "atmen_breathwork": 0.93,
+   "meditation_hypnose": 0.4
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.93
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.8,
+   "ernaehrung_abnehmen": 0.75
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7
+  },
+  "tones": {
+   "positiv": 0.5667,
+   "neutral": 0.5311
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "koerper": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.85
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "psyche": 0.95,
+    "bildung": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.93
+  },
+  "formats": {
+   "erklaerung_analyse": 0.55,
+   "tutorial_anleitung": 0.55
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.15,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9165,
+   "mobilitaet_kraft_training": 0.5611
+  },
+  "formats": {
+   "mitmach_praxis": 0.9748
+  },
+  "tones": {
+   "positiv": 0.8199,
+   "neutral": 0.3271
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.916
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.95
+  },
+  "formats": {
+   "reaktion_kommentar": 0.85,
+   "news_aktuell": 0.4
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.95
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9761
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8573
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.976
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.95
+  },
+  "formats": {
+   "tutorial_anleitung": 0.7,
+   "vortrag_interview": 0.3
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "praxis": 0.7,
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.9036,
+   "psyche_therapie": 0.3096
+  },
+  "formats": {
+   "mitmach_praxis": 0.9647
+  },
+  "tones": {
+   "positiv": 0.8955,
+   "neutral": 0.2976
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.904
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "sexualitaet_aufklaerung": 0.9,
+   "gesundheit_medizin": 0.3
+  },
+  "formats": {
+   "tutorial_anleitung": 0.6,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.6811,
+   "positiv": 0.3108
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9946
+  },
+  "formats": {
+   "review_test": 0.6789
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "tech_gadgets_hardware": 0.817
+  },
+  "formats": {
+   "review_test": 0.8416
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.7902
+  },
+  "formats": {
+   "review_test": 0.3447
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.79
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9055
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.7125
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.905
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.95,
+   "psyche_therapie": 0.6
+  },
+  "formats": {
+   "vortrag_interview": 0.85
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "psyche": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.7,
+   "wissenschaft": 0.55
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.9,
+    "zerstreuung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.9,
+   "gesundheit_medizin": 0.7
+  },
+  "formats": {
+   "erklaerung_analyse": 0.85
+  },
+  "tones": {
+   "positiv": 0.5119,
+   "neutral": 0.4665
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.9275,
+   "gesundheit_medizin": 0.4618
+  },
+  "formats": {
+   "vortrag_interview": 0.9762,
+   "erklaerung_analyse": 0.2715
+  },
+  "tones": {
+   "neutral": 0.5431,
+   "positiv": 0.5358
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "psyche": 0.927,
+    "bildung": 0.976
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.9729
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7558
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.756
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.95
+  },
+  "formats": {
+   "tutorial_anleitung": 0.4,
+   "unterhaltung_vlog": 0.35
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.6,
+   "philosophie_gesellschaft_geschichte": 0.5,
+   "tech_gadgets_hardware": 0.3
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.5,
+   "doku_lang": 0.4
+  },
+  "tones": {
+   "neutral": 0.7302,
+   "positiv": 0.2579
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "philosophie_gesellschaft_geschichte": 0.4296
+  },
+  "formats": {
+   "doku_lang": 0.3306
+  },
+  "tones": {
+   "neutral": 0.587
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.93,
+   "programmieren": 0.4
+  },
+  "formats": {
+   "tutorial_anleitung": 0.55,
+   "erklaerung_analyse": 0.5
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.3451,
+   "tech_gadgets_hardware": 0.2528
+  },
+  "formats": {
+   "erklaerung_analyse": 0.3686
+  },
+  "tones": {
+   "neutral": 0.8005
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "linux_maker_smarthome": 0.979,
+   "tech_gadgets_hardware": 0.3346
+  },
+  "formats": {
+   "tutorial_anleitung": 0.5933,
+   "review_test": 0.4087
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.893
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.7563,
+   "mobilitaet_kraft_training": 0.2516
+  },
+  "formats": {
+   "mitmach_praxis": 0.8764
+  },
+  "tones": {
+   "positiv": 0.7434,
+   "neutral": 0.2746
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.756
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9,
+   "mystery_internetkultur": 0.3
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.9
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.95
+  },
+  "formats": {
+   "news_aktuell": 0.5,
+   "tutorial_anleitung": 0.35
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.15,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "mobilitaet_kraft_training": 0.7563
+  },
+  "formats": {
+   "mitmach_praxis": 0.4916
+  },
+  "tones": {
+   "neutral": 0.6,
+   "positiv": 0.3,
+   "belastend": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "xr_vr": 0.9883
+  },
+  "formats": {
+   "tutorial_anleitung": 0.7601
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.76
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.85
+  },
+  "formats": {
+   "reaktion_kommentar": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "office_pkm_software": 0.9582
+  },
+  "formats": {
+   "tutorial_anleitung": 0.6416
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.942
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.97
+  },
+  "formats": {
+   "tutorial_anleitung": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.9595
+  },
+  "formats": {
+   "erklaerung_analyse": 0.4642,
+   "tutorial_anleitung": 0.3188
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9582
+  },
+  "formats": {
+   "doku_lang": 0.6156
+  },
+  "tones": {
+   "positiv": 0.5,
+   "neutral": 0.4,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "bildung": 0.916
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9055,
+   "reisen_outdoor": 0.8473
+  },
+  "formats": {
+   "review_test": 0.7479
+  },
+  "tones": {
+   "neutral": 0.7341
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.847
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.9357,
+   "psyche_therapie": 0.2704
+  },
+  "formats": {
+   "vortrag_interview": 0.9603
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.75,
+   "it_sicherheit_datenschutz": 0.55
+  },
+  "formats": {
+   "erklaerung_analyse": 0.55,
+   "news_aktuell": 0.55
+  },
+  "tones": {
+   "belastend": 0.5,
+   "neutral": 0.45,
+   "positiv": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "belastend",
+   "cats": {
+    "bildung": 0.75
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "mystery_internetkultur": 0.5,
+   "spiritualitaet_esoterik": 0.5,
+   "philosophie_gesellschaft_geschichte": 0.45
+  },
+  "formats": {
+   "erklaerung_analyse": 0.85
+  },
+  "tones": {
+   "neutral": 0.5999,
+   "belastend": 0.3124
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9709,
+   "reisen_outdoor": 0.4377
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.4814,
+   "doku_lang": 0.3214
+  },
+  "tones": {
+   "positiv": 0.7,
+   "neutral": 0.3,
+   "belastend": 0.05
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.8045,
+   "foto_video_design": 0.5047,
+   "programmieren": 0.2625
+  },
+  "formats": {
+   "tutorial_anleitung": 0.2907
+  },
+  "tones": {
+   "neutral": 0.8,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9661,
+   "philosophie_gesellschaft_geschichte": 0.3188
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9285
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.966
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "tech_gadgets_hardware": 0.3777
+  },
+  "formats": {
+   "erklaerung_analyse": 0.4517
+  },
+  "tones": {
+   "neutral": 0.8047
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9357
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8037
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.936
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.7441
+  },
+  "formats": {
+   "mitmach_praxis": 0.9395
+  },
+  "tones": {
+   "positiv": 0.8656,
+   "neutral": 0.2791
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.744
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.8,
+   "linux_maker_smarthome": 0.4
+  },
+  "formats": {
+   "tutorial_anleitung": 0.8,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "hobby_sammeln_spiele": 0.95
+  },
+  "formats": {
+   "review_test": 0.9
+  },
+  "tones": {
+   "neutral": 0.6692,
+   "positiv": 0.2663
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.95,
+   "mobilitaet_kraft_training": 0.5
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "haushalt_diy_vorsorge": 0.7927,
+   "linux_maker_smarthome": 0.407
+  },
+  "formats": {
+   "tutorial_anleitung": 0.3285
+  },
+  "tones": {
+   "neutral": 0.7298
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "it_sicherheit_datenschutz": 0.7761,
+   "tech_gadgets_hardware": 0.4371
+  },
+  "formats": {
+   "news_aktuell": 0.6507,
+   "review_test": 0.3053
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.7177
+  },
+  "formats": {
+   "erklaerung_analyse": 0.3893
+  },
+  "tones": {
+   "neutral": 0.4966,
+   "positiv": 0.4259
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "psyche": 0.718
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.3435
+  },
+  "formats": {
+   "news_aktuell": 0.4516,
+   "vortrag_interview": 0.3815,
+   "erklaerung_analyse": 0.3463
+  },
+  "tones": {
+   "belastend": 0.5072,
+   "neutral": 0.418
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "belastend",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.2917,
+   "psyche_therapie": 0.2787
+  },
+  "formats": {
+   "erklaerung_analyse": 0.4744,
+   "vortrag_interview": 0.4621
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "hobby_sammeln_spiele": 0.9542
+  },
+  "formats": {
+   "review_test": 0.6101
+  },
+  "tones": {
+   "neutral": 0.7402
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.954
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "tech_gadgets_hardware": 0.2616
+  },
+  "formats": {
+   "review_test": 0.6529,
+   "tutorial_anleitung": 0.384
+  },
+  "tones": {
+   "neutral": 0.7935
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.9
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9787
+  },
+  "formats": {
+   "news_aktuell": 0.3265
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.979
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.6146
+  },
+  "formats": {
+   "erklaerung_analyse": 0.839,
+   "review_test": 0.326
+  },
+  "tones": {
+   "neutral": 0.8683
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.839,
+    "zerstreuung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.75,
+   "foto_video_design": 0.6
+  },
+  "formats": {
+   "vortrag_interview": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.9,
+    "zerstreuung": 0.75
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "spiritualitaet_esoterik": 0.2883,
+   "meditation_hypnose": 0.2621
+  },
+  "formats": {
+   "mitmach_praxis": 0.4531
+  },
+  "tones": {
+   "positiv": 0.6868,
+   "neutral": 0.3576
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "office_pkm_software": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6,
+   "tutorial_anleitung": 0.5
+  },
+  "tones": {
+   "neutral": 0.8,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "tantra_erotik": 0.6385,
+   "sexualitaet_aufklaerung": 0.3787
+  },
+  "formats": {},
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.95
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.7371
+  },
+  "formats": {
+   "reaktion_kommentar": 0.6091,
+   "news_aktuell": 0.5344
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.737
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.902
+  },
+  "formats": {
+   "mitmach_praxis": 0.9919
+  },
+  "tones": {
+   "positiv": 0.8296,
+   "neutral": 0.306
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.902
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.5497,
+   "wissenschaft": 0.3181
+  },
+  "formats": {
+   "reaktion_kommentar": 0.3463,
+   "vortrag_interview": 0.257
+  },
+  "tones": {
+   "neutral": 0.5833
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.97,
+   "mobilitaet_kraft_training": 0.3
+  },
+  "formats": {
+   "mitmach_praxis": 0.98
+  },
+  "tones": {
+   "positiv": 0.6,
+   "neutral": 0.4,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.97
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ernaehrung_abnehmen": 0.85,
+   "gesundheit_medizin": 0.7
+  },
+  "formats": {
+   "erklaerung_analyse": 0.55,
+   "vortrag_interview": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "koerper": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.45,
+   "mystery_internetkultur": 0.35
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.7,
+   "doku_lang": 0.3
+  },
+  "tones": {
+   "neutral": 0.5412,
+   "belastend": 0.3485
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.7
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.7,
+   "mystery_internetkultur": 0.35
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8
+  },
+  "tones": {
+   "neutral": 0.9,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "schlaf_klang": 0.95,
+   "gesundheit_medizin": 0.6
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6,
+   "tutorial_anleitung": 0.6
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.7,
+    "ruhe": 0.95,
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "sexualitaet_aufklaerung": 0.9155,
+   "beziehungen_dating": 0.6607
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6658
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.3,
+   "positiv": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6,
+   "unterhaltung_vlog": 0.3
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "haushalt_diy_vorsorge": 0.4458
+  },
+  "formats": {
+   "erklaerung_analyse": 0.3526
+  },
+  "tones": {
+   "neutral": 0.6881
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.4283,
+   "gesundheit_medizin": 0.2839
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5653
+  },
+  "tones": {
+   "positiv": 0.8,
+   "neutral": 0.3,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "schlaf_klang": 0.8509,
+   "meditation_hypnose": 0.7525
+  },
+  "formats": {
+   "mitmach_praxis": 0.7061
+  },
+  "tones": {
+   "positiv": 0.7449,
+   "neutral": 0.296
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.706,
+    "ruhe": 0.851
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "psyche_therapie": 0.8604,
+   "selbstentwicklung_produktivitaet": 0.8048
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6922
+  },
+  "tones": {
+   "neutral": 0.5595,
+   "positiv": 0.4315
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "psyche": 0.86
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.85,
+   "mystery_internetkultur": 0.8248
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8405
+  },
+  "tones": {
+   "belastend": 0.7,
+   "neutral": 0.3,
+   "positiv": 0.1
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "belastend",
+   "cats": {
+    "bildung": 0.841,
+    "zerstreuung": 0.825
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.9063
+  },
+  "formats": {
+   "tutorial_anleitung": 0.2733,
+   "erklaerung_analyse": 0.2728
+  },
+  "tones": {
+   "neutral": 0.6861
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "selbstentwicklung_produktivitaet": 0.5,
+   "gesundheit_medizin": 0.45,
+   "psyche_therapie": 0.4
+  },
+  "formats": {
+   "vortrag_interview": 0.93
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.93
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.95,
+   "mobilitaet_kraft_training": 0.4
+  },
+  "formats": {
+   "mitmach_praxis": 0.97
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.939
+  },
+  "formats": {
+   "erklaerung_analyse": 0.91
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.91
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9,
+   "mobilitaet_kraft_training": 0.5
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9645
+  },
+  "formats": {
+   "review_test": 0.3862
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.95,
+   "programmieren": 0.4
+  },
+  "formats": {
+   "tutorial_anleitung": 0.85,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.85
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.8463,
+   "ernaehrung_abnehmen": 0.6714,
+   "psyche_therapie": 0.3249
+  },
+  "formats": {
+   "vortrag_interview": 0.9787
+  },
+  "tones": {
+   "neutral": 0.5622,
+   "positiv": 0.3651
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "koerper": 0.846
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9766,
+   "mobilitaet_kraft_training": 0.5827
+  },
+  "formats": {
+   "mitmach_praxis": 0.9832
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.977
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.8016
+  },
+  "formats": {
+   "tutorial_anleitung": 0.315
+  },
+  "tones": {
+   "neutral": 0.7369
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "reisen_outdoor": 0.878
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.7344
+  },
+  "tones": {
+   "neutral": 0.631,
+   "positiv": 0.3298
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.878
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9
+  },
+  "formats": {
+   "tutorial_anleitung": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.7,
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.9399
+  },
+  "formats": {
+   "vortrag_interview": 0.7643,
+   "erklaerung_analyse": 0.4461
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.764
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.9,
+   "programmieren": 0.3
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5,
+   "tutorial_anleitung": 0.45
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "finanzen_wirtschaft": 0.65,
+   "ki_gesellschaft_ethik": 0.5,
+   "ki": 0.4
+  },
+  "formats": {
+   "erklaerung_analyse": 0.85
+  },
+  "tones": {
+   "belastend": 0.5494,
+   "neutral": 0.4826
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "belastend",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.6208,
+   "atmen_breathwork": 0.2706
+  },
+  "formats": {
+   "tutorial_anleitung": 0.494,
+   "mitmach_praxis": 0.2572
+  },
+  "tones": {
+   "neutral": 0.5083,
+   "positiv": 0.4075
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.3244
+  },
+  "formats": {
+   "reaktion_kommentar": 0.8916
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.95,
+   "mobilitaet_kraft_training": 0.5
+  },
+  "formats": {
+   "mitmach_praxis": 0.95
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.95
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9743,
+   "mobilitaet_kraft_training": 0.7073
+  },
+  "formats": {
+   "mitmach_praxis": 0.9864
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.974
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.6634
+  },
+  "formats": {
+   "erklaerung_analyse": 0.2859
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.4348
+  },
+  "formats": {
+   "reaktion_kommentar": 0.8933
+  },
+  "tones": {
+   "belastend": 0.6,
+   "neutral": 0.35,
+   "positiv": 0.05
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "belastend",
+   "cats": {
+    "aktuelles": 0.7
+   },
+   "weight": 0.15
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.85
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.9528
+  },
+  "formats": {
+   "tutorial_anleitung": 0.5814
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.881
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.97
+  },
+  "formats": {
+   "mitmach_praxis": 0.97
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.97
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.95
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5,
+   "reaktion_kommentar": 0.5,
+   "unterhaltung_vlog": 0.4
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.95
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.8978,
+   "mobilitaet_kraft_training": 0.646
+  },
+  "formats": {
+   "mitmach_praxis": 0.9963
+  },
+  "tones": {
+   "positiv": 0.875
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.898
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.8045,
+   "programmieren": 0.335
+  },
+  "formats": {
+   "tutorial_anleitung": 0.5589
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.804
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ernaehrung_abnehmen": 0.75,
+   "gesundheit_medizin": 0.6
+  },
+  "formats": {
+   "erklaerung_analyse": 0.9
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "koerper": 0.75
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.97
+  },
+  "formats": {
+   "reaktion_kommentar": 0.95
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.97
+   },
+   "weight": 0.3
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.9558,
+   "spiritualitaet_esoterik": 0.2852
+  },
+  "formats": {
+   "mitmach_praxis": 0.9095
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.909
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.8325,
+   "psyche_therapie": 0.6076
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5686
+  },
+  "tones": {
+   "neutral": 0.5,
+   "positiv": 0.5,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "psyche": 0.7,
+    "koerper": 0.833
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.85,
+   "tech_gadgets_hardware": 0.3
+  },
+  "formats": {
+   "tutorial_anleitung": 0.9
+  },
+  "tones": {
+   "neutral": 0.8302
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "beziehungen_dating": 0.9352
+  },
+  "formats": {
+   "vortrag_interview": 0.2815,
+   "erklaerung_analyse": 0.2518
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.9505
+  },
+  "formats": {
+   "tutorial_anleitung": 0.8531,
+   "erklaerung_analyse": 0.5441
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.853
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.3044
+  },
+  "formats": {
+   "vortrag_interview": 0.3915,
+   "erklaerung_analyse": 0.2789
+  },
+  "tones": {
+   "neutral": 0.5531
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "yoga": 0.9786
+  },
+  "formats": {
+   "mitmach_praxis": 0.9917
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.979
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.9,
+   "foto_video_design": 0.6
+  },
+  "formats": {
+   "vortrag_interview": 0.75,
+   "erklaerung_analyse": 0.4
+  },
+  "tones": {
+   "neutral": 0.9,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.9
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.9632
+  },
+  "formats": {
+   "tutorial_anleitung": 0.8312
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.831
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "ki": 0.9548
+  },
+  "formats": {
+   "tutorial_anleitung": 0.6748
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.955
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "meditation_hypnose": 0.8661,
+   "schlaf_klang": 0.333
+  },
+  "formats": {
+   "mitmach_praxis": 0.9557
+  },
+  "tones": {
+   "positiv": 0.9,
+   "neutral": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "positiv",
+   "cats": {
+    "praxis": 0.866
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "film_serien": 0.6248,
+   "mystery_internetkultur": 0.3631
+  },
+  "formats": {
+   "erklaerung_analyse": 0.6091
+  },
+  "tones": {
+   "neutral": 0.6596
+  },
+  "clickbait": true,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "zerstreuung": 0.7
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "gaming": 0.3181
+  },
+  "formats": {
+   "news_aktuell": 0.5193,
+   "erklaerung_analyse": 0.254
+  },
+  "tones": {
+   "neutral": 0.6,
+   "belastend": 0.1,
+   "positiv": 0.1
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {},
+   "weight": 0.0
+  }
+ },
+ {
+  "themes": {
+   "schlaf_klang": 0.95
+  },
+  "formats": {
+   "audio_musik": 0.7,
+   "mitmach_praxis": 0.65
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "ruhe": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.75,
+   "philosophie_gesellschaft_geschichte": 0.3
+  },
+  "formats": {
+   "erklaerung_analyse": 0.7,
+   "doku_lang": 0.4
+  },
+  "tones": {
+   "neutral": 0.6434
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "mobilitaet_kraft_training": 0.95,
+   "gesundheit_medizin": 0.3
+  },
+  "formats": {
+   "mitmach_praxis": 0.9
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "praxis": 0.9
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "programmieren": 0.9433
+  },
+  "formats": {
+   "erklaerung_analyse": 0.4815,
+   "tutorial_anleitung": 0.2568
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "bildung": 0.781
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "sexualitaet_aufklaerung": 0.9,
+   "gesundheit_medizin": 0.8,
+   "beziehungen_dating": 0.4
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8,
+   "vortrag_interview": 0.2
+  },
+  "tones": {
+   "neutral": 0.8,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "koerper": 0.8
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "rad_mtb": 0.85
+  },
+  "formats": {
+   "unterhaltung_vlog": 0.8
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "zerstreuung": 0.85
+   },
+   "weight": 0.5
+  }
+ },
+ {
+  "themes": {
+   "wissenschaft": 0.5762,
+   "film_serien": 0.3653
+  },
+  "formats": {
+   "erklaerung_analyse": 0.8224
+  },
+  "tones": {
+   "neutral": 0.85,
+   "positiv": 0.1,
+   "belastend": 0.05
+  },
+  "clickbait": false,
+  "expect": {
+   "tone": "neutral",
+   "cats": {
+    "bildung": 0.822
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "gesundheit_medizin": 0.7,
+   "politik_nachrichten": 0.4
+  },
+  "formats": {
+   "erklaerung_analyse": 0.5,
+   "news_aktuell": 0.5
+  },
+  "tones": {},
+  "clickbait": true,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "koerper": 0.7
+   },
+   "weight": 1.0
+  }
+ },
+ {
+  "themes": {
+   "politik_nachrichten": 0.97
+  },
+  "formats": {
+   "reaktion_kommentar": 0.6,
+   "erklaerung_analyse": 0.5
+  },
+  "tones": {},
+  "clickbait": false,
+  "expect": {
+   "tone": null,
+   "cats": {
+    "aktuelles": 0.97
+   },
+   "weight": 0.3
+  }
+ }
+]
