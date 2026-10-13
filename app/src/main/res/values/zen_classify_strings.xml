@@ -24,4 +24,24 @@
     <string name="zen_class_review_hint">Latest classifications (newest first): categories with confidence · tone · feed weight · input (T = title and channel only, D = with description). Second line: strongest topics and formats. The recognition is wrong for about one video in seven.</string>
     <string name="zen_class_selftest">Self-test (debug)</string>
     <string name="zen_class_selftest_running">Running self-test…</string>
+    <!-- AP 4: feed weighting -->
+    <string name="zen_set_class_feed">Content recognition: order the feed by content (news and entertainment further back)</string>
+    <string name="zen_set_class_heavy">Content recognition: limit distressing videos (at most 1 in 10, never two in a row, not at the top)</string>
+    <string name="zen_class_switches_hint">The two content switches are in the list above. Turning them off is a loosening (takes effect after 24 hours). Without a working model the feed is ordered exactly as before.</string>
+    <string name="zen_class_delete_blocked">To delete the model, first turn off both content switches above (a loosening that takes effect after 24 hours).</string>
+    <string name="zen_cat_praxis">Practice</string>
+    <string name="zen_cat_ruhe">Calm</string>
+    <string name="zen_cat_psyche">Psyche</string>
+    <string name="zen_cat_bildung">Education</string>
+    <string name="zen_cat_koerper">Body</string>
+    <string name="zen_cat_aktuelles">News</string>
+    <string name="zen_cat_zerstreuung">Entertainment</string>
+    <string name="zen_tone_belastend">distressing</string>
+    <string name="zen_tone_positiv">positive</string>
+    <string name="zen_why_weight">weight %1$s</string>
+    <string name="zen_why_level_t">uncertain (title only)</string>
+    <string name="zen_why_level_d">with description</string>
+    <string name="zen_why_no_category">no category</string>
+    <string name="zen_why_unclassified">not classified yet</string>
+    <string name="zen_why_exempt">exception: content recognition not applied</string>
 </resources>

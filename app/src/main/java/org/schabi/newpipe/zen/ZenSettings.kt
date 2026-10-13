@@ -35,6 +35,16 @@ object ZenSettingKeys {
     const val INTENT_WAIT_S = "intent_wait_s"
     const val INTENT_BACKGROUND_MIN = "intent_background_min"
     const val REDUCED_DETAILS = "reduced_details"
+
+    /** Content recognition: order the feed by content (news/distraction further back). */
+    const val CLASS_FEED = "class_feed"
+
+    /** Content recognition: at most 1 heavy video in 10 places, never two in a row, not on places 1-9. */
+    const val CLASS_HEAVY = "class_heavy"
+
+    /** Settings that only matter with the content recognition (shown only where it is supported). */
+    @JvmField
+    val CLASSIFIER = setOf(CLASS_FEED, CLASS_HEAVY)
 }
 
 object ZenSettingDefs {
@@ -52,7 +62,10 @@ object ZenSettingDefs {
         ZenSettingDef(ZenSettingKeys.INTENT_WAIT_S, default = 5, min = 3, max = 30, strictHigher = true),
         ZenSettingDef(ZenSettingKeys.INTENT_BACKGROUND_MIN, default = 5, min = 1, max = 60, strictHigher = false),
         // video detail page without description, counts, date and meta info; on = stricter
-        ZenSettingDef(ZenSettingKeys.REDUCED_DETAILS, default = 1, min = 0, max = 1, strictHigher = true, isBool = true)
+        ZenSettingDef(ZenSettingKeys.REDUCED_DETAILS, default = 1, min = 0, max = 1, strictHigher = true, isBool = true),
+        // content recognition (spec 4.7): on = stricter, off = loosening; effective only with a model
+        ZenSettingDef(ZenSettingKeys.CLASS_FEED, default = 1, min = 0, max = 1, strictHigher = true, isBool = true),
+        ZenSettingDef(ZenSettingKeys.CLASS_HEAVY, default = 1, min = 0, max = 1, strictHigher = true, isBool = true)
     )
 
     private val byKey = all.associateBy { it.key }
@@ -133,4 +146,10 @@ object ZenSettings {
 
     @JvmStatic
     fun reducedVideoDetails() = get(ZenSettingKeys.REDUCED_DETAILS) == 1
+
+    @JvmStatic
+    fun classFeedWeighting() = get(ZenSettingKeys.CLASS_FEED) == 1
+
+    @JvmStatic
+    fun classHeavyLimit() = get(ZenSettingKeys.CLASS_HEAVY) == 1
 }

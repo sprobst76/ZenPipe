@@ -23,4 +23,24 @@
     <string name="zen_class_review_hint">Letzte Einordnungen (neueste zuerst): Kategorien mit Sicherheit · Ton · Feed-Gewicht · Eingabe (T = nur Titel und Kanal, D = mit Beschreibung). Zweite Zeile: stärkste Themen und Formate. Die Erkennung irrt sich bei etwa jedem siebten Video.</string>
     <string name="zen_class_selftest">Selbsttest (Debug)</string>
     <string name="zen_class_selftest_running">Selbsttest läuft …</string>
+    <!-- AP 4: Feed-Gewichtung -->
+    <string name="zen_set_class_feed">Inhalts-Erkennung: Feed nach Inhalt gewichten (Aktuelles und Unterhaltung weiter hinten)</string>
+    <string name="zen_set_class_heavy">Inhalts-Erkennung: belastende Videos begrenzen (höchstens 1 von 10, nie hintereinander, nicht ganz oben)</string>
+    <string name="zen_class_switches_hint">Die beiden Inhalts-Schalter stehen oben in der Liste. Ausschalten ist eine Lockerung (wirkt nach 24 Stunden). Ohne funktionierendes Modell wird der Feed genau wie bisher sortiert.</string>
+    <string name="zen_class_delete_blocked">Zum Löschen des Modells zuerst beide Inhalts-Schalter oben ausschalten (Lockerung, wirkt nach 24 Stunden).</string>
+    <string name="zen_cat_praxis">Praxis</string>
+    <string name="zen_cat_ruhe">Ruhe</string>
+    <string name="zen_cat_psyche">Psyche</string>
+    <string name="zen_cat_bildung">Bildung</string>
+    <string name="zen_cat_koerper">Körper</string>
+    <string name="zen_cat_aktuelles">Aktuelles</string>
+    <string name="zen_cat_zerstreuung">Unterhaltung</string>
+    <string name="zen_tone_belastend">belastend</string>
+    <string name="zen_tone_positiv">positiv</string>
+    <string name="zen_why_weight">Gewicht %1$s</string>
+    <string name="zen_why_level_t">unsicher (nur Titel)</string>
+    <string name="zen_why_level_d">mit Beschreibung</string>
+    <string name="zen_why_no_category">ohne Kategorie</string>
+    <string name="zen_why_unclassified">noch nicht eingeordnet</string>
+    <string name="zen_why_exempt">Ausnahme: Inhalts-Erkennung nicht angewandt</string>
 </resources>

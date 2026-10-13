@@ -109,6 +109,8 @@ data class StreamItem(
         if (itemVersion != ItemVersion.MINI) {
             viewBinding.itemAdditionalDetails.text =
                 getStreamInfoDetailLine(viewBinding.itemAdditionalDetails.context)
+            // zen: second line "why" of the content recognition (views are recycled: always reset)
+            viewBinding.itemAdditionalDetails.setLines(if (zenWhy(viewBinding.itemAdditionalDetails.context) != null) 2 else 1)
         }
 
         execBindEnd?.accept(viewBinding)
@@ -127,8 +129,11 @@ data class StreamItem(
         } else {
             context.getString(R.string.zen_reason_minutes, pick.minutes)
         }
-        return if (detail.isEmpty()) reason else Localization.concatenateStrings(reason, detail)
+        val line = if (detail.isEmpty()) reason else Localization.concatenateStrings(reason, detail)
+        return zenWhy(context)?.let { "$line\n$it" } ?: line
     }
+
+    private fun zenWhy(context: Context): String? = zenPick?.why?.let { org.schabi.newpipe.zen.classify.ZenClassWhy.feedLine(context, it) }
 
     private fun getStreamInfoDetailLineBase(context: Context): String {
         var viewsAndDate = ""

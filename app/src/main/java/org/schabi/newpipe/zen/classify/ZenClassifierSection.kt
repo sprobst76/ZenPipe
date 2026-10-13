@@ -14,11 +14,13 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import org.schabi.newpipe.BuildConfig
 import org.schabi.newpipe.R
+import org.schabi.newpipe.zen.Zen
+import org.schabi.newpipe.zen.ZenSettingKeys
 
 /**
  * Settings > Zen, section "Content recognition (local)": status, opt-in download (not locked),
- * delete and the license notices. Deleting is a loosening only once classifier switches exist
- * (spec 4.7: "delete only without active switches"); until then it is free.
+ * delete and the license notices. Deleting a working model needs both content switches off
+ * (spec 4.7: "delete only without active switches"; turning them off is a loosening).
  */
 class ZenClassifierSection(private val activity: Activity, private val rerender: () -> Unit) {
     private var progressView: TextView? = null
@@ -90,11 +92,16 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
 
             ZenClassifierModel.Status.INSTALLED -> Unit
         }
+        // spec 4.7: deleting a working model while a content switch is on would be a loosening
+        // without the lock, so it needs both switches off first (a broken model has no effect anyway)
+        val deleteBlocked = status == ZenClassifierModel.Status.INSTALLED && switchesOn()
         if (status == ZenClassifierModel.Status.INSTALLED || status == ZenClassifierModel.Status.BROKEN) {
-            buttons.addView(button(activity.getString(R.string.zen_class_delete)) { confirmDelete() })
+            buttons.addView(button(activity.getString(R.string.zen_class_delete), enabled = !deleteBlocked) { confirmDelete() })
         }
         buttons.addView(button(activity.getString(R.string.zen_class_licenses)) { showNotices(R.raw.zen_classifier_notices) })
         content.addView(buttons)
+        if (deleteBlocked) content.addView(text(activity.getString(R.string.zen_class_delete_blocked), 12f))
+        if (status != ZenClassifierModel.Status.UNSUPPORTED) content.addView(text(activity.getString(R.string.zen_class_switches_hint), 12f))
         if (status == ZenClassifierModel.Status.INSTALLED) {
             val extra = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
             extra.addView(button(activity.getString(R.string.zen_class_review)) { showReview() })
@@ -182,11 +189,17 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
             .show()
     }
 
+    private fun switchesOn(): Boolean {
+        val lock = Zen.settingsLock(activity)
+        return ZenSettingKeys.CLASSIFIER.any { lock.effective(it) == 1 }
+    }
+
     private fun confirmDelete() {
         AlertDialog.Builder(activity)
             .setTitle(R.string.zen_class_title)
             .setMessage(R.string.zen_class_delete_confirm)
             .setPositiveButton(R.string.zen_class_delete) { _, _ ->
+                if (ZenClassifierModel.isReady(activity) && switchesOn()) return@setPositiveButton
                 ZenClassifierModel.delete(activity)
                 rerender()
             }

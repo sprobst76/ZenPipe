@@ -55,6 +55,18 @@ class ZenClassifier private constructor(private val app: Context) {
     /** Classifies [v] now (blocking, on the classifier thread) and stores it in the cache. */
     fun classifyBlocking(key: String, v: VideoText): ClassEntry? = exec.submit(Callable { classifyNow(key, v) }).get()
 
+    /**
+     * Like [classifyBlocking], but waits at most [timeoutMs] (the work itself continues and lands
+     * in the cache). Null on timeout, error or without a model.
+     */
+    fun classifyWithin(key: String, v: VideoText, timeoutMs: Long): ClassEntry? = try {
+        exec.submit(Callable { classifyNow(key, v) }).get(timeoutMs, TimeUnit.MILLISECONDS)
+    } catch (e: java.util.concurrent.TimeoutException) {
+        null
+    } catch (e: java.util.concurrent.ExecutionException) {
+        null
+    }
+
     /** Classifies [v] later in the background unless the cache already has it at this level. */
     fun submit(key: String, v: VideoText, delayMs: Long = 0) {
         exec.schedule({ classifyNow(key, v) }, delayMs, TimeUnit.MILLISECONDS)

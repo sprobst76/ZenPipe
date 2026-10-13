@@ -163,4 +163,106 @@ class ZenFeedTest {
         store.put("zone_id" to "Asia/Tokyo")
         assertEquals(ZoneId.of("Asia/Tokyo"), ZenZone.fixed(store))
     }
+
+    // ---------------------------------------------------------------- content weighting (AP 4)
+
+    private val on = ZenFeedPlanner.ContentRules(weighting = true, heavyLimit = true)
+
+    private fun cls(c: ZenFeedPlanner.Candidate, cats: Map<String, Double>?, tone: String? = "neutral", level: String = "T") = c.copy(zenCats = cats, tone = tone, classLevel = level)
+
+    @Test
+    fun `news goes behind education despite a better group rank`() {
+        val news = cls(c(1, rank = 0), mapOf("aktuelles" to 0.9)) // 60 group points x 0.6 (title only)
+        val edu = cls(c(2, rank = 2), mapOf("bildung" to 0.8)) // 30 group points x 1.0
+        val off = ZenFeedPlanner.select(listOf(news, edu), now, 2)
+        assertEquals(listOf("https://y/v1", "https://y/v2"), off.picks.map { it.url })
+        val sel = ZenFeedPlanner.select(listOf(news, edu), now, 2, rules = on)
+        assertEquals(listOf("https://y/v2", "https://y/v1"), sel.picks.map { it.url })
+    }
+
+    @Test
+    fun `weights follow the bundle, no category and unclassified stay at 1`() {
+        assertEquals(0.3, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9), level = "D")), 1e-9)
+        // news from title + channel only: gentle (AP 0: news F1 only 58 % on short text)
+        assertEquals(0.6, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9))), 1e-9)
+        assertEquals(0.8, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9), "positiv")), 1e-9)
+        assertEquals(0.8, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9), "positiv", "D")), 1e-9)
+        assertEquals(0.5, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("zerstreuung" to 0.7))), 1e-9)
+        assertEquals(0.5, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("zerstreuung" to 0.7, "aktuelles" to 0.8), level = "D")), 1e-9)
+        assertEquals(0.15, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9), "belastend", "D")), 1e-9)
+        assertEquals(0.3, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("aktuelles" to 0.9), "belastend")), 1e-9)
+        // several categories: the highest weight counts
+        assertEquals(1.0, ZenFeedPlanner.contentWeight(cls(c(1), mapOf("bildung" to 0.7, "aktuelles" to 0.8))), 1e-9)
+        // E4: classified without a category, not classified yet: normal weight
+        assertEquals(1.0, ZenFeedPlanner.contentWeight(cls(c(1), emptyMap())), 1e-9)
+        assertEquals(1.0, ZenFeedPlanner.contentWeight(cls(c(1), emptyMap(), "belastend")), 1e-9)
+        assertEquals(1.0, ZenFeedPlanner.contentWeight(c(1)), 1e-9)
+        // exception list: 1.0 and not heavy
+        val exempt = cls(c(1), mapOf("aktuelles" to 0.9), "belastend").copy(classExempt = true)
+        assertEquals(1.0, ZenFeedPlanner.contentWeight(exempt), 1e-9)
+        assertFalse(ZenFeedPlanner.isHeavy(exempt))
+    }
+
+    @Test
+    fun `without classification the order is unchanged (regression)`() {
+        val pool = (1L..40L).map { c(it, ch = "c${it % 9}", ageH = it * 3, sec = (5L + it % 40) * min, rank = (it % 5).toInt().takeIf { r -> r < 4 }) }
+        val before = ZenFeedPlanner.select(pool, now, 15)
+        val withRulesNoData = ZenFeedPlanner.select(pool, now, 15, rules = on)
+        assertEquals(before.picks.map { it.url }, withRulesNoData.picks.map { it.url })
+        val allUncategorised = ZenFeedPlanner.select(pool.map { cls(it, emptyMap()) }, now, 15, rules = on)
+        assertEquals(before.picks.map { it.url }, allUncategorised.picks.map { it.url })
+        assertTrue(before.picks.all { it.why == null })
+        assertTrue(withRulesNoData.picks.all { it.why == ZenFeedPlanner.WHY_UNCLASSIFIED })
+    }
+
+    @Test
+    fun `heavy videos at most 1 of 15, not before place 10, never in a row`() {
+        // heavy ones have the best base score (fresh, top group), light ones are older
+        val heavy = (1L..5L).map { cls(c(it, ageH = 1, rank = 0), mapOf("bildung" to 0.8), "belastend") }
+        val light = (10L..40L).map { cls(c(it, ageH = it), mapOf("bildung" to 0.8)) }
+        val sel = ZenFeedPlanner.select(heavy + light, now, 15, rules = on)
+        assertEquals(15, sel.picks.size)
+        val heavyPlaces = sel.picks.mapIndexedNotNull { i, p -> if (p.url in heavy.map { it.url }) i + 1 else null }
+        assertEquals(listOf(10), heavyPlaces)
+        assertEquals(36 - 15, sel.eligibleCount - sel.picks.size) // skipped heavy ones wait as leftover
+        // both rules off: the heavy ones lead by their base score
+        val noLimit = ZenFeedPlanner.select(heavy + light, now, 15, rules = on.copy(heavyLimit = false, weighting = false))
+        assertEquals(heavy.map { it.url }, noLimit.picks.take(5).map { it.url })
+    }
+
+    @Test
+    fun `heavy rule rules`() {
+        assertFalse(ZenFeedPlanner.heavyAllowed(9, 0, false, 15))
+        assertTrue(ZenFeedPlanner.heavyAllowed(10, 0, false, 15))
+        assertFalse(ZenFeedPlanner.heavyAllowed(11, 0, true, 15))
+        assertFalse(ZenFeedPlanner.heavyAllowed(12, 1, false, 15)) // 2 of 15 > 10 %
+        assertFalse(ZenFeedPlanner.heavyAllowed(10, 0, false, 9)) // a small edition has no place
+        assertTrue(ZenFeedPlanner.heavyAllowed(12, 1, false, 20))
+    }
+
+    @Test
+    fun `exception list lifts the weight and the heavy rule`() {
+        val news = cls(c(1, rank = 0), mapOf("aktuelles" to 0.9), "belastend").copy(classExempt = true)
+        val edu = cls(c(2, rank = 2), mapOf("bildung" to 0.8))
+        val sel = ZenFeedPlanner.select(listOf(news, edu), now, 2, rules = on)
+        assertEquals(listOf("https://y/v1", "https://y/v2"), sel.picks.map { it.url })
+        assertEquals(ZenFeedPlanner.WHY_EXEMPT, sel.picks[0].why)
+    }
+
+    @Test
+    fun `why is stored with the edition`() {
+        val store = MemoryZenStore()
+        val pool = listOf(
+            cls(c(1, rank = 1), mapOf("aktuelles" to 0.82), "positiv"),
+            cls(c(2), emptyMap()),
+            c(3)
+        )
+        val v1 = state(store).view(now, true, on) { pool }
+        val why = v1.open.associate { it.url to it.why }
+        assertEquals("T|positiv|0.80|aktuelles=0.82", why["https://y/v1"])
+        assertEquals("T|neutral|1.00|", why["https://y/v2"])
+        assertEquals(ZenFeedPlanner.WHY_UNCLASSIFIED, why["https://y/v3"])
+        // reload from the store: identical (group names may be empty)
+        assertEquals(v1.open, state(store).view(now + 60_000, true, on) { pool }.open)
+    }
 }

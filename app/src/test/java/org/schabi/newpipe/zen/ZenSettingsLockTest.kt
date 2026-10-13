@@ -382,4 +382,20 @@ class ZenSettingsLockTest {
         assertEquals(300, ZenSettings.minLengthSec())
         assertEquals(2 * min, ZenPauseRules.pauseLengthMs(10 * min))
     }
+
+    @Test
+    fun `content switches default on, off is a loosening, on is immediate`() {
+        val (_, l) = ready()
+        assertEquals(1, l.effective(ZenSettingKeys.CLASS_FEED))
+        assertEquals(1, l.effective(ZenSettingKeys.CLASS_HEAVY))
+        val r = l.apply(mapOf(ZenSettingKeys.CLASS_FEED to 0)) as ZenSettingsLock.Result.Applied
+        assertEquals(listOf(ZenSettingKeys.CLASS_FEED), r.pending)
+        assertTrue(r.lockStarted)
+        assertEquals(1, l.effective(ZenSettingKeys.CLASS_FEED))
+        // while locked: the second switch cannot be loosened
+        assertTrue(l.apply(mapOf(ZenSettingKeys.CLASS_HEAVY to 0)) is ZenSettingsLock.Result.Rejected)
+        // turning it back on cancels the pending loosening at once
+        l.apply(mapOf(ZenSettingKeys.CLASS_FEED to 1))
+        assertTrue(l.pending().isEmpty())
+    }
 }

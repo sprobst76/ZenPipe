@@ -103,6 +103,8 @@ class ZenSettingsFragment : Fragment() {
         ZenSettingKeys.PAUSE_TRIGGER_MIN -> R.string.zen_set_pause_trigger
         ZenSettingKeys.INTENT_WAIT_S -> R.string.zen_set_intent_wait
         ZenSettingKeys.REDUCED_DETAILS -> R.string.zen_set_reduced_details
+        ZenSettingKeys.CLASS_FEED -> R.string.zen_set_class_feed
+        ZenSettingKeys.CLASS_HEAVY -> R.string.zen_set_class_heavy
         else -> R.string.zen_set_intent_bg
     }
 
@@ -176,7 +178,9 @@ class ZenSettingsFragment : Fragment() {
 
         // setting rows
         val locked = !snap.setupMode && snap.lockRemainingMs > 0
-        ZenSettingDefs.all.forEach { def -> content.addView(row(def, eff, snap, locked)) }
+        val classifierOk = org.schabi.newpipe.zen.classify.ZenClassifierModel.isSupported()
+        ZenSettingDefs.all.filter { classifierOk || it.key !in ZenSettingKeys.CLASSIFIER }
+            .forEach { def -> content.addView(row(def, eff, snap, locked)) }
 
         val changed = changedMap(eff)
         content.addView(

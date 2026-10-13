@@ -38,6 +38,7 @@ class ZenFeedState(
     fun view(
         nowMillis: Long,
         allowCreate: Boolean,
+        rules: ZenFeedPlanner.ContentRules = ZenFeedPlanner.ContentRules.OFF,
         candidates: () -> List<ZenFeedPlanner.Candidate>
     ): View {
         val day = ZenDay.dayOf(nowMillis, zone).toString()
@@ -49,7 +50,7 @@ class ZenFeedState(
         val due = edition == null || edition.day != day ||
             (!capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS)
         if (allowCreate && due) {
-            edition = createEdition(nowMillis, day, edition, candidates)
+            edition = createEdition(nowMillis, day, edition, rules, candidates)
         }
         val handled = handled()
         val open = edition?.picks?.filter { it.url !in handled } ?: emptyList()
@@ -66,6 +67,7 @@ class ZenFeedState(
         now: Long,
         day: String,
         previous: Edition?,
+        rules: ZenFeedPlanner.ContentRules,
         candidates: () -> List<ZenFeedPlanner.Candidate>
     ): Edition? {
         val handled = handled()
@@ -75,7 +77,8 @@ class ZenFeedState(
             now,
             ZenSettings.feedBudget(),
             counted,
-            maxOf(0, ZenSettings.dailyCap() - counted.size)
+            maxOf(0, ZenSettings.dailyCap() - counted.size),
+            rules
         )
         // no data yet: do not seal an empty edition, retry on the next call
         if (sel.picks.isEmpty()) return previous
@@ -83,7 +86,14 @@ class ZenFeedState(
         save(e)
         val all = (counted.toList() + e.picks.map { it.url }).distinct()
         store.put(KEY_DAY_URLS to all.joinToString("\n"))
-        log?.add("edition", "n=${e.picks.size} leftover=${e.leftover} dayDistinct=${all.size}")
+        val content = if (rules.active) {
+            val why = e.picks.map { it.why }
+            " weighting=${rules.weighting} heavyLimit=${rules.heavyLimit} unclassified=${why.count { it == ZenFeedPlanner.WHY_UNCLASSIFIED }}" +
+                " heavy=${why.count { it?.split('|')?.getOrNull(1) == "belastend" }}"
+        } else {
+            ""
+        }
+        log?.add("edition", "n=${e.picks.size} leftover=${e.leftover} dayDistinct=${all.size}$content")
         return e
     }
 
@@ -108,7 +118,8 @@ class ZenFeedState(
             KEY_EDITION_DAY to e.day,
             KEY_LEFTOVER to e.leftover,
             KEY_PICKS to e.picks.joinToString("\n") {
-                "${it.url}\t${it.minutes}\t${(it.groupName ?: "").replace('\t', ' ').replace('\n', ' ')}"
+                "${it.url}\t${it.minutes}\t${(it.groupName ?: "").replace('\t', ' ').replace('\n', ' ')}" +
+                    (it.why?.let { w -> "\t" + w.replace('\t', ' ').replace('\n', ' ') } ?: "")
             }
         )
     }
@@ -117,14 +128,15 @@ class ZenFeedState(
         val at = store.getLong(KEY_AT, -1)
         if (at < 0) return null
         val picks = lines(KEY_PICKS).mapNotNull {
-            val p = it.split('\t', limit = 3)
+            val p = it.split('\t', limit = 4)
             if (p[0].isEmpty()) {
                 null
             } else {
                 ZenFeedPlanner.Pick(
                     p[0],
                     p.getOrNull(1)?.toIntOrNull() ?: 0,
-                    p.getOrNull(2)?.ifEmpty { null }
+                    p.getOrNull(2)?.ifEmpty { null },
+                    p.getOrNull(3)?.ifEmpty { null }
                 )
             }
         }

@@ -1,5 +1,7 @@
 package org.schabi.newpipe.zen
 
+import org.schabi.newpipe.zen.classify.ZenRules
+
 /**
  * Local, explainable selection of the videos for one feed edition. No network, no YouTube
  * recommendations. All numbers are named constants so they are easy to tune.
@@ -40,10 +42,37 @@ object ZenFeedPlanner {
         val groupRank: Int?,
         val groupName: String?,
         /** Channel is an active practice channel: its videos never enter an edition (practice tab). */
-        val praxis: Boolean = false
+        val praxis: Boolean = false,
+        /**
+         * Content categories from the classifier cache (spec 4.3); null = not classified yet (or the
+         * classifier is not in use), empty = classified without a category. Never computed here.
+         */
+        val zenCats: Map<String, Double>? = null,
+        /** Tone from the classifier ("belastend", "positiv", "neutral"), null if unknown. */
+        val tone: String? = null,
+        /** Input level of the classification: "T" = title + channel, "D" = with details. */
+        val classLevel: String? = null,
+        /** Channel/keyword on the classifier exception list: weight 1.0 and no heavy rule. */
+        val classExempt: Boolean = false
     )
 
-    data class Pick(val url: String, val minutes: Int, val groupName: String?)
+    /**
+     * Which content rules apply to an edition. Both need an installed, working classifier; the
+     * switches are Zen settings (turning them off is a loosening).
+     */
+    data class ContentRules(val weighting: Boolean, val heavyLimit: Boolean) {
+        val active get() = weighting || heavyLimit
+
+        companion object {
+            @JvmField val OFF = ContentRules(weighting = false, heavyLimit = false)
+        }
+    }
+
+    /**
+     * One video of an edition. [why] is the compact classification at selection time (see
+     * [whyOf]); null while the content rules are off.
+     */
+    data class Pick(val url: String, val minutes: Int, val groupName: String?, val why: String? = null)
 
     data class Selection(val picks: List<Pick>, val eligibleCount: Int)
 
@@ -93,6 +122,67 @@ object ZenFeedPlanner {
         return group + length + fresh
     }
 
+    /** Heavy videos: at most this share of the places of an edition (15 places: 1). */
+    const val HEAVY_MAX_SHARE = 0.1
+
+    /** Heavy videos never take one of the first places (1-based place >= this). */
+    const val HEAVY_FIRST_PLACE = 10
+
+    /**
+     * Content weight (spec 4.2/4.3, bundle weights): the highest category weight (news 0.3, from
+     * title + channel only 0.6, positive news 0.8, distraction 0.5, everything else 1.0), heavy
+     * tone halves it. Not
+     * classified, classified without a category (E4) or on the exception list: 1.0.
+     */
+    @JvmStatic
+    fun contentWeight(c: Candidate): Double {
+        val cats = c.zenCats ?: return 1.0
+        if (c.classExempt || cats.isEmpty()) return 1.0
+        val light = if (c.tone == ZenRules.TONE_HEAVY) null else c.tone
+        val w = cats.keys.maxOf { k ->
+            val bundle = ZenRules.weight(mapOf(k to 1.0), light)
+            // News from title + channel only is unreliable (F1 58 % vs. 71 % with the description,
+            // AP 0): only a gentle step back until the video was opened (level D).
+            if (k == NEWS && c.classLevel != LEVEL_DETAILS) maxOf(bundle, NEWS_WEIGHT_TITLE_ONLY) else bundle
+        }
+        return if (c.tone == ZenRules.TONE_HEAVY) w * HEAVY_FACTOR else w
+    }
+
+    private const val NEWS = "aktuelles"
+    private const val LEVEL_DETAILS = "D"
+
+    /** Weight of news classified from title + channel only (bundle weight 0.3 needs level D). */
+    const val NEWS_WEIGHT_TITLE_ONLY = 0.6
+
+    /** Bundle factor for heavy tone. */
+    const val HEAVY_FACTOR = 0.5
+
+    @JvmStatic
+    fun isHeavy(c: Candidate): Boolean = !c.classExempt && c.zenCats != null && c.tone == ZenRules.TONE_HEAVY
+
+    /** Score of the edition order: [score] times [contentWeight] while weighting is on. */
+    @JvmStatic
+    fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * if (weighting) contentWeight(c) else 1.0
+
+    /**
+     * Compact, stored "why" of a pick: `level|tone|weight|cat=p,cat=p`; "?" = not classified,
+     * "x" = exception list. Null when no content rule is active.
+     */
+    @JvmStatic
+    fun whyOf(c: Candidate, rules: ContentRules): String? {
+        if (!rules.active) return null
+        if (c.classExempt) return WHY_EXEMPT
+        val cats = c.zenCats ?: return WHY_UNCLASSIFIED
+        val w = if (rules.weighting) contentWeight(c) else 1.0
+        return "${c.classLevel ?: ""}|${c.tone ?: ""}|${fmt2(w)}|" +
+            cats.entries.joinToString(",") { "${it.key}=${fmt2(it.value)}" }
+    }
+
+    const val WHY_EXEMPT = "x"
+    const val WHY_UNCLASSIFIED = "?"
+
+    private fun fmt2(v: Double) = String.format(java.util.Locale.ROOT, "%.2f", v)
+
     @JvmStatic
     fun select(
         candidates: List<Candidate>,
@@ -101,29 +191,48 @@ object ZenFeedPlanner {
         /** Videos already counted against today's cap (re-offering them is free). */
         counted: Set<String> = emptySet(),
         /** How many NOT yet counted videos may still be added today. */
-        newAllowed: Int = count
+        newAllowed: Int = count,
+        /** Content weighting and heavy rule (off = the order without the classifier). */
+        rules: ContentRules = ContentRules.OFF
     ): Selection {
         val eligible = candidates.filter { isEligible(it, nowMillis) }
         val sorted = eligible.sortedWith(
-            compareByDescending<Candidate> { score(it, nowMillis) }
+            compareByDescending<Candidate> { weightedScore(it, nowMillis, rules.weighting) }
                 .thenByDescending { it.uploadMillis }
                 .thenBy { it.url }
         )
         val perChannel = HashMap<String, Int>()
         val picks = ArrayList<Pick>()
         var newUsed = 0
-        for (c in sorted) {
-            if (picks.size >= count) break
-            val isNew = c.url !in counted
-            if (isNew && newUsed >= newAllowed) continue
-            val n = perChannel.getOrDefault(c.channel, 0)
-            if (n >= MAX_PER_CHANNEL) continue
-            perChannel[c.channel] = n + 1
-            if (isNew) newUsed++
-            picks.add(Pick(c.url, (c.durationSec / 60).toInt(), c.groupName))
+        var heavyUsed = 0
+        var lastHeavy = false
+        val remaining = ArrayList(sorted)
+        // Fill place by place with the best candidate allowed there. Without the heavy rule this is
+        // the plain order (cap and channel limits only grow, a skipped video never fits later);
+        // a heavy video that does not fit yet waits for a later place (from place 10, not twice
+        // in a row, at most HEAVY_MAX_SHARE of the places) or stays leftover.
+        while (picks.size < count) {
+            val place = picks.size + 1
+            val i = remaining.indexOfFirst { c ->
+                (c.url in counted || newUsed < newAllowed) &&
+                    perChannel.getOrDefault(c.channel, 0) < MAX_PER_CHANNEL &&
+                    (!rules.heavyLimit || !isHeavy(c) || heavyAllowed(place, heavyUsed, lastHeavy, count))
+            }
+            if (i < 0) break
+            val c = remaining.removeAt(i)
+            perChannel[c.channel] = perChannel.getOrDefault(c.channel, 0) + 1
+            if (c.url !in counted) newUsed++
+            val heavy = rules.heavyLimit && isHeavy(c)
+            if (heavy) heavyUsed++
+            lastHeavy = heavy
+            picks.add(Pick(c.url, (c.durationSec / 60).toInt(), c.groupName, whyOf(c, rules)))
         }
         return Selection(picks, eligible.size)
     }
+
+    /** Heavy rule (spec 4.3): not before place 10, never after another heavy one, at most 10 %. */
+    @JvmStatic
+    fun heavyAllowed(place: Int, heavyUsed: Int, lastHeavy: Boolean, count: Int): Boolean = place >= HEAVY_FIRST_PLACE && !lastHeavy && (heavyUsed + 1) <= HEAVY_MAX_SHARE * count + 1e-9
 
     private const val DAY_MS = 24 * 60 * 60 * 1000L
 }
