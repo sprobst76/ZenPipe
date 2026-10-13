@@ -17,7 +17,9 @@ Kommunikation Deutsch; Code, Commits, technische Doku Englisch.
 - `./dev.sh` / `./stop.sh`: tmux-Dev-Loop (Build → Install → Logcat); CONFIG ist auf `io.github.sprobst76.zenpipe.debug` + `org.schabi.newpipe.MainActivity` gesetzt.
 - Paketnamen: Release `io.github.sprobst76.zenpipe`, Debug `io.github.sprobst76.zenpipe.debug` (Namespace/Package im Code bleibt `org.schabi.newpipe`). Alte Debug-App `org.schabi.newpipe.debug.zen` auf dem Defy ist Altlast (enthält Test-Abos). Versionsschema, Icon-Generator, Fastlane: `zen-docs/release.md`.
 - Gerät: Motorola Defy per WiFi-ADB; Status mit `~/development/WorkflowAnalyser/scripts/adb-device-check.sh`.
-- Release: Skill `/android-release` + `android-release-preflight.sh`. Signierung nur über Env `ZENPIPE_KEYSTORE`, `ZENPIPE_KEYSTORE_PASSWORD`, `ZENPIPE_KEY_ALIAS`, `ZENPIPE_KEY_PASSWORD` (ohne = unsigniert); CI-Release `.github/workflows/release.yml` bei Tag `v<versionName>` (Details `zen-docs/release.md`).
+- Release: Skill `/android-release` + `android-release-preflight.sh`.
+- Gerätetests mit 24-h-Sperre: nur im Debug-Build per `run-as io.github.sprobst76.zenpipe.debug sed -i …` den Wert `cd_settings_lock_rem` in `shared_prefs/zen_state.xml` verkürzen (App vorher `am force-stop`, ohne offene Wiedergabe – sonst Kill-Pause); danach `zs_*`, `zp_*`, `cd_settings_*`, `px_time` wieder entfernen. Keine Sperr-Umgehung in Release-Code.
+- Kotlin-Stil: `runKtlint` ist Teil von `runCheckstyle`-Läufen; Fehler mit `./gradlew formatKtlint` beheben. Signierung nur über Env `ZENPIPE_KEYSTORE`, `ZENPIPE_KEYSTORE_PASSWORD`, `ZENPIPE_KEY_ALIAS`, `ZENPIPE_KEY_PASSWORD` (ohne = unsigniert); CI-Release `.github/workflows/release.yml` bei Tag `v<versionName>` (Details `zen-docs/release.md`).
 - Abgeschaltete Upstream-Funktionen (z. B. Downloads) laufen über `zen/ZenFeatures.kt`; neue Einstiege immer dort prüfen lassen (Tabelle in `zen-docs/rules.md`).
 
 ## Status

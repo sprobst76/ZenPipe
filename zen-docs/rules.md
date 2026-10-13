@@ -1,6 +1,6 @@
 # ZenPipe: Regel-Tabelle (Single Source of Truth)
 
-Stand: 2026-10-13, nach Phase 2 Teil 1 und Verteilbarkeit Schritt 2. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
+Stand: 2026-10-13, nach Phase 2 Teil 1, Verteilbarkeit Schritt 2 und Praxis-Kanälen. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
 tragen dieselben Namen (Spalte „Code“). Entscheidungen F1-F9 stehen am Ende von `consistency-review.md`.
 Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieben; **offen** = nicht entschieden/nicht gebaut.
 
@@ -23,8 +23,8 @@ Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieb
 |---|---|---|---|---|---|
 | Ausgabe-Größe | 15 Videos | Feed | konfigurierbar 10-15 (<= Deckel/2) erst mit Einstellungs-Sperre | `ZenFeedPlanner.BUDGET_PER_HOUR` | umgesetzt (Konstante) |
 | Ausgabe-Takt (F5) | frühestens 60 min nach der letzten Ausgabe; Ausgabe erst nach bestätigter Absichtsabfrage und beim Öffnen des Feeds | Feed | während Pause/Nachtruhe soll keine neue Ausgabe entstehen (W14/W8) | `ZenFeedPlanner.EDITION_INTERVAL_MS` | umgesetzt, Pausen-Ausnahme offen |
-| Tages-Deckel (F1) | 30 **verschiedene** Videos pro Zen-Tag | Feed | Später-Liste, Playlists, gezielte Suche | `ZenFeedPlanner.DAILY_CAP` | umgesetzt |
-| Kandidaten | ungesehen, aus Abos, <= 7 Tage, kein Live, keine Musik (F3), Länge >= 5 min (gilt **nur im Feed**) | Feed | – | `ZenFeedPlanner.isEligible`, `MAX_AGE_DAYS`, `MIN_DURATION_SEC` | umgesetzt |
+| Tages-Deckel (F1) | 30 **verschiedene** Videos pro Zen-Tag | Feed | Später-Liste, Playlists, gezielte Suche, Praxis-Kanäle | `ZenFeedPlanner.DAILY_CAP` | umgesetzt |
+| Kandidaten | ungesehen, aus Abos, <= 7 Tage, kein Live, keine Musik (F3), kein Praxis-Kanal, Länge >= 5 min (gilt **nur im Feed**) | Feed | Praxis-Videos stehen im Praxis-Tab | `ZenFeedPlanner.isEligible`, `MAX_AGE_DAYS`, `MIN_DURATION_SEC` | umgesetzt |
 | Scoring | Feed-Gruppen-Rang (60 - 15 pro Rang, >= 0) + Länge (>= 15 min +12, >= 30 min +6 zusätzlich) + Frische (0-20); Musik ohne Längenbonus | Feed | – | `ZenFeedPlanner.score` | umgesetzt |
 | Vielfalt | max. 3 je Kanal und Ausgabe | Feed | – | `MAX_PER_CHANNEL` | umgesetzt |
 | Später-Liste | max. 10, lokale Playlist „Watch later“, Ablauf nach 30 Tagen (F4) | Feed-Triage | vom Tages-Deckel ausgenommen, Pause gilt | `ZenWatchLater.MAX_ITEMS`, `EXPIRY_MS` | umgesetzt |
@@ -50,13 +50,13 @@ Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieb
 |---|---|---|---|---|---|
 | „Zu Ende geschaut“ | Position >= 90 % oder Rest <= 60 s | Pause, Wiedergabe-Ende | – | `ZenPauseRules.FINISHED_FRACTION`, `FINISHED_REMAINING_MS` | umgesetzt |
 | Wiedergabezeit | echte Abspielzeit **einer Sitzung** des Videos; Pausieren/Puffern/Spulen zählen nicht | Pause | – | `ZenPauseEngine` | umgesetzt |
-| Auslöser | Abbruch einer Sitzung mit Wiedergabezeit >= 5 min | alle Player (Video, Popup, Hintergrund, Router) | Musik; „Später fortsetzen“ (F6) | `ZenPauseRules.MIN_WATCH_MS` | umgesetzt |
+| Auslöser | Abbruch einer Sitzung mit Wiedergabezeit >= 5 min | alle Player (Video, Popup, Hintergrund, Router) | Musik; Praxis-Kanal; „Später fortsetzen“ (F6) | `ZenPauseRules.MIN_WATCH_MS` | umgesetzt |
 | Abbruch | Player schließen (auch pausiert), Videowechsel, Prozess-Kill (beim nächsten Start erkannt) | Pause | Pausieren allein, Anruf/Audio-Fokus, zu Ende geschaut | `ZenPause`, `App.onCreate` | umgesetzt (Lücke: Mini-Player nach unten ziehen ohne Rückfrage) |
 | Pausenlänge | 20 % der Wiedergabezeit, min 1, max 15 min; nie kürzer als eine laufende | Pause | – | `PAUSE_FRACTION`, `MIN_PAUSE_MS`, `MAX_PAUSE_MS` | umgesetzt |
 | Verhalten | Wiedergabestart gesperrt (Pausenbildschirm mit Countdown, kein Überspringen), Browsen/Suchen erlaubt, endet nur durch Zeitablauf auf Gerätelaufzeit (nicht durch Stunden-/Tageswechsel, Uhr, Neustart) | alle Starts | – | `ZenPause.blockStart`, `PlayerService`-Netz | umgesetzt |
 | Musik vs. Podcast | Musik = Kategorie „Music“ / Topic- oder VEVO-Kanal / Titelwörter; Podcast = Hinweise oder >= 20 min Audio (Pause gilt wie Video); unsicher = streng | Pause | – | `ZenContentKind.classify` (StreamInfo.category/tags) | umgesetzt |
 | Später fortsetzen (F6) | 2x pro Zen-Tag, keine Pause, Rückfrage beim Mini-Player-X, nur wenn das Schließen eine Pause auslösen würde | Pause | – | `ZenPauseRules.LATER_PER_DAY`, `ZenPause.confirmClose` | umgesetzt |
-| Protokoll | `pause_start`, `pause_end`, `abort_short`, `abort_exempt`, `watch_end`, `later` | ZenLog | nicht im Export | `ZenLog` | umgesetzt |
+| Protokoll | `pause_start`, `pause_end`, `abort_short`, `abort_exempt` (Musik/Praxis), `watch_end`, `later` | ZenLog | nicht im Export | `ZenLog` | umgesetzt |
 
 ## Zen-Einstellungen (Modell, Phase 2 Teil 1)
 
@@ -103,6 +103,22 @@ Diese Werte sind veränderbar (Einstellungen > Zen) und stehen im Code in `ZenSe
 | Laufendes | laufende Pause und laufende Ausgabe werden durch Änderungen nie verkürzt bzw. neu gewürfelt (Parameter wirken ab dem nächsten Abbruch bzw. der nächsten Ausgabe; Deckel zählt gegen die schon gezählten Videos) | – | – | Konstanten nur zum Entscheidungszeitpunkt gelesen | umgesetzt |
 | Zen-Protokoll | `settings_change`, `settings_pending_applied`, `settings_pending_cancelled`, `settings_undo`, `settings_setup_done` | ZenLog | nicht im Export | `ZenSettingsLock` | umgesetzt |
 | Notfallschlüssel | standardmäßig aus, nicht gebaut | – | – | – | bewusst nicht umgesetzt |
+
+## Praxis (Details: `spec-praxis.md`)
+
+| Regel | Wert / Default | Gilt für | Ausnahme | Code / Quelle | Status |
+|---|---|---|---|---|---|
+| Zuordnung | vom Nutzer gepflegte Liste von **Kanälen** (`serviceId` + normalisierte Kanal-URL); keine automatische Erkennung; ein Kanal kann zugleich abonniert/in Gruppen sein, dann sind **alle** seine Videos Praxis | Praxis | Playlists: offen (Folgeaufgabe) | `ZenPraxisChannel`, `ZenSettingsLock.praxisChannels` | umgesetzt |
+| Hinzufügen | **Lockerung**: Bestätigung (3 s), ausstehend, wirksam mit Ende der dadurch gestarteten 24-h-Sperre, abbrechbar, 5-min-Rückgängig; während einer laufenden Sperre abgelehnt (globale Sperre); in der Ersteinrichtung sofort | Praxis | – | `ZenSettingsLock.addPraxis`, `ZenPraxisUi` | umgesetzt |
+| Entfernen | **strenger**: sofort, auch während der Sperre, startet keine Sperre, 5-min-Rückgängig; Entfernen eines ausstehenden Kanals = Abbrechen | Praxis | – | `ZenSettingsLock.removePraxis` | umgesetzt |
+| Feed | Praxis-Videos nicht in der Ausgabe: zählen nicht zu 15/Ausgabe und Deckel 30, Mindestlänge/Längenbonus/Scoring gelten nicht | Feed | – | `ZenFeedPlanner.isEligible` (`Candidate.praxis`) | umgesetzt |
+| Pflichtpause | Abbruch eines Praxis-Videos löst **keine** Pause aus (wie Musik, `abort_exempt kind=PRAXIS`); Pausieren bleibt kein Abbruch; eine **laufende** Pause blockiert auch Praxis-Starts | Pause | – | `ZenKind.PRAXIS`, `ZenContentKind.classify(praxis)` | umgesetzt |
+| Unverändert | kein Autoplay, keine Related/Kommentare, keine Shorts/Livestreams, Absichtsabfrage | Praxis | – | – | umgesetzt |
+| Praxis-Tab | Tab „Praxis“ (immer direkt nach dem Feed, auch bei alten Tab-Listen) + Drawer-Eintrag: neueste Videos der aktiven Praxis-Kanäle, max. 15 pro Kanal (`ZenPraxis.MAX_PER_CHANNEL`), nach Datum, kein Nachladen, kein Kontingent; Kopfzeile „Praxis heute: N min“ | Praxis | – | `ZenPraxisFragment`, `Tab.PraxisTab` (ID 10) | umgesetzt |
+| Markieren | Kanalseite > Menü „Als Praxis-Kanal markieren / Ausstehenden abbrechen / Entfernen“; Verwaltung in Einstellungen > Zen | UI | Long-Press auf Kanal-Einträgen fehlt | `ChannelFragment`, `ZenSettingsFragment` | umgesetzt |
+| Praxis-Minuten | Wiedergabezeit der Praxis-Sitzungen pro Zen-Tag (04:00, Tag des Sitzungsendes), 30 Tage; Anzeige im Praxis-Tab und in Einstellungen > Zen. **Kein Limit** (Entscheidung); weiches Limit nur als Hook (`ZenPraxisTime.msOn`) | Praxis | – | `ZenPraxisTime` (`px_time`) | umgesetzt |
+| Sleep-Timer | NewPipe hat keinen | – | – | – | offen (nicht gebaut) |
+| Zustand/Protokoll | `zen_state` (`zs_praxis`, `zp_praxis`, `px_time`), nicht in Export/Import/Reset/Auto-Backup; ZenLog `praxis_add`, `praxis_add_pending`, `praxis_activated`, `praxis_pending_cancelled`, `praxis_remove` | – | – | `ZenSettingsLock` | umgesetzt |
 
 ## Funktionen (zentrale Schalter, `zen/ZenFeatures.kt`)
 
