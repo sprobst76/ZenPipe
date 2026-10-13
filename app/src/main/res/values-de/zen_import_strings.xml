@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: Blatt „Kanal übernehmen“ für geteilte Kanal-Links. -->
+<resources>
+    <string name="zen_import_loading">Lade Kanal …</string>
+    <string name="zen_import_load_failed">Der Kanal konnte nicht geladen werden. Öffnen geht trotzdem.</string>
+    <string name="zen_import_subscribed">Abonniert</string>
+    <string name="zen_import_not_subscribed">Nicht abonniert</string>
+    <string name="zen_import_praxis_active">Praxis-Kanal</string>
+    <string name="zen_import_praxis_pending">Praxis-Kanal (ausstehend)</string>
+    <string name="zen_import_exempt">Ausnahme der Inhalts-Erkennung</string>
+    <string name="zen_import_mostly">Überwiegend %1$s (%2$d von %3$d)</string>
+    <string name="zen_import_mixed">Gemischt: %1$s (von %2$d)</string>
+    <string name="zen_import_unclear">Kein klares Bild: %1$d von %2$d Videos ohne Kategorie</string>
+    <string name="zen_import_empty">Keine Videos zum Prüfen gefunden.</string>
+    <string name="zen_import_news">Aktuelles: %1$d von %2$d</string>
+    <string name="zen_import_heavy">belastender Ton: %1$d von %2$d</string>
+    <string name="zen_import_low_feed">Dieser Kanal wird im Feed niedrig gewichtet: seine Videos landen eher hinten.</string>
+    <string name="zen_import_examples">Beispiele:</string>
+    <string name="zen_import_uncertain">Vorschlag der lokalen Inhalts-Erkennung, keine Entscheidung: Praxis erkennt sie zuverlässig, Bildung und Aktuelles nur grob (etwa jedes vierte Video wird falsch eingeordnet).</string>
+    <string name="zen_import_no_model">Inhalts-Erkennung nicht installiert – keine Einordnung (Einstellungen &gt; Zen). Abonnieren und Markieren gehen trotzdem.</string>
+    <string name="zen_import_check_failed">Die Videos konnten nicht geladen werden – keine Einordnung.</string>
+    <string name="zen_import_stopped">Einordnung abgebrochen.</string>
+    <string name="zen_import_subscribe">Abonnieren</string>
+    <string name="zen_import_view">Nur ansehen</string>
+    <string name="zen_import_close">Schließen</string>
+    <string name="zen_import_subscribed_toast">Abonniert: %1$s</string>
+    <string name="zen_import_subscribe_failed">Abonnieren fehlgeschlagen</string>
+</resources>

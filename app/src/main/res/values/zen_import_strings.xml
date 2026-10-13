@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: "take over channel" sheet for shared channel links. Separate file to keep upstream merges simple. -->
+<resources>
+    <string name="zen_import_loading">Loading channel …</string>
+    <string name="zen_import_load_failed">The channel could not be loaded. You can still open it.</string>
+    <string name="zen_import_subscribed">Subscribed</string>
+    <string name="zen_import_not_subscribed">Not subscribed</string>
+    <string name="zen_import_praxis_active">practice channel</string>
+    <string name="zen_import_praxis_pending">practice channel (pending)</string>
+    <string name="zen_import_exempt">exception of the content recognition</string>
+    <string name="zen_import_mostly">Mostly %1$s (%2$d of %3$d)</string>
+    <string name="zen_import_mixed">Mixed: %1$s (of %2$d)</string>
+    <string name="zen_import_unclear">No clear picture: %1$d of %2$d videos without a category</string>
+    <string name="zen_import_empty">No videos found to check.</string>
+    <string name="zen_import_news">News: %1$d of %2$d</string>
+    <string name="zen_import_heavy">distressing tone: %1$d of %2$d</string>
+    <string name="zen_import_low_feed">This channel is weighted low in the feed: its videos tend to come further back.</string>
+    <string name="zen_import_examples">Examples:</string>
+    <string name="zen_import_uncertain">A suggestion of the local content recognition, not a decision: practice is recognised reliably, education and news only roughly (about every fourth video is misjudged).</string>
+    <string name="zen_import_no_model">Content recognition not installed – no classification (Settings &gt; Zen). You can still subscribe or mark the channel.</string>
+    <string name="zen_import_check_failed">The videos could not be loaded – no classification.</string>
+    <string name="zen_import_stopped">Classification stopped.</string>
+    <string name="zen_import_subscribe">Subscribe</string>
+    <string name="zen_import_view">Just view</string>
+    <string name="zen_import_close">Close</string>
+    <string name="zen_import_subscribed_toast">Subscribed: %1$s</string>
+    <string name="zen_import_subscribe_failed">Subscribing failed</string>
+</resources>

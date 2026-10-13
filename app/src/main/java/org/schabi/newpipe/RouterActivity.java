@@ -304,6 +304,14 @@ public class RouterActivity extends AppCompatActivity {
     }
 
     protected void onSuccess() {
+        // zen: a channel link first shows the "take over channel" sheet (ZenChannelImport)
+        // instead of the open-action choice; "Just view" there opens the channel page
+        if (org.schabi.newpipe.zen.ZenChannelImport.handles(currentLinkType)) {
+            org.schabi.newpipe.zen.ZenChannelImport.show(getSupportFragmentManager(),
+                    currentServiceId, currentUrl);
+            return;
+        }
+
         final SharedPreferences preferences = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
