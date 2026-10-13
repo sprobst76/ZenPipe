@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -61,21 +62,36 @@ class ZenPauseActivity : AppCompatActivity() {
         }
         // one quote per pause (zen-docs/sprueche.md), below the countdown; wraps, never pushes the
         // buttons away (the whole screen scrolls if a long quote does not fit)
+        val (quoteText, attribution) = ZenQuotes.splitAttribution(
+            ZenQuotes.of(this).forPause(ZenPause.pauseSeq(this), ZenQuotes.builtIn(this)).orEmpty()
+        )
         val quote = TextView(this).apply {
             textSize = 17f
             gravity = Gravity.CENTER
             setTypeface(typeface, android.graphics.Typeface.ITALIC)
             setLineSpacing(0f, 1.15f)
             setPadding(0, pad, 0, 0)
-            text = ZenQuotes.of(this@ZenPauseActivity)
-                .forPause(ZenPause.pauseSeq(this@ZenPauseActivity), ZenQuotes.builtIn(this@ZenPauseActivity))
-            visibility = if (text.isNullOrEmpty()) android.view.View.GONE else android.view.View.VISIBLE
+            text = quoteText
+            visibility = if (quoteText.isEmpty()) View.GONE else View.VISIBLE
+        }
+        // source line: upright, smaller and muted, so it does not read as part of the quote
+        val source = TextView(this).apply {
+            textSize = 13f
+            gravity = Gravity.CENTER
+            alpha = 0.6f
+            setPadding(0, pad / 2, 0, 0)
+            text = attribution?.let { "— $it" }
+            visibility = if (attribution == null || quoteText.isEmpty()) View.GONE else View.VISIBLE
         }
         root.addView(title)
         root.addView(message)
         root.addView(countdown)
         root.addView(
             quote,
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+        )
+        root.addView(
+            source,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         )
         root.addView(

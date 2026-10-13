@@ -140,6 +140,17 @@ class ZenQuotesTest {
         assertEquals(2L, e.pauseSeq())
     }
 
+    @Test
+    fun `attribution line is split off, anonymous and own quotes have none`() {
+        assertEquals(
+            "Look within." to "Marcus Aurelius, Meditations VII.59",
+            ZenQuotes.splitAttribution("Look within.\n— Marcus Aurelius, Meditations VII.59")
+        )
+        assertEquals("Three calm breaths." to null, ZenQuotes.splitAttribution("Three calm breaths."))
+        assertEquals("Mine — with a dash" to null, ZenQuotes.splitAttribution("Mine — with a dash"))
+        assertEquals("" to null, ZenQuotes.splitAttribution(""))
+    }
+
     /** The shipped lists: 80-100 per language, same count, no duplicates, generated from sprueche.md. */
     @Test
     fun `shipped quote resources are complete`() {

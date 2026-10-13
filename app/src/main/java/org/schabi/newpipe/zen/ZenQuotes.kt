@@ -90,6 +90,19 @@ class ZenQuotes(private val store: ZenKeyValueStore, private val random: Random 
         /** Short stable id of a quote text (collisions only cost a skipped quote in one round). */
         fun idOf(text: String): String = Integer.toHexString(text.hashCode())
 
+        private const val ATTRIBUTION = "\n— "
+
+        /**
+         * Splits a quote into its text and the attribution line ("<text>\n— <source>", see
+         * zen-docs/gen_sprueche.py). The attribution is null for anonymous and own quotes.
+         */
+        fun splitAttribution(quote: String): Pair<String, String?> {
+            val i = quote.lastIndexOf(ATTRIBUTION)
+            if (i < 0) return quote to null
+            val attr = quote.substring(i + ATTRIBUTION.length).trim()
+            return quote.substring(0, i).trim() to attr.ifEmpty { null }
+        }
+
         @JvmStatic
         fun of(context: Context) = ZenQuotes(Zen.store(context))
 

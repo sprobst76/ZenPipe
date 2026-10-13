@@ -71,9 +71,9 @@ Am Gerät geprüft: Rick-Astley-Video -> Kategorie Music -> `abort_exempt`; Blen
 (Entertainment) -> Video.
 
 ## Pausenspruch (2026-10-13, Nutzerwunsch)
-- Der Pausenbildschirm zeigt unter dem Countdown einen kurzen Spruch (kursiv, zentriert, bricht um; bei sehr langen Sprüchen
-  scrollt der ganze Bildschirm, Countdown und „Zurück“ bleiben bedienbar). Inhalt: `zen-docs/sprueche.md` (99 Einträge je
-  Sprache: 33 gemeinfreie, belegte Zitate mit Stelle, 57 eigene Sätze, 9 Atemhinweise), daraus erzeugt
+- Der Pausenbildschirm zeigt unter dem Countdown einen kurzen Spruch (kursiv, zentriert, bricht um; Quellenzeile darunter abgesetzt: kleiner, nicht kursiv, gedämpft, bei anonymen und eigenen Sprüchen ausgeblendet; bei sehr langen Sprüchen
+  scrollt der ganze Bildschirm, Countdown und „Zurück“ bleiben bedienbar). Inhalt: `zen-docs/sprueche.md` (98 Einträge je
+  Sprache: 32 gemeinfreie, belegte Zitate mit Stelle, 57 eigene Sätze, 9 Atemhinweise), daraus erzeugt
   `res/values{,-de}/zen_quotes.xml` per `python3 zen-docs/gen_sprueche.py`. Sprache = App-Sprache (Ressourcen).
 - **Auswahl** (`ZenQuotes`): ein Spruch **pro Pause** (Pausennummer `pause_seq`, wird bei jedem `pause_start` hochgezählt), also
   derselbe Spruch, wenn man während derselben Pause den Bildschirm mehrmals sieht, und ein anderer bei der nächsten Pause (auch
