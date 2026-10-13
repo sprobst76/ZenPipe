@@ -265,4 +265,24 @@ class ZenFeedTest {
         // reload from the store: identical (group names may be empty)
         assertEquals(v1.open, state(store).view(now + 60_000, true, on) { pool }.open)
     }
+
+    @Test
+    fun `strongest theme is stored only without a category and never changes the order`() {
+        val tech = cls(c(1, rank = 1), emptyMap()).copy(classTheme = "tech_gadgets_hardware" to 0.42)
+        val edu = cls(c(2, rank = 2), mapOf("bildung" to 0.8)).copy(classTheme = "wissenschaft" to 0.9)
+        val plain = listOf(cls(c(1, rank = 1), emptyMap()), cls(c(2, rank = 2), mapOf("bildung" to 0.8)))
+        val sel = ZenFeedPlanner.select(listOf(tech, edu), now, 2, rules = on)
+        assertEquals(ZenFeedPlanner.select(plain, now, 2, rules = on).picks.map { it.url }, sel.picks.map { it.url })
+        assertEquals("T|neutral|1.00||tech_gadgets_hardware=0.42", sel.picks[0].why)
+        assertEquals("T|neutral|1.00|bildung=0.80", sel.picks[1].why)
+        val w = ZenFeedPlanner.parseWhy(sel.picks[0].why)!!
+        assertEquals("tech_gadgets_hardware" to 0.42, w.theme)
+        assertTrue(w.cats.isEmpty())
+        // an edition stored before the theme existed stays readable
+        val old = ZenFeedPlanner.parseWhy("T|belastend|0.30|aktuelles=0.82")!!
+        assertEquals(mapOf("aktuelles" to 0.82), old.cats)
+        assertEquals(0.30, old.weight, 1e-9)
+        assertNull(old.theme)
+        assertNull(ZenFeedPlanner.parseWhy(ZenFeedPlanner.WHY_UNCLASSIFIED))
+    }
 }

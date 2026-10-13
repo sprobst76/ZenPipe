@@ -119,7 +119,7 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
                 activity.getString(R.string.zen_class_review_empty)
             } else {
                 activity.getString(R.string.zen_class_review_hint) + "\n\n" +
-                    entries.joinToString("\n\n") { "${it.title} — ${it.channel}\n${ZenClassifier.describe(it)}" }
+                    entries.joinToString("\n\n") { "${it.title} — ${it.channel}\n${ZenClassifier.describe(activity, it)}" }
             }
             activity.runOnUiThread { if (!activity.isFinishing) showText(activity.getString(R.string.zen_class_review), body) }
         }.start()

@@ -224,11 +224,14 @@ class ZenClassifier private constructor(private val app: Context) {
             }
         }
 
-        /** Short German/English-neutral summary for the "why" line and the review list. */
-        fun describe(e: ClassEntry): String {
-            val cats = if (e.cats.isEmpty()) "–" else e.cats.entries.joinToString(", ") { "${it.key} ${"%.2f".format(java.util.Locale.ROOT, it.value)}" }
+        /**
+         * Review list entry: the "why" summary (categories, or the strongest theme without one;
+         * tone; level) with the feed weight, then the raw top themes/formats.
+         */
+        fun describe(context: Context, e: ClassEntry): String {
             val top = e.top.joinToString(", ") { "${it.first} ${"%.2f".format(java.util.Locale.ROOT, it.second)}" }
-            return "$cats · ${e.tone ?: "–"} · w ${"%.1f".format(java.util.Locale.ROOT, if (e.cats.isEmpty()) 1.0 else e.weight)} · ${e.level}\n$top"
+            val w = "w ${"%.1f".format(java.util.Locale.ROOT, if (e.cats.isEmpty()) 1.0 else e.weight)}"
+            return "${ZenClassWhy.summary(context, e.cats, e.tone, e.level, e.top)} · $w\n$top"
         }
 
         internal fun log(context: Context, type: String, detail: String) = Zen.log(context).add(type, detail)

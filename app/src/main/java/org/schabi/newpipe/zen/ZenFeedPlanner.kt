@@ -53,7 +53,9 @@ object ZenFeedPlanner {
         /** Input level of the classification: "T" = title + channel, "D" = with details. */
         val classLevel: String? = null,
         /** Channel/keyword on the classifier exception list: weight 1.0 and no heavy rule. */
-        val classExempt: Boolean = false
+        val classExempt: Boolean = false,
+        /** Strongest theme (key, probability) for the "why" line only; never used for the selection. */
+        val classTheme: Pair<String, Double>? = null
     )
 
     /**
@@ -165,8 +167,9 @@ object ZenFeedPlanner {
     fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * if (weighting) contentWeight(c) else 1.0
 
     /**
-     * Compact, stored "why" of a pick: `level|tone|weight|cat=p,cat=p`; "?" = not classified,
-     * "x" = exception list. Null when no content rule is active.
+     * Compact, stored "why" of a pick: `level|tone|weight|cat=p,cat=p` and, without a category,
+     * `|theme=p` (strongest theme, display only); "?" = not classified, "x" = exception list.
+     * Null when no content rule is active.
      */
     @JvmStatic
     fun whyOf(c: Candidate, rules: ContentRules): String? {
@@ -174,8 +177,27 @@ object ZenFeedPlanner {
         if (c.classExempt) return WHY_EXEMPT
         val cats = c.zenCats ?: return WHY_UNCLASSIFIED
         val w = if (rules.weighting) contentWeight(c) else 1.0
+        val theme = c.classTheme?.takeIf { cats.isEmpty() }?.let { "|${it.first}=${fmt2(it.second)}" } ?: ""
         return "${c.classLevel ?: ""}|${c.tone ?: ""}|${fmt2(w)}|" +
-            cats.entries.joinToString(",") { "${it.key}=${fmt2(it.value)}" }
+            cats.entries.joinToString(",") { "${it.key}=${fmt2(it.value)}" } + theme
+    }
+
+    /** A parsed [whyOf] string (not for [WHY_EXEMPT]/[WHY_UNCLASSIFIED]). */
+    data class Why(val level: String?, val tone: String?, val weight: Double, val cats: Map<String, Double>, val theme: Pair<String, Double>?)
+
+    /** Parses a stored "why"; older 4-field values (without theme) stay valid. */
+    @JvmStatic
+    fun parseWhy(why: String?): Why? {
+        if (why == null || why == WHY_EXEMPT || why == WHY_UNCLASSIFIED) return null
+        val p = why.split('|', limit = 5)
+        if (p.size < 4) return null
+        return Why(
+            p[0].ifEmpty { null },
+            p[1].ifEmpty { null },
+            p[2].toDoubleOrNull() ?: 1.0,
+            org.schabi.newpipe.zen.classify.ClassEntry.decodeMap(p[3]),
+            p.getOrNull(4)?.let { org.schabi.newpipe.zen.classify.ClassEntry.decodePairs(it).firstOrNull() }
+        )
     }
 
     const val WHY_EXEMPT = "x"

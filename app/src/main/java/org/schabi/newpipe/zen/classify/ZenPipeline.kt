@@ -27,9 +27,15 @@ data class Analysis(
     val categories: Map<String, Double>,
     val weight: Double
 ) {
-    /** The [n] strongest themes and formats, for the "why" line. */
-    fun top(n: Int = 3): List<Pair<String, Double>> = (themes.entries + formats.entries)
-        .sortedByDescending { it.value }.take(n).map { it.key to it.value }
+    /**
+     * The [n] strongest themes and formats, for the "why" line; the strongest theme is always
+     * included (appended when only formats made the top [n]), so "no category" can name it.
+     */
+    fun top(n: Int = 3): List<Pair<String, Double>> {
+        val best = (themes.entries + formats.entries).sortedByDescending { it.value }.take(n).map { it.key to it.value }
+        val theme = themes.entries.maxByOrNull { it.value } ?: return best
+        return if (best.any { it.first == theme.key }) best else best + (theme.key to theme.value)
+    }
 }
 
 /**

@@ -60,8 +60,27 @@ class ZenClassCacheTest {
     }
 
     @Test
-    fun `describe shows unclassified videos with weight 1`() {
-        val text = ZenClassifier.describe(entry("a").copy(cats = emptyMap(), weight = 0.0))
-        assertTrue(text, text.startsWith("– · neutral · w 1.0 · T"))
+    fun `strongest theme ignores formats and old entries without a theme`() {
+        assertEquals("wissenschaft" to 0.9, ZenClassWhy.strongestTheme(entry("a").top))
+        val formatsFirst = listOf("erklaerung_analyse" to 0.8, "tech_gadgets_hardware" to 0.42, "ki" to 0.3)
+        assertEquals("tech_gadgets_hardware" to 0.42, ZenClassWhy.strongestTheme(formatsFirst))
+        // stored before themes were always kept: only formats -> nothing to name
+        assertNull(ZenClassWhy.strongestTheme(listOf("erklaerung_analyse" to 0.8, "news_aktuell" to 0.1)))
+        assertNull(ZenClassWhy.strongestTheme(emptyList()))
+        assertTrue(ZenClassWhy.belowThreshold(0.42))
+        assertFalse(ZenClassWhy.belowThreshold(0.6))
+    }
+
+    @Test
+    fun `top keeps the strongest theme even when formats lead`() {
+        val a = Analysis(
+            "t", 1, FloatArray(0),
+            themes = mapOf("ki" to 0.3, "wissenschaft" to 0.2),
+            formats = mapOf("erklaerung_analyse" to 0.9, "doku_lang" to 0.8, "vortrag_interview" to 0.7),
+            tones = emptyMap(), tone = null, categories = emptyMap(), weight = 1.0
+        )
+        assertEquals(listOf("erklaerung_analyse", "doku_lang", "vortrag_interview", "ki"), a.top().map { it.first })
+        val b = a.copy(themes = mapOf("ki" to 0.95))
+        assertEquals(listOf("ki", "erklaerung_analyse", "doku_lang"), b.top().map { it.first })
     }
 }

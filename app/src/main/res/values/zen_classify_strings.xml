@@ -42,6 +42,26 @@
     <string name="zen_why_level_t">uncertain (title only)</string>
     <string name="zen_why_level_d">with description</string>
     <string name="zen_why_no_category">no category</string>
+    <string name="zen_why_no_category_theme_below">no category (strongest topic: %1$s %2$s, below threshold)</string>
+    <string name="zen_why_no_category_theme">no category (strongest topic: %1$s %2$s)</string>
+    <string name="zen_theme_ki">AI</string>
+    <string name="zen_theme_ki_gesellschaft">AI &amp; society</string>
+    <string name="zen_theme_programmieren">Programming</string>
+    <string name="zen_theme_technik">Tech</string>
+    <string name="zen_theme_linux_maker">Linux &amp; maker</string>
+    <string name="zen_theme_it_sicherheit">IT security</string>
+    <string name="zen_theme_wissenschaft">Science</string>
+    <string name="zen_theme_gesellschaft">Society &amp; history</string>
+    <string name="zen_theme_politik">Politics</string>
+    <string name="zen_theme_wirtschaft">Economy</string>
+    <string name="zen_theme_gesundheit">Health</string>
+    <string name="zen_theme_psyche">Psychology</string>
+    <string name="zen_theme_gaming">Gaming</string>
+    <string name="zen_theme_film">Film &amp; series</string>
+    <string name="zen_theme_musik">Music</string>
+    <string name="zen_theme_sport">Sports</string>
+    <string name="zen_theme_reisen">Travel &amp; outdoors</string>
+    <string name="zen_theme_sonstiges">Other</string>
     <string name="zen_why_unclassified">not classified yet</string>
     <string name="zen_why_exempt">exception: content recognition not applied</string>
     <!-- AP 5: plausibility check when marking practice -->

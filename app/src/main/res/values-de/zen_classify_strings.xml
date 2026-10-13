@@ -41,6 +41,26 @@
     <string name="zen_why_level_t">unsicher (nur Titel)</string>
     <string name="zen_why_level_d">mit Beschreibung</string>
     <string name="zen_why_no_category">ohne Kategorie</string>
+    <string name="zen_why_no_category_theme_below">ohne Kategorie (stärkstes Thema: %1$s %2$s, unter Schwelle)</string>
+    <string name="zen_why_no_category_theme">ohne Kategorie (stärkstes Thema: %1$s %2$s)</string>
+    <string name="zen_theme_ki">KI</string>
+    <string name="zen_theme_ki_gesellschaft">KI &amp; Gesellschaft</string>
+    <string name="zen_theme_programmieren">Programmieren</string>
+    <string name="zen_theme_technik">Technik</string>
+    <string name="zen_theme_linux_maker">Linux &amp; Maker</string>
+    <string name="zen_theme_it_sicherheit">IT-Sicherheit</string>
+    <string name="zen_theme_wissenschaft">Wissenschaft</string>
+    <string name="zen_theme_gesellschaft">Gesellschaft &amp; Geschichte</string>
+    <string name="zen_theme_politik">Politik</string>
+    <string name="zen_theme_wirtschaft">Wirtschaft</string>
+    <string name="zen_theme_gesundheit">Gesundheit</string>
+    <string name="zen_theme_psyche">Psychologie</string>
+    <string name="zen_theme_gaming">Gaming</string>
+    <string name="zen_theme_film">Film &amp; Serien</string>
+    <string name="zen_theme_musik">Musik</string>
+    <string name="zen_theme_sport">Sport</string>
+    <string name="zen_theme_reisen">Reisen &amp; Outdoor</string>
+    <string name="zen_theme_sonstiges">Sonstiges</string>
     <string name="zen_why_unclassified">noch nicht eingeordnet</string>
     <string name="zen_why_exempt">Ausnahme: Inhalts-Erkennung nicht angewandt</string>
     <!-- AP 5: Plausibilitätsprüfung beim Markieren als Praxis -->

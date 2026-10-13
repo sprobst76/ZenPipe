@@ -306,7 +306,7 @@ object ZenPlausibilityCheck {
                 "${c.title}\n${activity.getString(R.string.zen_check_list_failed)}"
             } else {
                 val top = e.top.joinToString(", ") { "${it.first} ${"%.2f".format(java.util.Locale.ROOT, it.second)}" }
-                "${c.title}\n${ZenClassWhy.summary(activity, e.cats, e.tone, e.level)}" +
+                "${c.title}\n${ZenClassWhy.summary(activity, e.cats, e.tone, e.level, e.top)}" +
                     (if (c.detailsFailed) " · " + activity.getString(R.string.zen_check_list_not_loaded) else "") + "\n$top"
             }
         }

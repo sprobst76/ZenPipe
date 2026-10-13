@@ -8,6 +8,7 @@ import org.schabi.newpipe.util.StreamTypeUtil
 import org.schabi.newpipe.util.ZenIntentPrompt
 import org.schabi.newpipe.zen.classify.VideoText
 import org.schabi.newpipe.zen.classify.ZenClassCache
+import org.schabi.newpipe.zen.classify.ZenClassWhy
 import org.schabi.newpipe.zen.classify.ZenClassifier
 import org.schabi.newpipe.zen.classify.ZenClassifierModel
 
@@ -112,7 +113,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
         return list.map { c ->
             if (!ZenFeedPlanner.isEligible(c, now)) return@map c
             val e = cache.get(ZenClassCache.keyOf(serviceIds[c.url] ?: 0, c.url))
-            if (e == null || e.model != ZenClassifierModel.VERSION) c else c.copy(zenCats = e.cats, tone = e.tone, classLevel = e.level)
+            if (e == null || e.model != ZenClassifierModel.VERSION) c else c.copy(zenCats = e.cats, tone = e.tone, classLevel = e.level, classTheme = ZenClassWhy.strongestTheme(e.top))
         }
     }
 
