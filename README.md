@@ -25,7 +25,7 @@ NewPipe (Settings > Backup and restore) and import it in ZenPipe.
 SHA-256 fingerprint of the ZenPipe signing certificate (to verify downloaded APKs):
 
 ```
-(follows with the first release)
+6E:25:F0:FA:A5:7B:D9:F5:7A:D4:4E:56:4D:7E:AB:D4:FD:B2:92:C3:F0:41:65:C3:3A:39:4E:0A:C6:08:95:18
 ```
 
 ### Opening YouTube links with ZenPipe

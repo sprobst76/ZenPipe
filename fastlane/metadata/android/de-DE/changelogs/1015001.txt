@@ -1,5 +1,5 @@
 Erste ZenPipe-Entwicklungsversion (basiert auf NewPipe 0.29.1).
 • Eigene Identität: ZenPipe, läuft neben NewPipe, neues Icon
-• Feed mit Ende, Tages-Deckel, kein Autoplay/Kommentare/Ähnliches/Shorts
+• Feed mit Ende, Tages-Deckel, kein Autoplay/Kommentare/Ähnliches/Shorts, keine Downloads
 • Absichtsabfrage, Pflichtpause nach frühem Abbruch, Zen-Einstellungen mit 24-h-Sperre
-• Absturzberichte gehen an GitHub (ZenPipe) statt an NewPipe, Update-Prüfung abgeschaltet
+• Praxis-Kanäle und -Playlists (Yoga, Atemübungen, Meditation) immer verfügbar, Sleep-Timer

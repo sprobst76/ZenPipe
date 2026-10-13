@@ -1,5 +1,5 @@
 First ZenPipe development release (based on NewPipe 0.29.1).
 • Own identity: ZenPipe, installs next to NewPipe, new icon
-• Feed with an end, daily cap, no autoplay/comments/related/Shorts
+• Feed with an end, daily cap, no autoplay/comments/related/Shorts, no downloads
 • Intention check, mandatory break after early abort, Zen settings with 24 h lock
-• Crash reports go to GitHub (ZenPipe) instead of NewPipe, update check disabled
+• Practice channels and playlists (yoga, breathwork, meditation) always available, sleep timer
