@@ -165,6 +165,8 @@ public final class VideoDetailFragment
     private boolean showComments;
     private boolean showRelatedItems;
     private boolean showDescription;
+    // zen: reduced video details (Zen setting): no description, counts, date or meta info
+    private boolean zenReduced;
     private String selectedTabTag;
     @AttrRes
     @NonNull
@@ -178,7 +180,7 @@ public final class VideoDetailFragment
     private final SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener =
             (sharedPreferences, key) -> {
                 if (getString(R.string.show_description_key).equals(key)) {
-                    showDescription = sharedPreferences.getBoolean(key, true);
+                    showDescription = !zenReduced && sharedPreferences.getBoolean(key, true);
                     tabSettingsChanged = true;
                 }
             };
@@ -315,7 +317,9 @@ public final class VideoDetailFragment
         // ZenPipe: comments and related videos are permanently hidden
         showComments = false;
         showRelatedItems = false;
-        showDescription = prefs.getBoolean(getString(R.string.show_description_key), true);
+        zenReduced = org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails();
+        showDescription = !zenReduced
+                && prefs.getBoolean(getString(R.string.show_description_key), true);
         selectedTabTag = prefs.getString(
                 getString(R.string.stream_info_selected_tab_key), COMMENTS_TAB_TAG);
         prefs.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
@@ -368,6 +372,20 @@ public final class VideoDetailFragment
         updateOverlayPlayQueueButtonVisibility();
 
         setupBrightness();
+
+        // zen: the reduced-details setting may have changed while this fragment was paused
+        if (zenReduced != org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()) {
+            zenReduced = !zenReduced;
+            showDescription = !zenReduced && PreferenceManager.getDefaultSharedPreferences(activity)
+                    .getBoolean(getString(R.string.show_description_key), true);
+            tabSettingsChanged = true;
+            if (zenReduced && binding != null) {
+                binding.detailsPanel.setVisibility(View.GONE);
+                binding.detailUploaderTextView.setVisibility(View.GONE);
+                binding.detailMetaInfoTextView.setVisibility(View.GONE);
+                binding.detailMetaInfoSeparator.setVisibility(View.GONE);
+            }
+        }
 
         if (tabSettingsChanged) {
             tabSettingsChanged = false;
@@ -917,7 +935,8 @@ public final class VideoDetailFragment
         }
 
         if (pageAdapter.getCount() == 0) {
-            pageAdapter.addFragment(EmptyFragment.newInstance(true), EMPTY_TAB_TAG);
+            // zen: no "nothing here" message on the reduced detail page
+            pageAdapter.addFragment(EmptyFragment.newInstance(!zenReduced), EMPTY_TAB_TAG);
         }
         pageAdapter.notifyDataSetUpdate();
 
@@ -1562,6 +1581,8 @@ public final class VideoDetailFragment
             displayUploaderAsSubChannel(info);
         }
 
+        // zen: views and likes hidden on the reduced detail page
+        binding.detailsPanel.setVisibility(zenReduced ? View.GONE : View.VISIBLE);
         if (info.getViewCount() >= 0) {
             if (info.getStreamType().equals(StreamType.AUDIO_LIVE_STREAM)) {
                 binding.detailViewCountView.setText(Localization.listeningCount(activity,
@@ -1630,7 +1651,8 @@ public final class VideoDetailFragment
         checkUpdateProgressInfo(info);
         CoilHelper.INSTANCE.loadDetailsThumbnail(binding.detailThumbnailImageView,
                 info.getThumbnails());
-        showMetaInfoInTextView(info.getMetaInfo(), binding.detailMetaInfoTextView,
+        showMetaInfoInTextView(zenReduced ? null : info.getMetaInfo(),
+                binding.detailMetaInfoTextView,
                 binding.detailMetaInfoSeparator, disposables);
 
         if (!isPlayerAvailable() || player.isStopped()) {
@@ -1674,7 +1696,7 @@ public final class VideoDetailFragment
         binding.detailSubChannelTextView.setVisibility(View.VISIBLE);
         binding.detailSubChannelTextView.setSelected(true);
 
-        if (info.getUploaderSubscriberCount() > -1) {
+        if (info.getUploaderSubscriberCount() > -1 && !zenReduced) { // zen: no subscriber count
             binding.detailUploaderTextView.setText(
                     Localization.shortSubscriberCount(activity, info.getUploaderSubscriberCount()));
             binding.detailUploaderTextView.setVisibility(View.VISIBLE);
@@ -1698,7 +1720,7 @@ public final class VideoDetailFragment
             subText.append(
                     String.format(getString(R.string.video_detail_by), info.getUploaderName()));
         }
-        if (info.getUploaderSubscriberCount() > -1) {
+        if (info.getUploaderSubscriberCount() > -1 && !zenReduced) { // zen: no subscriber count
             if (subText.length() > 0) {
                 subText.append(Localization.DOT_SEPARATOR);
             }

@@ -923,6 +923,7 @@
     <string name="zen_set_pause_trigger">Pause ab einer Schauzeit von mindestens</string>
     <string name="zen_set_intent_wait">Wartezeit der Absichtsabfrage</string>
     <string name="zen_set_intent_bg">Abfrage nach Abwesenheit von</string>
+    <string name="zen_set_reduced_details">Reduzierte Videodetails (ohne Beschreibung, Zahlen und Datum)</string>
     <string name="zen_unit_videos">%d Videos</string>
     <string name="zen_unit_min">%d Min.</string>
     <string name="zen_unit_percent">%d %%</string>

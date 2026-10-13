@@ -34,6 +34,7 @@ object ZenSettingKeys {
     const val PAUSE_TRIGGER_MIN = "pause_trigger_min"
     const val INTENT_WAIT_S = "intent_wait_s"
     const val INTENT_BACKGROUND_MIN = "intent_background_min"
+    const val REDUCED_DETAILS = "reduced_details"
 }
 
 object ZenSettingDefs {
@@ -49,7 +50,9 @@ object ZenSettingDefs {
         ZenSettingDef(ZenSettingKeys.PAUSE_MAX_MIN, default = 15, min = 5, max = 30, strictHigher = true),
         ZenSettingDef(ZenSettingKeys.PAUSE_TRIGGER_MIN, default = 5, min = 1, max = 15, strictHigher = false),
         ZenSettingDef(ZenSettingKeys.INTENT_WAIT_S, default = 5, min = 3, max = 30, strictHigher = true),
-        ZenSettingDef(ZenSettingKeys.INTENT_BACKGROUND_MIN, default = 5, min = 1, max = 60, strictHigher = false)
+        ZenSettingDef(ZenSettingKeys.INTENT_BACKGROUND_MIN, default = 5, min = 1, max = 60, strictHigher = false),
+        // video detail page without description, counts, date and meta info; on = stricter
+        ZenSettingDef(ZenSettingKeys.REDUCED_DETAILS, default = 1, min = 0, max = 1, strictHigher = true, isBool = true)
     )
 
     private val byKey = all.associateBy { it.key }
@@ -127,4 +130,7 @@ object ZenSettings {
 
     @JvmStatic
     fun intentBackgroundMs() = get(ZenSettingKeys.INTENT_BACKGROUND_MIN) * 60_000L
+
+    @JvmStatic
+    fun reducedVideoDetails() = get(ZenSettingKeys.REDUCED_DETAILS) == 1
 }

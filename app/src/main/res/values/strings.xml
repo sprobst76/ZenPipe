@@ -958,6 +958,7 @@
     <string name="zen_set_pause_trigger">Pause starts after watching at least</string>
     <string name="zen_set_intent_wait">Wait time of the intention prompt</string>
     <string name="zen_set_intent_bg">Prompt after being away for</string>
+    <string name="zen_set_reduced_details">Reduced video details (no description, counts or date)</string>
     <string name="zen_unit_videos">%d videos</string>
     <string name="zen_unit_min">%d min</string>
     <string name="zen_unit_percent">%d %%</string>

@@ -78,11 +78,17 @@ Diese Werte sind veränderbar (Einstellungen > Zen) und stehen im Code in `ZenSe
 | `pause_trigger_min` | Schauzeit, ab der ein Abbruch pausiert | 5 min | 1-15 (1) | kleiner | nächster Abbruch |
 | `intent_wait_s` | Wartezeit der Absichtsabfrage | 5 s | 3-30 (1) | größer | nächste Abfrage |
 | `intent_background_min` | Abwesenheit bis zur erneuten Abfrage | 5 min | 1-60 (1) | kleiner | nächste Rückkehr |
+| `reduced_details` | Reduzierte Videodetails | an | an/aus | an | nächstes geöffnetes Video (Beschreibungs-Tab sofort beim Zurückkehren) |
 
 - Budget und Deckel haben als Obergrenze den bisherigen Default: mehr als vorher wird nie angeboten, Lockern heißt „zurück Richtung
   Default“. Die Absichtsabfrage hat keinen Aus-Schalter (gibt es nicht); „Pflichtpause aus“ zählt als Lockern.
 - Pflichtpause aus: Abbrüche werden als `abort_pause_off` protokolliert, es entsteht keine Pause; eine bereits laufende Pause
   wird nicht verkürzt (Countdown läuft weiter), eine laufende Sitzung beim Umschalten zählt nach der neuen Einstellung.
+- Reduzierte Videodetails an: die Detailseite zeigt nur Thumbnail (Play, Dauer), Titel (antippbar: Teilen/Link kopieren),
+  Kanalname + Avatar (antippbar) und Hinzufügen/Hintergrund/Pop-up. Ausgeblendet: Beschreibungs-Tab (Beschreibung inkl. Links,
+  „Veröffentlicht am“, Tags/Kategorie/Lizenz/Altersfreigabe), Aufrufe, Likes/Dislikes, Abonnentenzahl, Meta-Info-Kasten,
+  „Nichts hier“-Hinweis. Kein „Details anzeigen“ (keine Hintertür per Tipp). Kapitel stehen nicht auf der Detailseite, nur im
+  Player (bleiben). „Aus“ zählt als Lockern (`VideoDetailFragment.zenReduced`).
 - Kreuzregeln (immer gegen den neuen **und** den ausstehenden Zielzustand geprüft): Deckel >= Ausgabe-Größe, Ausgabe >= 5 (Spanne).
   Kürzeste <= längste Pause ist durch die getrennten Spannen (1-5 / 5-30) immer erfüllt.
 - Richtung wird pro Einstellung bestimmt (gegen den **wirksamen** Wert). Eine Gruppe mit gemischten Richtungen wird aufgeteilt:

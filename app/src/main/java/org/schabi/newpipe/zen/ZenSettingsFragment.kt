@@ -100,6 +100,7 @@ class ZenSettingsFragment : Fragment() {
         ZenSettingKeys.PAUSE_MAX_MIN -> R.string.zen_set_pause_max
         ZenSettingKeys.PAUSE_TRIGGER_MIN -> R.string.zen_set_pause_trigger
         ZenSettingKeys.INTENT_WAIT_S -> R.string.zen_set_intent_wait
+        ZenSettingKeys.REDUCED_DETAILS -> R.string.zen_set_reduced_details
         else -> R.string.zen_set_intent_bg
     }
 

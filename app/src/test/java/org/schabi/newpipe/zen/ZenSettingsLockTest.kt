@@ -10,6 +10,7 @@ import org.schabi.newpipe.zen.ZenSettingKeys.MIN_LENGTH_MIN
 import org.schabi.newpipe.zen.ZenSettingKeys.PAUSE_ENABLED
 import org.schabi.newpipe.zen.ZenSettingKeys.PAUSE_MAX_MIN
 import org.schabi.newpipe.zen.ZenSettingKeys.PAUSE_MIN_MIN
+import org.schabi.newpipe.zen.ZenSettingKeys.REDUCED_DETAILS
 
 class ZenSettingsLockTest {
     private val h = 60 * 60 * 1000L
@@ -51,6 +52,7 @@ class ZenSettingsLockTest {
         assertEquals(5, l.effective(ZenSettingKeys.INTENT_WAIT_S))
         assertEquals(5, l.effective(ZenSettingKeys.INTENT_BACKGROUND_MIN))
         assertEquals(1, l.effective(PAUSE_ENABLED))
+        assertEquals(1, l.effective(REDUCED_DETAILS))
         ZenSettingDefs.all.forEach { assertTrue(it.key, it.inRange(it.default)) }
     }
 
@@ -182,6 +184,35 @@ class ZenSettingsLockTest {
         // turning it on again is stricter and immediate
         assertTrue(l.apply(mapOf(PAUSE_ENABLED to 1)) is ZenSettingsLock.Result.Applied)
         assertEquals(1, l.effective(PAUSE_ENABLED))
+    }
+
+    @Test
+    fun `reduced video details are on by default and turning them off is a loosening`() {
+        ZenSettings.install(null)
+        assertTrue(ZenSettings.reducedVideoDetails())
+        val (e, l) = ready()
+        ZenSettings.install(l)
+        try {
+            val r = l.apply(mapOf(REDUCED_DETAILS to 0)) as ZenSettingsLock.Result.Applied
+            assertEquals(listOf(REDUCED_DETAILS), r.pending)
+            assertTrue(l.isLocked())
+            assertTrue(ZenSettings.reducedVideoDetails())
+            // undo within 5 min restores the state without a lock
+            assertTrue(l.undo())
+            assertTrue(l.pending().isEmpty())
+            assertFalse(l.isLocked())
+            l.apply(mapOf(REDUCED_DETAILS to 0))
+            e.mono += 23 * h
+            assertTrue(ZenSettings.reducedVideoDetails())
+            e.mono += 2 * h
+            assertFalse(ZenSettings.reducedVideoDetails())
+            // turning it on again is stricter: immediate, even while a new lock would run
+            assertTrue(l.apply(mapOf(REDUCED_DETAILS to 1)) is ZenSettingsLock.Result.Applied)
+            assertTrue(ZenSettings.reducedVideoDetails())
+            assertTrue(l.pending().isEmpty())
+        } finally {
+            ZenSettings.install(null)
+        }
     }
 
     @Test
