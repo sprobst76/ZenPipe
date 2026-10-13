@@ -955,7 +955,7 @@
     <string name="zen_applied_now">Übernommen</string>
     <string name="zen_applied_pending">Lockerung vorgemerkt für %1$s</string>
     <string name="zen_praxis_title">Praxis</string>
-    <string name="zen_praxis_today">Praxis heute: %1$d min</string>
+    <string name="zen_praxis_today">Praxis heute: %1$d Min.</string>
     <string name="zen_praxis_pending_count">%1$d Praxis-Kanal/-Playlist(s) ausstehend (siehe Einstellungen > Zen)</string>
     <string name="zen_praxis_empty">Noch keine Praxis-Kanäle oder -Playlists. Markiere sie über das Menü ihrer Seite oder per langem Druck in einer Liste.</string>
     <string name="zen_praxis_failed">%1$d Kanal/Kanäle bzw. Playlist(s) konnten nicht geladen werden</string>
@@ -980,7 +980,7 @@
     <string name="zen_praxis_empty_pending">Dein Praxis-Eintrag wird nach der 24-Stunden-Wartezeit aktiv (siehe Einstellungen > Zen).</string>
     <string name="zen_sleep_timer">Sleep-Timer</string>
     <string name="zen_sleep_off">Ausschalten</string>
-    <string name="zen_sleep_minutes">%1$d min</string>
+    <string name="zen_sleep_minutes">%1$d Min.</string>
     <string name="zen_sleep_default_entry">%1$d min (Standard)</string>
     <string name="zen_sleep_running">Sleep-Timer: noch %1$s</string>
     <string name="zen_sleep_set">Sleep-Timer: Wiedergabe wird in %1$s leiser und pausiert</string>
