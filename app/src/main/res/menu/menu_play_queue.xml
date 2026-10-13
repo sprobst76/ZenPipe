@@ -12,6 +12,13 @@
 
 
     <item
+        android:id="@+id/action_zen_sleep"
+        android:icon="@drawable/ic_bedtime"
+        android:title="@string/zen_sleep_timer"
+        android:visible="true"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/action_playback_speed"
         android:title="1x"
         android:tooltipText="@string/playback_speed_control"

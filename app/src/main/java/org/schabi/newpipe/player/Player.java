@@ -281,12 +281,34 @@ public final class Player implements PlaybackListener, Listener {
      * @param sessionConnector used to build the {@link MediaSessionPlayerUi}, lives in the service
      *                         and could possibly be reused with multiple player instances
      */
+    // ZenPipe: sleep timer - fades the volume during its last 30 s, then pauses (no abort)
+    private final org.schabi.newpipe.zen.ZenSleep.Target zenSleepTarget =
+            new org.schabi.newpipe.zen.ZenSleep.Target() {
+                @Override
+                public void zenSleepVolume(final float volume) {
+                    if (!exoPlayerIsNull() && !isMuted()) {
+                        simpleExoPlayer.setVolume(volume);
+                    }
+                }
+
+                @Override
+                public void zenSleepEnd() {
+                    final boolean muted = isMuted();
+                    org.schabi.newpipe.zen.ZenPause.onSleepTimerEnd(context);
+                    pause();
+                    if (!exoPlayerIsNull() && !muted) {
+                        simpleExoPlayer.setVolume(1);
+                    }
+                }
+            };
+
     public Player(@NonNull final PlayerService service,
                   @NonNull final MediaSessionCompat mediaSession,
                   @NonNull final MediaSessionConnector sessionConnector) {
         this.service = service;
         context = service;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        org.schabi.newpipe.zen.ZenSleep.bind(context, zenSleepTarget);
         recordManager = new HistoryRecordManager(context);
 
         setupBroadcastReceiver();
@@ -698,6 +720,7 @@ public final class Player implements PlaybackListener, Listener {
             Log.d(TAG, "destroy() called");
         }
 
+        org.schabi.newpipe.zen.ZenSleep.unbind(zenSleepTarget);
         org.schabi.newpipe.zen.ZenPlayback.setPlaying(false);
         // ZenPipe: closing the player before the end of a video is an abort (mandatory pause)
         org.schabi.newpipe.zen.ZenPause.onClosed(context,

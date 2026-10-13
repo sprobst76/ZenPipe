@@ -135,6 +135,8 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
     private PopupMenu qualityPopupMenu;
     private PopupMenu audioTrackPopupMenu;
     protected PopupMenu playbackSpeedPopupMenu;
+    private final Runnable zenSleepListener = () ->
+            org.schabi.newpipe.zen.ZenSleepUi.updateButton(binding.zenSleepButton);
     private PopupMenu captionPopupMenu;
 
 
@@ -211,6 +213,12 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
         binding.audioTrackTextView.setOnClickListener(
                 makeOnClickListener(this::onAudioTracksClicked));
         binding.playbackSpeed.setOnClickListener(makeOnClickListener(this::onPlaybackSpeedClicked));
+        // ZenPipe: sleep timer button (countdown as its text)
+        binding.zenSleepButton.setOnClickListener(makeOnClickListener(() ->
+                org.schabi.newpipe.zen.ZenSleepUi.showMenu(new ContextThemeWrapper(context,
+                        R.style.DarkPopupMenu), binding.zenSleepButton)));
+        org.schabi.newpipe.zen.ZenSleep.addListener(zenSleepListener);
+        zenSleepListener.run();
 
         binding.playbackSeekBar.setOnSeekBarChangeListener(this);
         binding.captionTextView.setOnClickListener(makeOnClickListener(this::onCaptionClicked));
@@ -288,6 +296,8 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
         binding.qualityTextView.setOnClickListener(null);
         binding.audioTrackTextView.setOnClickListener(null);
         binding.playbackSpeed.setOnClickListener(null);
+        binding.zenSleepButton.setOnClickListener(null);
+        org.schabi.newpipe.zen.ZenSleep.removeListener(zenSleepListener);
         binding.playbackSeekBar.setOnSeekBarChangeListener(null);
         binding.captionTextView.setOnClickListener(null);
         binding.resizeTextView.setOnClickListener(null);

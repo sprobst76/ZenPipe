@@ -978,6 +978,17 @@
     <string name="zen_praxis_cancel">Abbrechen</string>
     <string name="zen_praxis_remove">Entfernen</string>
     <string name="zen_praxis_empty_pending">Dein Praxis-Eintrag wird nach der 24-Stunden-Wartezeit aktiv (siehe Einstellungen > Zen).</string>
+    <string name="zen_sleep_timer">Sleep-Timer</string>
+    <string name="zen_sleep_off">Ausschalten</string>
+    <string name="zen_sleep_minutes">%1$d min</string>
+    <string name="zen_sleep_default_entry">%1$d min (Standard)</string>
+    <string name="zen_sleep_running">Sleep-Timer: noch %1$s</string>
+    <string name="zen_sleep_set">Sleep-Timer: Wiedergabe wird in %1$s leiser und pausiert</string>
+    <string name="zen_sleep_cancelled">Sleep-Timer aus</string>
+    <string name="zen_sleep_default_title">Standard-Sleep-Timer</string>
+    <string name="zen_sleep_default_none">keiner</string>
+    <string name="zen_sleep_default_row">Standard: %1$s</string>
+    <string name="zen_sleep_settings_hint">Mond-Knopf im Player (beim Hintergrund-Player in der Warteschlange). In den letzten 30 s wird es leiser, dann pausiert die Wiedergabe. Das zählt nie als Abbruch (keine Pflichtpause). Der Timer läuft über die Videos einer Praxis-Kette weiter und endet mit dem Schließen des Players. Der Standard wird zuerst angeboten.</string>
     <string name="zen_praxis_pl_mark">Als Praxis-Playlist markieren</string>
     <string name="zen_praxis_pl_unmark">Aus Praxis-Playlists entfernen</string>
     <string name="zen_praxis_pl_cancel_pending">Ausstehende Praxis-Playlist abbrechen</string>

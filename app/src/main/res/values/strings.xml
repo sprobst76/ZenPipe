@@ -1013,6 +1013,17 @@
     <string name="zen_praxis_cancel">Cancel</string>
     <string name="zen_praxis_remove">Remove</string>
     <string name="zen_praxis_empty_pending">Your practice entry becomes active after the 24-hour wait (see Settings > Zen).</string>
+    <string name="zen_sleep_timer">Sleep timer</string>
+    <string name="zen_sleep_off">Switch off</string>
+    <string name="zen_sleep_minutes">%1$d min</string>
+    <string name="zen_sleep_default_entry">%1$d min (default)</string>
+    <string name="zen_sleep_running">Sleep timer: %1$s left</string>
+    <string name="zen_sleep_set">Sleep timer: playback fades out and pauses in %1$s</string>
+    <string name="zen_sleep_cancelled">Sleep timer off</string>
+    <string name="zen_sleep_default_title">Default sleep timer</string>
+    <string name="zen_sleep_default_none">none</string>
+    <string name="zen_sleep_default_row">Default: %1$s</string>
+    <string name="zen_sleep_settings_hint">Moon button in the player (queue screen for the background player). The volume fades out during the last 30 s, then playback pauses. This never counts as an abort (no mandatory pause). The timer runs across videos of a practice chain and ends when the player closes. The default is offered first.</string>
     <string name="zen_praxis_pl_mark">Mark as practice playlist</string>
     <string name="zen_praxis_pl_unmark">Remove from practice playlists</string>
     <string name="zen_praxis_pl_cancel_pending">Cancel pending practice playlist</string>

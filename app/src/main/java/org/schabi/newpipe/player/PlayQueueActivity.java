@@ -134,6 +134,9 @@ public final class PlayQueueActivity extends AppCompatActivity
         } else if (itemId == R.id.action_settings) {
             NavigationHelper.openSettings(this);
             return true;
+        } else if (itemId == R.id.action_zen_sleep) {
+            org.schabi.newpipe.zen.ZenSleepUi.showDialog(this); // ZenPipe: sleep timer
+            return true;
         } else if (itemId == R.id.action_append_playlist) {
             PlaylistDialog.showForPlayQueue(player, getSupportFragmentManager());
             return true;

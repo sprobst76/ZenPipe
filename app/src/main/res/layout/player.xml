@@ -220,6 +220,24 @@
                         tools:ignore="RtlHardcoded,RtlSymmetry"
                         tools:text="1x" />
 
+                    <org.schabi.newpipe.views.NewPipeTextView
+                        android:id="@+id/zenSleepButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="8dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/zen_sleep_timer"
+                        android:drawablePadding="2dp"
+                        app:drawableTint="@color/white"
+                        android:gravity="center"
+                        android:minWidth="0dp"
+                        android:padding="@dimen/player_main_buttons_padding"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        app:drawableStartCompat="@drawable/ic_bedtime"
+                        tools:ignore="RtlHardcoded"
+                        tools:text="29:59" />
+
                     <androidx.appcompat.widget.AppCompatImageButton
                         android:id="@+id/queueButton"
                         android:layout_width="35dp"

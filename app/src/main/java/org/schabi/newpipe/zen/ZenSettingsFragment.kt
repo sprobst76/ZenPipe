@@ -186,6 +186,23 @@ class ZenSettingsFragment : Fragment() {
                 .apply { topMargin = dp(16) }
         )
         renderPraxis(snap)
+        renderSleep()
+    }
+
+    /** Sleep timer: the duration offered first in the player (comfort, no lock). */
+    private fun renderSleep() {
+        content.addView(
+            text(getString(R.string.zen_sleep_timer), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        content.addView(text(getString(R.string.zen_sleep_settings_hint), 12f))
+        content.addView(
+            Button(requireContext()).apply {
+                text = ZenSleepUi.defaultLabel(requireContext())
+                setOnClickListener { ZenSleepUi.showDefaultDialog(requireActivity()) { render() } }
+            }
+        )
     }
 
     /** Practice channels: list with state, remove/cancel (both immediate), minutes of today. */

@@ -127,6 +127,7 @@ class ZenPauseEngine(
         data class Exempt(val playedMs: Long, val kind: ZenKind) : Outcome()
         data class Paused(val playedMs: Long, val lengthMs: Long) : Outcome()
         object Later : Outcome()
+        data class Slept(val playedMs: Long) : Outcome()
     }
 
     private var open = false
@@ -138,6 +139,8 @@ class ZenPauseEngine(
     private var playingSince = -1L
     private var lastPersist = 0L
     private var chainUrl: String? = null
+    private var parkedUrl: String? = null
+    private var parkedDur = 0L
     private var chained = false
     private val praxisTime = ZenPraxisTime(store)
 
@@ -161,6 +164,7 @@ class ZenPauseEngine(
     @Synchronized
     fun onItem(newUrl: String, durationMs: Long) {
         if (open && newUrl != url) finish(Reason.SWITCHED, pos, dur)
+        parkedUrl = null
         if (!open) {
             chained = newUrl == chainUrl
             chainUrl = null
@@ -179,6 +183,8 @@ class ZenPauseEngine(
 
     @Synchronized
     fun onPlaying(playing: Boolean, positionMs: Long) {
+        val parked = parkedUrl
+        if (!open && playing && parked != null) onItem(parked, parkedDur) // resumed after the sleep timer
         if (!open) return
         accumulate()
         playingSince = if (playing) monotonic() else -1
@@ -240,6 +246,27 @@ class ZenPauseEngine(
             return false // harmless: the normal switch handling decides when the new item arrives
         }
         return finish(Reason.SWITCHED, pos, dur) is Outcome.Paused
+    }
+
+    /**
+     * The sleep timer ran out and paused the player: the session ends WITHOUT a pause (falling
+     * asleep is no abort) and without using a "resume later". Practice minutes count. If the user
+     * resumes the same item later, a new session starts (so the time is counted again).
+     */
+    @Synchronized
+    fun endBySleepTimer(): Outcome {
+        if (!open) return Outcome.None
+        accumulate()
+        val playedMs = played
+        val k = kind ?: ZenKind.VIDEO
+        val u = url
+        val d = dur
+        log("sleep_end", "url=$u kind=$k playedMs=$playedMs posMs=$pos durMs=$d")
+        clearSession()
+        if (k == ZenKind.PRAXIS) praxisTime.add(ZenDay.dayOf(trustedNow(), zone()).toString(), playedMs)
+        parkedUrl = u
+        parkedDur = d
+        return Outcome.Slept(playedMs)
     }
 
     // ---------------------------------------------------------------- resume later (F6)
@@ -499,6 +526,12 @@ object ZenPause {
     @JvmStatic
     fun onClosed(context: Context, positionMs: Long, durationMs: Long) {
         engine(context).onClosed(positionMs, durationMs)
+    }
+
+    /** The sleep timer paused the player: end the session without a pause. */
+    @JvmStatic
+    fun onSleepTimerEnd(context: Context) {
+        engine(context).endBySleepTimer()
     }
 
     /** Process start: a session left open by a killed process counts as aborted. */
