@@ -133,7 +133,8 @@ data class StreamItem(
     private fun getStreamInfoDetailLineBase(context: Context): String {
         var viewsAndDate = ""
         val viewCount = stream.viewCount
-        if (viewCount != null && viewCount >= 0) {
+        // zen: no view counts with reduced video details (as on the detail page)
+        if (viewCount != null && viewCount >= 0 && !org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()) {
             viewsAndDate = when (stream.streamType) {
                 AUDIO_LIVE_STREAM -> Localization.listeningCount(context, viewCount)
                 LIVE_STREAM -> Localization.shortWatchingCount(context, viewCount)

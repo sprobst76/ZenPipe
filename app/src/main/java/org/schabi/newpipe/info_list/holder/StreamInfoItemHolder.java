@@ -64,7 +64,9 @@ public class StreamInfoItemHolder extends StreamMiniInfoItemHolder {
 
     private String getStreamInfoDetailLine(final StreamInfoItem infoItem) {
         String viewsAndDate = "";
-        if (infoItem.getViewCount() >= 0) {
+        // zen: no view counts with reduced video details (as on the detail page)
+        if (infoItem.getViewCount() >= 0
+                && !org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()) {
             if (infoItem.getStreamType().equals(StreamType.AUDIO_LIVE_STREAM)) {
                 viewsAndDate = Localization
                         .listeningCount(itemBuilder.getContext(), infoItem.getViewCount());

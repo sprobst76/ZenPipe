@@ -98,6 +98,13 @@ public class ChannelMiniInfoItemHolder extends InfoItemHolder {
 
     @Nullable
     private String getDetailLine(final ChannelInfoItem item) {
+        // zen: no subscriber counts with reduced video details (as on the detail page)
+        if (org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()) {
+            return item.getStreamCount() >= 0
+                    ? Localization.localizeStreamCount(itemBuilder.getContext(),
+                            item.getStreamCount())
+                    : null;
+        }
         if (item.getStreamCount() >= 0 && item.getSubscriberCount() >= 0) {
             return Localization.concatenateStrings(
                     Localization.shortSubscriberCount(itemBuilder.getContext(),
