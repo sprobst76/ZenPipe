@@ -122,8 +122,9 @@ Aufwand A: ca. 2-3 h inkl. Gerätprüfung. C zusätzlich ca. 3-4 h und mehr Merg
 - **Gewichte**: keine fetten Titel; Listen-Titel regular 14sp (wie Upstream), Toolbar-Titel medium.
   Countdown/Zahlen `sans-serif-light`, Ziffern tabellarisch.
 - **Meta-Zeile ruhig**: Kanal/Datum in Sekundär-/Hinweisfarbe (kommt mit Stufe 2 Textfarben).
-- **Zähler weg** (Entscheidung 4): Aufrufzahlen in Listen (`StreamInfoItemHolder.getStreamInfoDetailLine`)
-  und Aufrufe/Likes auf der Detailseite ausblenden; „N min · Gruppe“ bleibt.
+- **Zähler weg** (Entscheidung 4): die Detailseite ist mit „Reduzierte Videodetails“
+  (`reduced_details`, Commit 162d6dffc) schon zählerfrei. Offen sind die Aufrufzahlen in Listen
+  (`StreamInfoItemHolder.getStreamInfoDetailLine`): an dieselbe Einstellung koppeln; „N min · Gruppe“ bleibt.
 - **Dauer-Badge dezent**: 72 % Grüngrau statt Schwarz, Text Off-White (Farbwerte genügen).
 - **Thumbnails** ohne zusätzliche Overlays; Entsättigung **nicht** jetzt (Codeänderung im
   Bildladen, eigener Graustufen-Modus wäre ein späteres Feature).
@@ -157,7 +158,7 @@ Je Schritt ein Commit `zen: …`; nach jedem Schritt `./gradlew assembleDebug ru
 4. **Pausenbildschirm** im neuen Look (Abschnitt 5).
 5. **Textfarben** (Stufe 2): `color/zen_text_primary_{light,dark}.xml` usw. als Color-State-List
    mit Disabled-Zustand, in `Base.V21.*Theme` als `android:textColorPrimary/Secondary/Hint`.
-6. **Zähler ausblenden** (nur nach Nutzer-OK, Entscheidung 4).
+6. **Listen-Aufrufzahlen** an `reduced_details` koppeln (nur nach Nutzer-OK, Entscheidung 4).
 
 **Verifikation auf dem Defy** (`adb-device-check.sh`, dann je Theme Hell/Dunkel/Schwarz und
 „System folgen“ mit `adb shell cmd uimode night yes|no`): Screenshots (`adb exec-out screencap -p`)
@@ -174,7 +175,7 @@ mehr Rot (Ausnahme: Thumbnails); Logcat ohne FATAL. Danach `STATE.md` und diese 
 1. Variante: **A Salbei (Empfehlung)**, B Stein oder C Papier.
 2. Nachtvariante bei „System folgen“: **Dunkel (Empfehlung, Upstream-Default)** oder Schwarz.
 3. Medien-Benachrichtigung standardmäßig nicht eingefärbt: **ja (Empfehlung)**.
-4. Aufruf-/Like-Zähler ausblenden: **ja (Empfehlung)**.
+4. Aufrufzahlen auch in Listen ausblenden (gekoppelt an „Reduzierte Videodetails“): **ja (Empfehlung)**.
 
 ## Anhang: Kontrastformel
 
