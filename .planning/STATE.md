@@ -1,6 +1,6 @@
 # State
 
-- Stand: 2026-10-13 (zuletzt: Inhalts-Erkennung AP 1–3)
+- Stand: 2026-10-13 (zuletzt: Inhalts-Erkennung AP 4–6)
 - Phase: MVP + Phase 0/1 + Phase 2 Teil 1 (Zen-Einstellungen mit 24-h-Sperre) + Verteilbarkeit 1/2 + Praxis-Kanäle + Praxis-Playlists/Kette/Pause-Ausnahme + Sleep-Timer umgesetzt (Branch `zen`), auf Motorola Defy teilweise verifiziert (s. u.)
 
 ## Erledigt (je ein Commit `zen:`)
@@ -140,4 +140,12 @@ Vorgehen: Praxis-Playlist „One-Minute Meditations with NYU …“ per Long-Pre
 - Gerätetest-Tricks: Debug-Download aus lokaler Quelle: `python3 -m http.server 8765` im Ordner mit dem Zip, `adb reverse tcp:8765 tcp:8765`, in `zen_state` `cls_debug_url=http://127.0.0.1:8765/<zip>` + `cls_debug_sha=<sha256>` (App vorher `force-stop`); danach Schlüssel wieder entfernen. Defekt-Test: `run-as … truncate -s 1000000 no_backup/zen_classifier/model/encoder_int8.onnx` nach Leerlauf-Schließen.
 - Defy-Zustand danach: `zen_state` auf Sicherung zurückgesetzt (Ersteinrichtung offen, keine `cls_*`-Schlüssel), Sprache Systemstandard; **Modell bleibt in der Debug-App installiert** (Cache mit 2 Einträgen), Verlauf enthält das BBC-Testvideo (1:54 min).
 - Offen: AP 0 (Asset + SHA), Worker-Erstlauf mit echtem Feed (Debug-App hatte 0 Kandidaten), Release-Build am Gerät, AP 4–7.
+
+## Inhalts-Erkennung AP 4–6 (2026-10-13), Commits `zen:` (Spec Abschnitt 11, Regeln `rules.md` „Inhalts-Erkennung“)
+- AP 0 geliefert (Daten in der Session, nicht im Repo): Modell unverändert; nur Titel+Kanal F1 69,1 % (voll 74,5 %), Praxis 89 zuverlässig, Aktuelles nur 58 % → Aktuelles auf Stufe T Gewicht 0,6 statt 0,3. `golden_synthetic.json` (52 erfundene Fälle) als Test-Ressource.
+- AP 4 Feed-Gewichtung (Gewicht im Score, Belastend-Regel Platz ≥ 10/nie hintereinander/≤ 10 %, 3-s-Nachklassifikation, „Warum“-Zeile, Schalter `class_feed`/`class_heavy` mit Sperre, Modell löschen nur mit beiden aus); AP 5 Plausibilitätsprüfung beim Markieren (15 Videos, 1 Anfrage/s, 30/60 %); AP 6 Ausnahmeliste (Kanäle + Schlagwörter, Lockerung über `ZenSettingsLock`, Entfernen sofort; Einstellungen, Long-Press Kanal/Abo).
+- Verifiziert: `assembleDebug runCheckstyle testDebugUnitTest` grün (326 Tests), Defy mit vorübergehend abonnierten öffentlichen Kanälen (tagesschau, ZDFheute, phoenix, MrWissen2go, Kurzgesagt DE, Doktor Whatson, Gronkh, HandOfBlood): Worker 92 Videos/15 s, „Warum“-Zeilen EN+DE, Gewichtung, Belastend auf Platz 10–12, Schalter aus = ausstehend/Sperre/Löschen gesperrt, an = sofort, Prüfung (Yoga passt, tagesschau/Kurzgesagt deutliche Warnung, Gronkh „kein klares Bild“, Playlist passt, ohne Modell Hinweis, Überspringen, gesperrt = keine Prüfung), Ausnahmen (Kanal aktiv → tagesschau mit „Ausnahme“ oben, Entfernen während Sperre sofort, Schlagwort ausstehend/abgebrochen, Long-Press Abo).
+- Gerätetest-Tricks: neue Ausgabe erzwingen = `feed_edition_*`, `feed_day_urls`, `feed_handled` aus `zen_state` löschen (App vorher `force-stop`); Sperre verkürzen wie gehabt (`cd_settings_lock_rem`); Modell „nicht installiert“ simulieren = `installed.properties` per `run-as mv` weg und zurück. Vor solchen Tests `databases/newpipe.db*` + `zen_state.xml` sichern und danach per `adb exec-in run-as … sh -c 'cat > …'` zurückspielen. Kanal-Links per Intent: nach „Show info“ erscheint „Just once“ nicht immer – nur tippen, wenn sichtbar (sonst trifft der Tipp ein Video).
+- Defy-Zustand danach: Abos/Feed-DB und `zen_state` exakt auf die Sicherung vor dem Test zurückgespielt (nur Veritasium), Klassifikations-Cache gelöscht, Modell bleibt installiert, Sprache Systemstandard. Im Verlauf/Logcat der Sitzung kurze Test-Wiedergaben (≤ 31 s), Verlauf-DB ebenfalls zurückgespielt.
+- Offen: Schwellen/„kein klares Bild“-Vorrang mit Stichprobe kalibrieren, zu häufiger Ton „belastend“ bei Nachrichten, erste Ausgabe nach Aktualisierung unklassifiziert, `RuntimeException` beim ersten Prüflauf (Ursache unbekannt), Akku-Messung ohne USB, AP 7, AP-0-Asset/SHA.
 

@@ -1,6 +1,6 @@
 # Spec: Lokaler Inhalts-Klassifikator (Praxis/Bildung/Aktuelles/Ton) in ZenPipe
 
-Stand: 2026-10-13. **Status: AP 1–3 umgesetzt (Abschnitt 10), AP 4–7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
+Stand: 2026-10-13. **Status: AP 0 geliefert (Messung 2.3), AP 1–3 umgesetzt (Abschnitt 10), AP 4–6 umgesetzt (Abschnitt 11), AP 7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
 Abschnitt 8 listet die nötigen Änderungen an `rules.md`. Quelle des Klassifikators: Projekt YoutubeManager, übergeben als
 `resources/zen-android.zip`, `zen-handoff.zip`, `zen-rules.zip` (**ungetrackt, wird nicht committet**).
 
@@ -104,9 +104,14 @@ von 29 Labels verloren, 8 kamen hinzu.
 Lesart: Mit Titel+Kanal ändert sich gut ein Drittel der Einordnungen; Praxis-Erkennung hängt stark an der Beschreibung.
 Auch 128 statt 256 Tokens verschiebt 10 von 40 Mengen. Die Doku meldet für 128 Tokens trotzdem gleiche oder bessere F1 gegen
 die Wahrheit [D]; Verschiebung ist also nicht gleich Verschlechterung. n = 40 ist zu klein für Prozentangaben je Kategorie.
-**Nötig vor dem Bau (AP 0):** im YoutubeManager die Ende-zu-Ende-F1 mit Titel+Kanal gegen die Konsens-Wahrheit messen und
-optional eigene **Kurztext-Köpfe** trainieren (gleicher Encoder, Text `query: Titel — Kanal`). Das kostet keine App-Größe
-(Köpfe 0,1 MB).
+**AP 0 (geliefert 2026-10-13, YoutubeManager `docs/zen-ergebnisse.md`) [D, gegen die Konsens-Wahrheit zweier Beurteiler,
+je 200 Videos]:** Android-Modell mit vollem Text F1 **74,5 %** (P 84,5 / R 66,7), nur `Titel — Kanal` F1 **69,1 %** (P 78,6 /
+R 61,6). Je Kategorie (voller Text → nur Titel): Praxis 89 → 89 (zuverlässig), Bildung 74 → 66, Aktuelles 71 → **58**,
+Körper 64 → 68, Psyche 74 → 69, Unterhaltung 70 → 62; Ruhe zu selten zum Bewerten. Ohne Kategorie bei nur Titel 24–26 %.
+Eigene Kurztext-Köpfe brachten nichts (66,3 statt 69,1) → bestehende Köpfe, `MIN_P` 0,6, 128 Tokens bleiben; Modell,
+Köpfe, Tokenizer unverändert (Encoder-SHA-256 wie zuvor). Folgen: Plausibilitätsprüfung für Praxis ist auch auf Stufe T
+verlässlich (mit D besser); Aktuelles auf Stufe T im Feed nur sanft abwerten (0,6 statt 0,3) und als unsicher kennzeichnen
+(Abschnitt 11). Die n = 40-Tabelle oben bleibt als Indiz für die Verschiebung, die Zahlen hier gelten.
 
 ### 2.4 Wo im Zen-Feed-Ablauf
 
@@ -366,7 +371,8 @@ lauten, sondern „erkennt nur …“.
 | Ton | Genauigkeit 88,6 %; belastend P 57 % / R 67 % bei n ≈ 8 | [D], sehr unsicher |
 | Videos ohne Kategorie | 21–26 % (Schüler-Labels) | [D]; 13/40 im Probelauf [V] |
 | Obergrenze (die zwei Opus-Beurteiler untereinander) | F1 92–94 % | [D] |
-| Kurztext (Titel+Kanal) | keine Messung gegen Wahrheit; 15/40 Kategorie-Mengen ändern sich, Praxis 1/4 | [V] Probelauf, n = 40 |
+| Android voller Text (AP 0) | F1 74,5 %, P 84,5 %, R 66,7 % | [D] `zen-ergebnisse.md` |
+| Kurztext (Titel+Kanal, AP 0) | F1 69,1 %, P 78,6 %, R 61,6 %; Praxis 89, Bildung 66, Aktuelles 58, Körper 68, Psyche 69, Unterhaltung 62; ohne Kategorie 24–26 % | [D] `zen-ergebnisse.md` (statt des n = 40-Indizes) |
 
 Was das praktisch heißt: Etwa jede 7. Einordnung ist falsch (Precision 85 %), fast jede 3.–4. richtige Kategorie fehlt
 (Recall ~71 %). „Belastend“ beruht auf sehr wenigen Testfällen. Wahrheit sind Urteile zweier KI-Beurteiler, nicht Stefans
@@ -512,8 +518,7 @@ download`, `zen: ci emulator for API 23 on x86_64`, `zen: classification cache a
 3. CI-Emulator API 23 auf x86_64 (Debug-APK hat kein 32-bit-x86 mehr).
 4. Cache mit `SQLiteOpenHelper` statt Room (keine Migrationen, eine Tabelle).
 5. Prüfansicht in **allen** Builds (Stichprobe 6.3 läuft mit Stefans echten Abos), Selbsttest nur Debug.
-6. Löschen des Modells ist derzeit frei (es gibt noch keine Schalter, 4.7); mit AP 4 wird es zur Lockerung, solange
-   ein Schalter aktiv ist.
+6. Löschen des Modells war bis AP 3 frei; seit AP 4 nur, wenn beide Inhalts-Schalter aus sind (Abschnitt 11).
 7. Thread-Wechsel 4 ↔ 2 lädt den Encoder neu (~0,7 s); geöffnete Videos werden 5 s verzögert eingeordnet.
 8. AboutLibraries-Export nicht neu erzeugt (bringt große fremde Upstream-Änderungen); Lizenzen stattdessen unter
    Einstellungen > Zen > Lizenzen. Fastlane/F-Droid-Beschreibung erst, wenn das Modell veröffentlicht ist.
@@ -525,4 +530,65 @@ download`, `zen: ci emulator for API 23 on x86_64`, `zen: classification cache a
   (nur Test-Abo, dessen neues Video angeschaut ist). Zeit pro Video ist aus dem Selbsttest bekannt.
 - Release-Build am Gerät (Keep-Regeln nur statisch geprüft: ORT-Klassen im Dex vorhanden), Ruckeln bei Wiedergabe mit
   2 Threads (nur Log), Kategorie-Namen des Extraktors in anderer Inhaltssprache, HTML-Beschreibung gegen Server-Text.
+
+## 11. Umsetzung AP 4–6 (2026-10-13)
+
+Commits auf `zen`: `zen: synthetic golden test for the classifier`, `zen: feed weighting by content`, `zen: plausibility check
+when marking practice`, `zen: classifier exceptions`, `zen: classifier exception from the subscriptions long press`.
+Regeln: `rules.md` „Inhalts-Erkennung“.
+
+### 11.1 Bausteine
+- **AP 4 Feed:** `Candidate` + `zenCats`, `tone`, `classLevel`, `classExempt`; `ZenFeedPlanner.ContentRules` (beide Schalter,
+  nur mit funktionierendem Modell, sonst `OFF` = altes Verhalten); `contentWeight`, `weightedScore`, Belastend-Regel als
+  Platz-für-Platz-Füllung in `select` (ohne Regel identisch zur alten Schleife, Regressions-Test); `whyOf` → `Pick.why`
+  (in `feed_edition_picks` als 4. Feld gespeichert); `ZenFeedProvider.classified` liest den Cache und klassifiziert Fehlendes
+  höchstens 3 s (`ZenClassifier.classifyWithin`); Zeile in `StreamItem` über `ZenClassWhy.feedLine`. Zen-Einstellungen
+  `class_feed`/`class_heavy` (bool, Default an, aus = Lockerung), nur wo der Klassifikator unterstützt ist sichtbar; Modell
+  löschen nur mit beiden aus.
+- **AP 5 Prüfung:** `ZenPlausibility` (reine Logik, Schwellen 30/60/20 %, „kein klares Bild“ ab 8/15), `ZenPlausibilityCheck`
+  (Fortschrittsdialog „prüfe 7 von 15 …“ mit Überspringen/Abbrechen, Liste, gedrosselte `StreamInfo`-Abrufe 1/s,
+  Cache-Wiederverwendung, Warn-Dialog mit Spec-Texten, Videoliste mit Kategorien/Ton/Stufe/Top-Themen), Einstieg in
+  `ZenPraxisUi.onMenu` (auch Long-Press), danach unverändert `confirmAdd` mit einer Zeile zum Ergebnis.
+- **AP 6 Ausnahmen:** `ZenClassExempt` (Kanal/Schlagwort), `ZenClassExemptions` (Abgleich Kanal-Schlüssel wie Praxis,
+  Schlagwort als Teilstring im Titel), `ZenSettingsLock.addExempt/removeExempt` (Mechanik wie Praxis inkl. Undo, Abbrechen,
+  Ausstehendes in der Statusbox), UI in Einstellungen > Zen > Inhalts-Erkennung und Long-Press auf Kanal-Einträge/Abos.
+
+### 11.2 Abweichungen von dieser Spec
+1. **Aktuelles auf Stufe T: Gewicht 0,6 statt 0,3** (AP-0-Messung, Aktuelles-F1 nur 58 % ohne Beschreibung); Stufe D 0,3.
+   „Warum“-Zeile zeigt „unsicher (nur Titel)“.
+2. Ohne Kategorie gilt Gewicht 1,0 **auch bei belastendem Ton** (E4); die Belastend-Platzregel gilt aber für jeden
+   eingeordneten belastenden Ton, auch ohne Kategorie.
+3. Unter 10 Plätzen pro Ausgabe gibt es keinen Platz für Belastendes (10 %-Regel); Ausgaben können durch die Regel kürzer
+   als das Budget werden (übersprungene warten).
+4. Prüfung: Ein Praxis-Video, das zugleich wie Unterhaltung aussieht, zählt nicht als Warnsignal; „kein klares Bild“ hat
+   Vorrang vor der Warnung (Spec-Tabelle). Bildung-Zeilen der Tabelle sind nicht gebaut (AP 7).
+5. Ausnahmen: zusätzlich zu Kanälen auch **Schlagwörter im Titel** (Auftrag); Playlists nicht (Feed kennt nur Kanäle).
+   Bildungsprüfung-Ausnahme folgt mit AP 7. Gesperrt: Hinzufügen-Knöpfe ausgegraut.
+6. `golden_synthetic.json` (52 erfundene Fälle) liegt als Test-Ressource im Repo (`ZenSyntheticGoldenTest`: Textbau,
+   Clickbait, Regeln, Gewicht, Ton immer; Tokenizer/Köpfe mit `ZEN_MODEL_DIR`).
+
+### 11.3 Messwerte (Defy, Debug, mit vorübergehend abonnierten öffentlichen Kanälen)
+| Messung | Wert |
+|---|---|
+| Unit-Tests | 326 (1 übersprungen ohne `ZEN_GOLDEN_DIR`); neu u. a. 7 Feed-, 4 Sperr-, 6 Prüf-Tests, synthetische Goldfälle 52/52 |
+| Worker-Erstlauf | 92 Kandidaten (Titel+Kanal) in 15,2 s, Ø 134 ms/Video, Laden 1,7 s; Akku: Gerät am USB bei 100 %, 25 °C → Verbrauch nicht messbar |
+| Erste Ausgabe direkt nach Feed-Aktualisierung | Worker lief parallel: 3-s-Budget schaffte 4 von 92 (Modell-Laden 1,7 s), alle 14 Picks „noch nicht eingeordnet“ |
+| Ausgabe mit vollem Cache | 12 Videos, 0 nicht eingeordnet, 1 belastendes auf Platz 12; Nachrichten (tagesschau/phoenix/ZDFheute, ~70 % als belastend eingeordnet) fast alle hinten/übrig |
+| Prüfung Yoga With Adriene | 15/15 Praxis → passt (beim ersten Lauf 8 von 14 Detailabrufen mit `RuntimeException`, danach Titel+Kanal; spätere Läufe ohne Fehler) |
+| Prüfung tagesschau | 0/15, 15 Aktuelles (alle belastend) → deutliche Warnung; „Trotzdem markieren“ → `praxis_add_pending` |
+| Prüfung Kurzgesagt (DE) | 0/15 → deutliche Warnung (12 Bildung) |
+| Prüfung Gronkh (Let's Plays) | 11/15 ohne Kategorie → nur „kein klares Bild“ |
+| Prüfung Playlist One-Minute Meditations | 8 Videos (ohne Shorts), 5 Praxis → passt |
+| Dauer der Prüfung | 15 Videos 21–30 s (14–15 Detailabrufe, Drosselung 1/s), Playlist 8 Videos 15 s |
+
+Auffällige Fehlurteile: Gronkh „PALWORLD … Forsche Forschungen …“ = Bildung 0,84; tagesschau „Die Toten Hosen: Letztes Konzert“
+und „Wirtschaftsnobelpreis …“ = Aktuelles + **belastend**; fast alle Nachrichten belastend (Ton-Precision laut AP 0 nur 50–73 %);
+MrWissen2go „KI außer Kontrolle?“ ohne Kategorie; Talk-Formate (phoenix persönlich, 11KM-Podcast „Pferde klonen“) = Bildung.
+
+### 11.4 Offen
+- Schwellen (E8) und „kein klares Bild“-Vorrang mit Stefans Stichprobe (6.3) kalibrieren: Gronkh bekäme heute nur einen Hinweis.
+- Belastend-Ton bei Nachrichten wirkt zu häufig: mit der Regel landen Nachrichtensendungen praktisch nie in der Ausgabe.
+- Erste Ausgabe nach einer Feed-Aktualisierung ist meist unklassifiziert (Worker und Ausgabe starten gleichzeitig).
+- Ursache der `RuntimeException` beim ersten Prüflauf (8 von 14 Detailabrufen) unklar; Ursachen-Logging ist jetzt drin.
+- AP 7 (Bildung ohne Politik), AP 0-Asset/SHA in `ZenClassifierModel`, Akku-Messung ohne USB.
 
