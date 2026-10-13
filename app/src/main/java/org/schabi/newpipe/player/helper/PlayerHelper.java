@@ -240,6 +240,10 @@ public final class PlayerHelper {
 
     @MinimizeMode
     public static int getMinimizeOnExitAction(@NonNull final Context context) {
+        // zen: the picture never runs alongside (ZenFeatures): leaving the app pauses the video
+        if (!org.schabi.newpipe.zen.ZenFeatures.minimizeOnExitEnabled()) {
+            return MINIMIZE_ON_EXIT_MODE_NONE;
+        }
         final String action = getPreferences(context)
                 .getString(context.getString(R.string.minimize_on_exit_key), "");
         if (action.equals(context.getString(R.string.minimize_on_exit_popup_key))) {

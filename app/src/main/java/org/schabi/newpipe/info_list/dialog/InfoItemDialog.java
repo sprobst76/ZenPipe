@@ -216,6 +216,11 @@ public final class InfoItemDialog {
                     && !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
                 return this;
             }
+            // zen: the popup player is disabled centrally (ZenFeatures)
+            if (entry == StreamDialogDefaultEntry.START_HERE_ON_POPUP
+                    && !org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+                return this;
+            }
             entries.add(entry.toStreamDialogEntry());
             return this;
         }

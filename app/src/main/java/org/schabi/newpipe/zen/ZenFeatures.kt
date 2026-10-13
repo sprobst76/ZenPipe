@@ -13,6 +13,51 @@ object ZenFeatures {
      */
     private const val DOWNLOADS_ENABLED = false
 
+    /**
+     * Pop-up (floating window) player: detail-page button, long-press "Start here on popup",
+     * playlist/channel "Popup" control, share target "Popup player", queue menu "Switch to
+     * popup", minimize-on-exit "Popup", popup settings and any player intent asking for it.
+     * Off in ZenPipe: the picture never runs alongside other apps.
+     */
+    private const val POPUP_PLAYER_ENABLED = false
+
+    /**
+     * Minimize-on-exit of the video player ("continue as background audio" or "popup" when the
+     * app is left). Off in ZenPipe: leaving the app or turning the screen off pauses the video
+     * player (mode "none"); the setting is hidden. Audio started via the "Background" action is
+     * a separate player and keeps playing (screen on or off).
+     */
+    private const val MINIMIZE_ON_EXIT_ENABLED = false
+
     @JvmStatic
     fun downloadsEnabled(): Boolean = DOWNLOADS_ENABLED
+
+    @JvmStatic
+    fun popupPlayerEnabled(): Boolean = POPUP_PLAYER_ENABLED
+
+    @JvmStatic
+    fun minimizeOnExitEnabled(): Boolean = MINIMIZE_ON_EXIT_ENABLED
+
+    /**
+     * The open action that is actually used for a stored or chosen [choice] (share targets and
+     * the "preferred open action" setting): disabled downloads show the info page, a disabled
+     * popup player becomes the normal video player.
+     */
+    @JvmStatic
+    fun effectiveOpenAction(
+        choice: String,
+        downloadKey: String,
+        popupKey: String,
+        showInfoKey: String,
+        videoPlayerKey: String
+    ): String = when {
+        choice == downloadKey && !downloadsEnabled() -> showInfoKey
+        choice == popupKey && !popupPlayerEnabled() -> videoPlayerKey
+        else -> choice
+    }
+
+    /** Whether an open action may be offered in lists (share dialog, settings). */
+    @JvmStatic
+    fun isOpenActionOffered(choice: String, downloadKey: String, popupKey: String): Boolean = !(choice == downloadKey && !downloadsEnabled()) &&
+        !(choice == popupKey && !popupPlayerEnabled())
 }

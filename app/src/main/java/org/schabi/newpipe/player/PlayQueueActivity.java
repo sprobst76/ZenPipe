@@ -104,6 +104,9 @@ public final class PlayQueueActivity extends AppCompatActivity
         this.menu = m;
         getMenuInflater().inflate(R.menu.menu_play_queue, m);
         getMenuInflater().inflate(R.menu.menu_play_queue_bg, m);
+        // zen: the popup player is disabled (ZenFeatures)
+        m.findItem(R.id.action_switch_popup)
+                .setVisible(org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled());
         buildAudioTrackMenu();
         onMaybeMuteChanged();
         // to avoid null reference
@@ -117,8 +120,10 @@ public final class PlayQueueActivity extends AppCompatActivity
     @Override
     public boolean onPrepareOptionsMenu(final Menu m) {
         if (player != null) {
+            // zen: no "switch to popup" while the popup player is disabled (ZenFeatures)
             menu.findItem(R.id.action_switch_popup)
-                    .setVisible(!player.popupPlayerSelected());
+                    .setVisible(!player.popupPlayerSelected()
+                            && org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled());
             menu.findItem(R.id.action_switch_background)
                     .setVisible(!player.audioPlayerSelected());
         }

@@ -540,7 +540,9 @@ public class RouterActivity extends AppCompatActivity {
         if (linkType == LinkType.STREAM || linkType == LinkType.PLAYLIST) {
             if (capabilities.contains(VIDEO)) {
                 returnedItems.add(videoPlayer);
-                returnedItems.add(popupPlayer);
+                if (org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+                    returnedItems.add(popupPlayer); // zen: popup player disabled (ZenFeatures)
+                }
             }
             if (capabilities.contains(AUDIO)) {
                 returnedItems.add(backgroundPlayer);
@@ -582,7 +584,9 @@ public class RouterActivity extends AppCompatActivity {
 
             if (capabilities.contains(VIDEO) && !isExtVideoEnabled) {
                 returnedItems.add(videoPlayer);
-                returnedItems.add(popupPlayer);
+                if (org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+                    returnedItems.add(popupPlayer); // zen: popup player disabled (ZenFeatures)
+                }
             }
             if (capabilities.contains(AUDIO) && !isExtAudioEnabled) {
                 returnedItems.add(backgroundPlayer);
@@ -618,10 +622,10 @@ public class RouterActivity extends AppCompatActivity {
     }
 
     private void handleChoice(final String choiceKey) {
-        // zen: downloads are disabled (ZenFeatures), a stored "download" choice shows info
-        final String selectedChoiceKey = choiceKey.equals(getString(R.string.download_key))
-                && !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()
-                ? getString(R.string.show_info_key) : choiceKey;
+        // zen: disabled features (ZenFeatures): "download" shows info, "popup" plays as video
+        final String selectedChoiceKey = org.schabi.newpipe.zen.ZenFeatures.effectiveOpenAction(
+                choiceKey, getString(R.string.download_key), getString(R.string.popup_player_key),
+                getString(R.string.show_info_key), getString(R.string.video_player_key));
         final List<String> validChoicesList = Arrays.asList(getResources()
                 .getStringArray(R.array.preferred_open_action_values_list));
         if (validChoicesList.contains(selectedChoiceKey)) {

@@ -184,6 +184,16 @@ public final class PlayerService extends MediaBrowserServiceCompat {
             return START_NOT_STICKY;
         }
 
+        // ZenPipe: the popup player is disabled (ZenFeatures); an intent asking for it is dropped
+        if (!org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()
+                && androidx.core.content.IntentCompat.getSerializableExtra(intent,
+                        Player.PLAYER_TYPE, PlayerType.class) == PlayerType.POPUP) {
+            if (player.getPlayQueue() == null) {
+                destroyPlayerAndStopService();
+            }
+            return START_NOT_STICKY;
+        }
+
         final PlayerType oldPlayerType = player.getPlayerType();
         player.handleIntent(intent);
         player.handleIntentPost(oldPlayerType);

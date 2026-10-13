@@ -27,7 +27,8 @@ public class VideoAudioSettingsFragment extends BasePreferenceFragment {
 
         updateSeekOptions();
         updateResolutionOptions();
-        zenRemoveDownloadOpenAction();
+        zenRemoveDisabledOpenActions();
+        zenRemoveHiddenPreferences();
         listener = (sharedPreferences, key) -> {
 
             // on M and above, if user chooses to minimise to popup player on exit
@@ -55,29 +56,59 @@ public class VideoAudioSettingsFragment extends BasePreferenceFragment {
     }
 
     /**
-     * zen: drop "Download" from the preferred open actions while downloads are disabled.
+     * zen: drop disabled features (ZenFeatures) from the preferred open actions:
+     * "Download" and "Popup player".
      */
-    private void zenRemoveDownloadOpenAction() {
-        if (org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
-            return;
-        }
+    private void zenRemoveDisabledOpenActions() {
         final ListPreference pref = findPreference(getString(R.string.preferred_open_action_key));
         if (pref == null) {
             return;
         }
         final String downloadKey = getString(R.string.download_key);
+        final String popupKey = getString(R.string.popup_player_key);
         final List<CharSequence> entries = new LinkedList<>();
         final List<CharSequence> values = new LinkedList<>();
         for (int i = 0; i < pref.getEntryValues().length; i++) {
-            if (!downloadKey.contentEquals(pref.getEntryValues()[i])) {
+            if (org.schabi.newpipe.zen.ZenFeatures.isOpenActionOffered(
+                    pref.getEntryValues()[i].toString(), downloadKey, popupKey)) {
                 entries.add(pref.getEntries()[i]);
                 values.add(pref.getEntryValues()[i]);
             }
         }
         pref.setEntries(entries.toArray(new CharSequence[0]));
         pref.setEntryValues(values.toArray(new CharSequence[0]));
-        if (downloadKey.equals(pref.getValue())) {
+        if (pref.getValue() != null && !org.schabi.newpipe.zen.ZenFeatures.isOpenActionOffered(
+                pref.getValue(), downloadKey, popupKey)) {
             pref.setValue(getString(R.string.preferred_open_action_default));
+        }
+    }
+
+    /**
+     * zen: preferences of disabled features (ZenFeatures): popup resolution and size, and
+     * "minimize on app switch" (fixed to "none": leaving the app pauses the video). They are
+     * removed from this screen and from the settings search.
+     *
+     * @param context the context to read the preference keys with
+     * @return the keys of the hidden preferences
+     */
+    public static List<String> zenHiddenPreferenceKeys(final android.content.Context context) {
+        final List<String> keys = new LinkedList<>();
+        if (!org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+            keys.add(context.getString(R.string.default_popup_resolution_key));
+            keys.add(context.getString(R.string.popup_remember_size_pos_key));
+        }
+        if (!org.schabi.newpipe.zen.ZenFeatures.minimizeOnExitEnabled()) {
+            keys.add(context.getString(R.string.minimize_on_exit_key));
+        }
+        return keys;
+    }
+
+    private void zenRemoveHiddenPreferences() {
+        for (final String key : zenHiddenPreferenceKeys(requireContext())) {
+            final androidx.preference.Preference pref = findPreference(key);
+            if (pref != null && pref.getParent() != null) {
+                pref.getParent().removePreference(pref);
+            }
         }
     }
 

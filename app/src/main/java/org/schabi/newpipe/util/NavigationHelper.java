@@ -144,6 +144,9 @@ public final class NavigationHelper {
     public static void playOnPopupPlayer(final Context context,
                                          final PlayQueue queue,
                                          final boolean resumePlayback) {
+        if (!org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+            return; // zen: the popup player is disabled (ZenFeatures)
+        }
         if (!PermissionHelper.isPopupEnabledElseAsk(context)) {
             return;
         }
@@ -180,6 +183,10 @@ public final class NavigationHelper {
     public static void enqueueOnPlayer(final Context context,
                                        final PlayQueue queue,
                                        final PlayerType playerType) {
+        if (playerType == PlayerType.POPUP
+                && !org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+            return; // zen: the popup player is disabled (ZenFeatures)
+        }
         if (playerType == PlayerType.POPUP && !PermissionHelper.isPopupEnabledElseAsk(context)) {
             return;
         }

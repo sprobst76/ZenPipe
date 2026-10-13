@@ -1096,6 +1096,9 @@ public final class VideoDetailFragment
     }
 
     private void openPopupPlayer(final boolean append) {
+        if (!org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()) {
+            return; // zen: the popup player is disabled (ZenFeatures)
+        }
         if (!PermissionHelper.isPopupEnabledElseAsk(activity)) {
             return;
         }
@@ -1686,7 +1689,10 @@ public final class VideoDetailFragment
 
         final boolean noVideoStreams =
                 info.getVideoStreams().isEmpty() && info.getVideoOnlyStreams().isEmpty();
-        binding.detailControlsPopup.setVisibility(noVideoStreams ? View.GONE : View.VISIBLE);
+        // zen: no popup button while the popup player is disabled (ZenFeatures)
+        binding.detailControlsPopup.setVisibility(noVideoStreams
+                || !org.schabi.newpipe.zen.ZenFeatures.popupPlayerEnabled()
+                ? View.GONE : View.VISIBLE);
         binding.detailThumbnailPlayButton.setImageResource(
                 noVideoStreams ? R.drawable.ic_headset_shadow : R.drawable.ic_play_arrow_shadow);
     }

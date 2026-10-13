@@ -8,6 +8,7 @@ package org.schabi.newpipe.util
 import android.content.Context
 import android.view.View
 import android.view.View.OnLongClickListener
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
@@ -15,6 +16,7 @@ import org.schabi.newpipe.R
 import org.schabi.newpipe.databinding.PlaylistControlBinding
 import org.schabi.newpipe.fragments.list.playlist.PlaylistControlViewHolder
 import org.schabi.newpipe.player.PlayerType
+import org.schabi.newpipe.zen.ZenFeatures
 
 /**
  * Utility class for play buttons and their respective click listeners.
@@ -48,6 +50,14 @@ object PlayButtonHelper {
         playlistControlBinding.playlistCtrlPlayBgButton.setOnClickListener {
             NavigationHelper.playOnBackgroundPlayer(activity, fragment.getPlayQueue(), false)
             showHoldToAppendToastIfNeeded(activity)
+        }
+
+        // zen: no popup control (and its separator) while the popup player is disabled
+        if (!ZenFeatures.popupPlayerEnabled()) {
+            val popup = playlistControlBinding.playlistCtrlPlayPopupButton
+            val parent = popup.parent as ViewGroup
+            popup.visibility = View.GONE
+            parent.getChildAt(parent.indexOfChild(popup) - 1)?.visibility = View.GONE
         }
 
         // long click listener

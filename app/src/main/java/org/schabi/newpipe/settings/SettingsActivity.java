@@ -236,6 +236,9 @@ public class SettingsActivity extends AppCompatActivity implements
                 .map(SettingsResourceRegistry.SettingRegistryEntry::getPreferencesResId)
                 // Parse
                 .map(parser::parse)
+                // zen: drop preferences of disabled features (ZenFeatures)
+                .peek(items -> items.removeIf(item -> VideoAudioSettingsFragment
+                        .zenHiddenPreferenceKeys(searchContext).contains(item.getKey())))
                 // Add it to the searcher
                 .forEach(searcher::add);
 
