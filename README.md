@@ -10,12 +10,18 @@ no comments, an intention check before watching. It is a **fork of [NewPipe](htt
 
 ### Installation
 
-Not published yet. Planned channels (all signed with the same ZenPipe key, so you can switch
-between them):
+Development releases, all signed with the same ZenPipe key (see below), so you can switch
+between these channels without reinstalling:
 
-- **GitHub releases** (`ZenPipe_v<version>.apk` + SHA-256): https://github.com/sprobst76/ZenPipe/releases (follows)
-- **Obtainium**: add `https://github.com/sprobst76/ZenPipe` as app source (follows)
-- **Own F-Droid repository** (repo URL and QR code follow)
+- **GitHub releases** (`ZenPipe_v<version>.apk` + SHA-256): https://github.com/sprobst76/ZenPipe/releases
+- **Obtainium**: add the app source `https://github.com/sprobst76/ZenPipe` (type GitHub; APK
+  filter `ZenPipe_v.*\.apk$`), or open the link `obtainium://add/https://github.com/sprobst76/ZenPipe`
+  on the phone. Obtainium does not check the signer: verify the first install against the
+  fingerprint below; Android then rejects updates signed with any other key.
+- **Own F-Droid repository** (F-Droid, Droid-ify, Neo Store): add the repository
+  `https://sprobst76.github.io/ZenPipe/repo` (being set up; the repository fingerprint will be
+  listed here, add it as `?fingerprint=…` to the URL). The repository only distributes the
+  signed APKs from the GitHub releases.
 
 ZenPipe installs next to NewPipe. To move subscriptions and playlists, export the database in
 NewPipe (Settings > Backup and restore) and import it in ZenPipe.

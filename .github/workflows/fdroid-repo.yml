@@ -1,0 +1,141 @@
+name: F-Droid repo
+
+# Publishes the ZenPipe F-Droid repository to GitHub Pages (branch gh-pages):
+#   https://sprobst76.github.io/ZenPipe/repo
+# The APKs are the signed release APKs from the GitHub releases; nothing is rebuilt or
+# re-signed. Only the repo index is signed, with the separate repo key.
+#
+# Runs after every release (called by release.yml) and manually (workflow_dispatch; GitHub
+# lists manual workflows only from the default branch).
+#
+# Secrets (environment "fdroid-repo"), see zen-docs/release.md:
+#   FDROID_KEYSTORE_BASE64    base64 of the repo key (PKCS12), NOT the app signing key
+#   FDROID_KEYSTORE_PASSWORD  store + key password (ASCII only)
+#   FDROID_KEY_ALIAS          key alias (e.g. zenpipe-repo)
+# Optional repository variable:
+#   FDROID_REPO_FINGERPRINT   expected repo key fingerprint (hex, no colons); the job fails
+#                             instead of publishing an index signed with a different key
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Push the result to gh-pages (otherwise only upload it as artifact)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fdroid-repo
+  cancel-in-progress: false
+
+env:
+  FDROIDSERVER_VERSION: '2.4.5'
+  # newest N releases go into the repo (archive_older in fdroid/config.yml moves older ones
+  # into the archive section)
+  MAX_RELEASES: '10'
+
+jobs:
+  repo:
+    runs-on: ubuntu-latest
+    environment: fdroid-repo
+    permissions:
+      contents: write # push the gh-pages branch
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install fdroidserver
+        run: |
+          pipx install "fdroidserver==$FDROIDSERVER_VERSION"
+          fdroid --version
+
+      - name: Download release APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APKS="$RUNNER_TEMP/apks"
+          mkdir -p "$APKS"
+          gh release list -R "$GITHUB_REPOSITORY" --exclude-drafts --limit "$MAX_RELEASES" \
+              --json tagName,publishedAt --jq '.[] | "\(.tagName) \(.publishedAt)"' |
+          while read -r TAG PUBLISHED; do
+            mkdir -p "$APKS/$TAG"
+            gh release download "$TAG" -R "$GITHUB_REPOSITORY" -D "$APKS/$TAG" \
+                -p 'ZenPipe_v*.apk' -p 'ZenPipe_v*.apk.sha256' || continue
+            # the file date becomes the "added" date in the index (fdroid update --use-date-from-apk)
+            touch -d "$PUBLISHED" "$APKS/$TAG"/*.apk
+            mv "${APKS:?}/${TAG:?}"/* "$APKS/"
+            rmdir "${APKS:?}/${TAG:?}"
+          done
+          ls -l "$APKS"
+
+      - name: Restore repo key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Secret FDROID_KEYSTORE_BASE64 is missing (environment fdroid-repo)"
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/fdroid-repo.p12"
+          chmod 600 "$RUNNER_TEMP/fdroid-repo.p12"
+
+      - name: Build and sign the repo index
+        env:
+          FDROID_KEYSTORE: ${{ runner.temp }}/fdroid-repo.p12
+          FDROID_KEYSTORE_PASSWORD: ${{ secrets.FDROID_KEYSTORE_PASSWORD }}
+          FDROID_KEY_ALIAS: ${{ secrets.FDROID_KEY_ALIAS }}
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
+        run: fdroid/build-repo.sh "$RUNNER_TEMP/apks" "$RUNNER_TEMP/site"
+
+      - name: Remove repo key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/fdroid-repo.p12"
+
+      - name: Check repo fingerprint
+        env:
+          EXPECTED: ${{ vars.FDROID_REPO_FINGERPRINT }}
+        run: |
+          FP="$(grep -o 'fingerprint=[0-9A-Fa-f]*' "$RUNNER_TEMP/site/repo/index.html" | head -n1 | cut -d= -f2)"
+          if [ -z "$FP" ]; then
+            echo "::error::no fingerprint found in repo/index.html"
+            exit 1
+          fi
+          if [ -n "$EXPECTED" ] && [ "${FP^^}" != "$(echo "$EXPECTED" | tr -d ': ' | tr '[:lower:]' '[:upper:]')" ]; then
+            echo "::error::repo key fingerprint $FP does not match FDROID_REPO_FINGERPRINT"
+            exit 1
+          fi
+          {
+            echo "### F-Droid repo"
+            echo
+            echo "Repo URL: https://sprobst76.github.io/ZenPipe/repo?fingerprint=$FP"
+            echo
+            echo "APKs: $(cd "$RUNNER_TEMP/site" && find repo archive -maxdepth 1 -name "*.apk" | sort | tr "\n" " ")"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fdroid-repo
+          path: ${{ runner.temp }}/site
+          include-hidden-files: true
+          retention-days: 7
+
+      - name: Publish to gh-pages
+        if: github.event_name != 'workflow_dispatch' || inputs.publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/site"
+          git init -q -b gh-pages
+          git add -A
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -q -m "F-Droid repo from ${GITHUB_REF_NAME} (${GITHUB_SHA::9})"
+          # a single orphan commit: old APKs do not pile up in the branch history
+          AUTH="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" \
+              push --force "https://github.com/$GITHUB_REPOSITORY.git" gh-pages

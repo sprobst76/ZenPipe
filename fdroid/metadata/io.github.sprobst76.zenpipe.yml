@@ -1,0 +1,22 @@
+# F-Droid metadata for the ZenPipe binary repository (https://sprobst76.github.io/ZenPipe/repo).
+# Texts, icon and changelogs come from fastlane/metadata/android/<locale>/ (copied by
+# fdroid/build-repo.sh); this file holds only the non-localized fields.
+AntiFeatures:
+  NonFreeNet:
+    en-US: Depends on YouTube for videos.
+    de-DE: Benötigt YouTube für die Videos.
+Categories:
+  - Multimedia
+  - Internet
+License: GPL-3.0-or-later
+AuthorName: Stefan Probst-Schendzielorz
+WebSite: https://github.com/sprobst76/ZenPipe#readme
+SourceCode: https://github.com/sprobst76/ZenPipe/tree/zen
+IssueTracker: https://github.com/sprobst76/ZenPipe/issues
+Changelog: https://github.com/sprobst76/ZenPipe/releases
+
+AutoName: ZenPipe
+
+# Only APKs signed with the ZenPipe release key are accepted (SHA-256 of the signing
+# certificate, see README). 'fdroid update' rejects every other APK.
+AllowedAPKSigningKeys: 6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518

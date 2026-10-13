@@ -1,0 +1,28 @@
+# fdroidserver config for the ZenPipe binary repository.
+# No secrets in this file: the repo signing key is read from the environment
+# (see fdroid/build-repo.sh and .github/workflows/fdroid-repo.yml).
+# The repo key is NOT the app signing key: it only signs the index (index-v1.jar,
+# entry.jar); the APKs keep the ZenPipe release signature.
+
+repo_url: https://sprobst76.github.io/ZenPipe/repo
+repo_name: ZenPipe
+repo_description: >-
+  Official ZenPipe repository: a calm, mindful YouTube client for Android, a fork of NewPipe
+  (not affiliated with TeamNewPipe). APKs are the signed builds from
+  https://github.com/sprobst76/ZenPipe/releases.
+repo_icon: zenpipe-icon.png
+
+archive_older: 3
+archive_url: https://sprobst76.github.io/ZenPipe/archive
+archive_name: ZenPipe archive
+archive_description: Older ZenPipe releases.
+archive_icon: zenpipe-icon.png
+
+# Repo signing key (PKCS12; store password == key password).
+keystore: repo-keystore.p12
+keystorepass: {env: FDROID_KEYSTORE_PASSWORD}
+keypass: {env: FDROID_KEYSTORE_PASSWORD}
+repo_keyalias: {env: FDROID_KEY_ALIAS}
+
+# No servergitmirrors / 'fdroid deploy': the workflow publishes the web root (repo/, archive/)
+# to the gh-pages branch itself.
