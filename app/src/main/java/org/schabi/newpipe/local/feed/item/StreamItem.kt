@@ -112,8 +112,14 @@ data class StreamItem(
         if (itemVersion != ItemVersion.MINI) {
             viewBinding.itemAdditionalDetails.text =
                 getStreamInfoDetailLine(viewBinding.itemAdditionalDetails.context)
-            // zen: second line "why" of the content recognition (views are recycled: always reset)
-            viewBinding.itemAdditionalDetails.setLines(if (zenWhy(viewBinding.itemAdditionalDetails.context) != null) 2 else 1)
+            // zen: "why" of the content recognition below the details, may wrap once (strongest
+            // topic without a category); views are recycled: always reset
+            if (zenWhy(viewBinding.itemAdditionalDetails.context) != null) {
+                viewBinding.itemAdditionalDetails.minLines = 2
+                viewBinding.itemAdditionalDetails.maxLines = 3
+            } else {
+                viewBinding.itemAdditionalDetails.setLines(1)
+            }
         }
 
         execBindEnd?.accept(viewBinding)
