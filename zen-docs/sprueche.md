@@ -16,7 +16,9 @@ Beim Ändern bitte nur die Tabellen bearbeiten und das Skript laufen lassen. Kei
 - **Kennzeichnung in der App:** wörtliche Zitate „— Autor, Werk Stelle“; eigene, sinngemäße Wiedergaben „— nach Autor, Werk Stelle“.
 - **Ausgeschlossen:** zweifelhafte Internet-Zitate (u. a. die typischen falschen „Buddha“-, „Laozi“- oder „Marc Aurel“-Sprüche),
   alles ohne auffindbare Stelle. Im Zweifel weggelassen (z. B. Issa „Tauwelt“ wegen des Trauer-Kontexts, Seneca „De brevitate
-  vitae 1“ als zu mahnend).
+  vitae 1“ als zu mahnend). Der frühere Q27 „Still sitzen, nichts tun. Der Frühling kommt, und das Gras wächst
+  von selbst.“ wurde gestrichen: die Zuordnung zum Zenrin kushū ist nicht belegbar (Vers nur aus der englischsprachigen
+  Sekundärliteratur bekannt, keine auffindbare Stelle).
 - **Ton** der eigenen Sätze: ruhig, Du-Form, ohne Vorwurf und ohne Belehrung; Einladungen statt Aufforderungen.
 
 Spalten: `Nr` (Q = Zitat, E = eigener Satz, A = Atemhinweis), Text Deutsch, Text Englisch, Anzeige DE / Anzeige EN (Zeile unter
@@ -52,13 +54,12 @@ dem Spruch, leer = anonym), Beleg.
 | Q24 | Der alte Teich. Ein Frosch springt hinein, das Geräusch des Wassers. | The old pond. A frog jumps in, the sound of water. | nach Bashō (1686) | after Bashō (1686) | Haiku „furuike ya kawazu tobikomu mizu no oto“; beide eigene Übertragung |
 | Q25 | Stille. Die Stimme der Zikaden dringt in die Felsen. | Stillness. The cicadas' voices seep into the rocks. | nach Bashō, Auf schmalen Pfaden durchs Hinterland | after Bashō, The Narrow Road to the Deep North | Haiku „shizukasa ya iwa ni shimiiru semi no koe“ (Ryūshaku-ji, 1689); beide eigene Übertragung |
 | Q26 | Der Dieb ließ es zurück: den Mond im Fenster. | The thief left it behind: the moon in the window. | nach Ryōkan | after Ryōkan | Haiku „nusubito ni torinokosareshi mado no tsuki“; beide eigene Übertragung |
-| Q27 | Still sitzen, nichts tun. Der Frühling kommt, und das Gras wächst von selbst. | Sitting quietly, doing nothing, spring comes, and the grass grows by itself. | nach dem Zenrin kushū | after the Zenrin kushū | Zen-Spruchsammlung (Tōyō Eichō, um 1500; Vers bekannt aus der englischsprachigen Zen-Literatur); beide eigene Übertragung |
-| Q28 | Zieh dich an, iss dein Essen, und wenn du müde bist, leg dich hin. | Put on your clothes, eat your meal, and when you are tired, lie down. | nach Linji (Linji lu) | after Linji (Record of Linji) | Linji lu „著衣喫飯，困來即臥“; beide eigene Übertragung |
-| Q29 | Wenn ich tanze, tanze ich; wenn ich schlafe, schlafe ich. | When I dance, I dance; when I sleep, I sleep. | nach Montaigne, Essais III 13 | after Montaigne, Essays III.13 | „Quand je danse, je danse; quand je dors, je dors“ (De l'expérience); beide eigene Übertragung |
-| Q30 | Alles Unglück der Menschen kommt daher, dass sie nicht ruhig in einem Zimmer bleiben können. | All of our unhappiness comes from one thing: not knowing how to stay quietly in a room. | nach Pascal, Gedanken 139 | after Pascal, Pensées 139 | Pensées Nr. 139 Brunschvicg (136 Lafuma) „tout le malheur des hommes vient d'une seule chose, qui est de ne savoir pas demeurer en repos dans une chambre“; beide eigene Übertragung |
-| Q31 | Unser Leben verzettelt sich in Einzelheiten. Vereinfache, vereinfache. | Our life is frittered away by detail. … Simplify, simplify. | nach Thoreau, Walden | Thoreau, Walden | Kap. 2 „Where I Lived, and What I Lived For“ (1854), EN wörtlich mit Auslassung; DE eigene Übertragung |
-| Q32 | Die Zeit ist nur der Bach, in dem ich fischen gehe. | Time is but the stream I go a-fishing in. | nach Thoreau, Walden | Thoreau, Walden | Kap. 2 (1854), EN wörtlich; DE eigene Übertragung |
-| Q33 | … Geduld zu haben gegen alles Ungelöste in Ihrem Herzen und zu versuchen, die Fragen selbst liebzuhaben. | Be patient toward all that is unsolved in your heart, and try to love the questions themselves. | Rilke, Briefe an einen jungen Dichter | after Rilke, Letters to a Young Poet | 4. Brief (16. Juli 1903), DE wörtlich; EN eigene Übertragung |
+| Q27 | Zieh dich an, iss dein Essen, und wenn du müde bist, leg dich hin. | Put on your clothes, eat your meal, and when you are tired, lie down. | nach Linji (Linji lu) | after Linji (Record of Linji) | Linji lu „著衣喫飯，困來即臥“; beide eigene Übertragung |
+| Q28 | Wenn ich tanze, tanze ich; wenn ich schlafe, schlafe ich. | When I dance, I dance; when I sleep, I sleep. | nach Montaigne, Essais III 13 | after Montaigne, Essays III.13 | „Quand je danse, je danse; quand je dors, je dors“ (De l'expérience); beide eigene Übertragung |
+| Q29 | Alles Unglück der Menschen kommt daher, dass sie nicht ruhig in einem Zimmer bleiben können. | All of our unhappiness comes from one thing: not knowing how to stay quietly in a room. | nach Pascal, Gedanken 139 | after Pascal, Pensées 139 | Pensées Nr. 139 Brunschvicg (136 Lafuma) „tout le malheur des hommes vient d'une seule chose, qui est de ne savoir pas demeurer en repos dans une chambre“; beide eigene Übertragung |
+| Q30 | Unser Leben verzettelt sich in Einzelheiten. Vereinfache, vereinfache. | Our life is frittered away by detail. … Simplify, simplify. | nach Thoreau, Walden | Thoreau, Walden | Kap. 2 „Where I Lived, and What I Lived For“ (1854), EN wörtlich mit Auslassung; DE eigene Übertragung |
+| Q31 | Die Zeit ist nur der Bach, in dem ich fischen gehe. | Time is but the stream I go a-fishing in. | nach Thoreau, Walden | Thoreau, Walden | Kap. 2 (1854), EN wörtlich; DE eigene Übertragung |
+| Q32 | … Geduld zu haben gegen alles Ungelöste in Ihrem Herzen und zu versuchen, die Fragen selbst liebzuhaben. | Be patient toward all that is unsolved in your heart, and try to love the questions themselves. | Rilke, Briefe an einen jungen Dichter | after Rilke, Letters to a Young Poet | 4. Brief (16. Juli 1903), DE wörtlich; EN eigene Übertragung |
 
 ## Eigene Sätze (anonym)
 
