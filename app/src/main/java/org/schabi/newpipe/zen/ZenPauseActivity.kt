@@ -6,10 +6,13 @@ import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
+import androidx.core.view.WindowCompat
 import org.schabi.newpipe.R
 import org.schabi.newpipe.util.ThemeHelper
 
@@ -35,29 +38,62 @@ class ZenPauseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
 
-        val pad = (24 * resources.displayMetrics.density).toInt()
+        val density = resources.displayMetrics.density
+        val pad = (24 * density).toInt()
+        // calm reference screen (spec-design.md §5): status bar = background, theme text colors
+        val attrs = obtainStyledAttributes(
+            intArrayOf(
+                android.R.attr.windowBackground,
+                android.R.attr.textColorPrimary,
+                android.R.attr.textColorSecondary,
+                androidx.appcompat.R.attr.colorAccent
+            )
+        )
+        val background = attrs.getColor(0, 0)
+        val textPrimary = attrs.getColorStateList(1)
+        val textSecondary = attrs.getColorStateList(2)
+        val accent = attrs.getColor(3, 0)
+        attrs.recycle()
+        window.statusBarColor = background
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars =
+            ThemeHelper.isLightThemeSelected(this)
+
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(pad, pad, pad, pad)
         }
+        val ring = ImageView(this).apply {
+            setImageResource(R.drawable.zen_splash_ring)
+            setColorFilter(accent)
+            alpha = 0.7f
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        }
         val title = TextView(this).apply {
             setText(R.string.zen_pause_title)
-            textSize = 26f
+            textSize = 24f
             gravity = Gravity.CENTER
+            setTextColor(textPrimary)
+            setPadding(0, pad, 0, 0)
         }
         message = TextView(this).apply {
-            textSize = 16f
+            textSize = 15f
             gravity = Gravity.CENTER
+            setLineSpacing(0f, 1.2f)
+            setTextColor(textSecondary)
             setPadding(0, pad, 0, pad)
         }
         countdown = TextView(this).apply {
-            textSize = 56f
+            textSize = 52f
             gravity = Gravity.CENTER
+            typeface = android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL)
+            fontFeatureSettings = "tnum"
+            setTextColor(textPrimary)
             contentDescription = getString(R.string.zen_pause_title)
         }
-        back = Button(this).apply {
+        back = AppCompatButton(this, null, androidx.appcompat.R.attr.borderlessButtonStyle).apply {
             setText(R.string.zen_pause_back)
+            setTextColor(accent)
             setOnClickListener { finish() }
         }
         // one quote per pause (zen-docs/sprueche.md), below the countdown; wraps, never pushes the
@@ -66,7 +102,8 @@ class ZenPauseActivity : AppCompatActivity() {
             ZenQuotes.of(this).forPause(ZenPause.pauseSeq(this), ZenQuotes.builtIn(this)).orEmpty()
         )
         val quote = TextView(this).apply {
-            textSize = 17f
+            textSize = 16f
+            setTextColor(textPrimary)
             gravity = Gravity.CENTER
             setTypeface(typeface, android.graphics.Typeface.ITALIC)
             setLineSpacing(0f, 1.15f)
@@ -76,13 +113,14 @@ class ZenPauseActivity : AppCompatActivity() {
         }
         // source line: upright, smaller and muted, so it does not read as part of the quote
         val source = TextView(this).apply {
-            textSize = 13f
+            textSize = 12f
             gravity = Gravity.CENTER
-            alpha = 0.6f
+            setTextColor(textSecondary)
             setPadding(0, pad / 2, 0, 0)
             text = attribution?.let { "— $it" }
             visibility = if (attribution == null || quoteText.isEmpty()) View.GONE else View.VISIBLE
         }
+        root.addView(ring, LinearLayout.LayoutParams((40 * density).toInt(), (40 * density).toInt()))
         root.addView(title)
         root.addView(message)
         root.addView(countdown)
