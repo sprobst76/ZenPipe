@@ -23,7 +23,8 @@ class ZenPauseTest {
             { mono },
             { wall },
             { ZoneId.of("Europe/Berlin") },
-            { type, detail -> logged.add("$type $detail") }
+            { type, detail -> logged.add("$type $detail") },
+            { boot }
         )
 
         /** Advance device time (both clocks). */
@@ -156,8 +157,9 @@ class ZenPauseTest {
         val e = env.engine()
         env.watch(e, "v1", 60 * min, 8 * min)
         e.onPlaying(false, 8 * min)
-        env.advance(10 * min)
-        assertTrue(e.onClosed(8 * min, 60 * min) is ZenPauseEngine.Outcome.Paused)
+        env.advance(10_000) // the rest time is credited (see the rest-time tests), 10 s of 96 s
+        val out = e.onClosed(8 * min, 60 * min)
+        assertEquals(ZenPauseEngine.Outcome.Paused(8 * min, 86_000), out)
     }
 
     @Test
@@ -397,5 +399,193 @@ class ZenPauseTest {
         e.onClosed(6 * min, 60 * min)
         // 15 min pause minus the 6 min that passed; the 1.2 min pause of the second video did not replace it
         assertEquals(9 * min, e.remainingMs())
+    }
+
+    // ------------------------------------------------------------------ rest-time credit
+
+    @Test
+    fun `abort while playing gets the full pause`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min)
+        assertEquals(0L, e.restMs())
+        assertEquals(ZenPauseEngine.Outcome.Paused(10 * min, 2 * min), e.onClosed(10 * min, 60 * min))
+        assertFalse(env.logged.any { it.startsWith("pause_rest_credit") })
+    }
+
+    @Test
+    fun `rest since the last stop shortens the pause`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min) // 2 min pause
+        e.onPlaying(false, 10 * min)
+        env.advance(30_000)
+        assertEquals(30_000L, e.restMs())
+        assertEquals(90_000L, e.previewClose()!!.pauseMs) // "resume later" question shows the shorter pause
+        val out = e.onClosed(10 * min, 60 * min)
+        assertEquals(ZenPauseEngine.Outcome.Paused(10 * min, 90_000), out)
+        assertEquals(90_000L, e.remainingMs())
+        assertTrue(env.logged.any { it.startsWith("pause_rest_credit") && it.contains("restMs=30000 fullMs=120000 lengthMs=90000") })
+        assertTrue(env.logged.any { it.startsWith("pause_start") && it.contains("lengthMs=90000 fullMs=120000 restMs=30000") })
+    }
+
+    @Test
+    fun `rest of the full length means no pause and no question`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min)
+        e.onPlaying(false, 10 * min)
+        env.advance(2 * min) // podcast paused on arrival, notification swiped away later
+        assertEquals(null, e.previewClose())
+        val out = e.onClosed(10 * min, 60 * min)
+        assertEquals(ZenPauseEngine.Outcome.Rested(10 * min, 2 * min, 2 * min), out)
+        assertFalse(e.isActive())
+        assertTrue(env.logged.any { it.startsWith("pause_rest_credit") && it.contains("lengthMs=0") })
+        assertFalse(env.logged.any { it.startsWith("pause_start") })
+    }
+
+    @Test
+    fun `rest counts from the last stop only and resume later costs nothing after enough rest`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min)
+        e.onPlaying(false, 10 * min)
+        env.advance(10 * min)
+        e.onPlaying(true, 10 * min) // played again: the earlier rest is gone
+        env.advance(1000)
+        e.onProgress(10 * min + 1000, 60 * min, true)
+        assertEquals(0L, e.restMs())
+        e.onPlaying(false, 10 * min + 1000)
+        env.advance(5 * min)
+        assertTrue(e.later()) // would cost no pause: simply closed
+        assertEquals(2, e.laterLeft())
+    }
+
+    @Test
+    fun `kill during rest is credited in the same boot, not after a reboot`() {
+        val store = MemoryZenStore()
+        val env = Env(store)
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min)
+        e.onPlaying(false, 10 * min)
+        env.advance(60_000)
+        // process killed; same boot, next start
+        val out = env.engine().recover()
+        assertEquals(ZenPauseEngine.Outcome.Paused(10 * min, 60_000), out)
+
+        val store2 = MemoryZenStore()
+        val env2 = Env(store2)
+        val e2 = env2.engine()
+        env2.watch(e2, "v1", 60 * min, 10 * min)
+        e2.onPlaying(false, 10 * min)
+        env2.advance(60_000)
+        env2.boot = 2 // reboot: elapsedRealtime not comparable -> no credit
+        env2.mono = 5_000
+        assertEquals(ZenPauseEngine.Outcome.Paused(10 * min, 2 * min), env2.engine().recover())
+    }
+
+    @Test
+    fun `kill while playing gets no credit however long ago`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 10 * min)
+        env.advance(60 * min) // process died while playing, app opened an hour later
+        assertEquals(ZenPauseEngine.Outcome.Paused(10 * min, 2 * min), env.engine().recover())
+    }
+
+    // ------------------------------------------------------------------ playing time per day
+
+    private fun ZenPauseEngine.play(env: Env, ms: Long) {
+        var t = 0L
+        while (t < ms) {
+            env.advance(1000)
+            t += 1000
+            onProgress(t, 60 * min, true)
+        }
+    }
+
+    @Test
+    fun `picture and sound are booked by player mode, paused time not`() {
+        val env = Env()
+        val e = env.engine()
+        e.onItem("v1", 60 * min)
+        e.setKind(ZenKind.VIDEO)
+        e.onPlaying(true, 0)
+        e.play(env, 3 * min)
+        e.setAudio(true) // "switch to background"
+        e.play(env, 2 * min)
+        e.onPlaying(false, 5 * min)
+        env.advance(30 * min) // paused: does not count
+        e.onPlaying(true, 5 * min)
+        e.play(env, 1 * min)
+        e.onClosed(6 * min, 60 * min)
+        val d = ZenWatchTime(env.store).get("2026-10-12")
+        assertEquals(3 * min, d.pictureMs)
+        assertEquals(3 * min, d.soundMs)
+        assertEquals(0L, d.musicMs + d.praxisMs)
+        assertEquals(3 * min + 90_000, d.zenMinutesMs) // sound counts half (hook only, no limit)
+        assertTrue(env.logged.any { it.contains("playedMs=360000 soundMs=180000") })
+    }
+
+    @Test
+    fun `booking is continuous and splits a session at 04 00`() {
+        val env = Env()
+        env.wall = ZonedDateTime.of(2026, 10, 13, 3, 55, 0, 0, zone).toInstant().toEpochMilli()
+        val e = env.engine()
+        e.onItem("v1", 60 * min)
+        e.setKind(ZenKind.VIDEO)
+        e.onPlaying(true, 0)
+        e.play(env, 10 * min)
+        // still running: already booked up to the last tick (10 s)
+        val before = ZenWatchTime(env.store).get("2026-10-12").pictureMs
+        val after = ZenWatchTime(env.store).get("2026-10-13").pictureMs
+        assertTrue(before in (5 * min - 10_000)..(5 * min))
+        assertTrue(after >= 5 * min - 20_000)
+        e.onClosed(10 * min, 60 * min)
+        assertEquals(10 * min, ZenWatchTime(env.store).get("2026-10-12").pictureMs + ZenWatchTime(env.store).get("2026-10-13").pictureMs)
+    }
+
+    @Test
+    fun `time waits for the kind, unknown counts as picture`() {
+        val env = Env()
+        val e = env.engine()
+        e.onItem("m", 60 * min)
+        e.onPlaying(true, 0)
+        e.play(env, 30_000) // StreamInfo not there yet
+        e.setKind(ZenKind.MUSIC)
+        e.play(env, 30_000)
+        e.onClosed(60_000, 60 * min)
+        assertEquals(60_000L, ZenWatchTime(env.store).get("2026-10-12").musicMs)
+        e.onItem("x", 60 * min)
+        e.onPlaying(true, 0)
+        e.play(env, 20_000)
+        e.onClosed(20_000, 60 * min) // kind never known
+        assertEquals(20_000L, ZenWatchTime(env.store).get("2026-10-12").pictureMs)
+    }
+
+    @Test
+    fun `kill keeps what was booked up to the last tick`() {
+        val env = Env()
+        val e = env.engine()
+        e.onItem("v1", 60 * min)
+        e.setKind(ZenKind.PODCAST)
+        e.setAudio(true)
+        e.onPlaying(true, 0)
+        e.play(env, 2 * min + 5_000)
+        env.engine().recover()
+        val sound = ZenWatchTime(env.store).get("2026-10-12").soundMs
+        assertTrue(sound in (2 * min + 5_000 - ZenPauseRules.PERSIST_INTERVAL_MS)..(2 * min + 5_000))
+    }
+
+    @Test
+    fun `watch time keeps 30 days and reads short values`() {
+        val t = ZenWatchTime(MemoryZenStore())
+        for (d in 1..31) t.add("2026-09-%02d".format(d).replace("09-31", "10-01"), false, ZenKind.VIDEO, min)
+        assertEquals(0L, t.get("2026-09-01").pictureMs)
+        assertEquals(min, t.get("2026-10-01").pictureMs)
+        t.add("2026-10-01", true, ZenKind.PRAXIS, min)
+        assertEquals(min, t.get("2026-10-01").praxisMs)
+        assertEquals(ZenWatchTime.Day(5, 0, 0, 0), ZenWatchTime.Day.decode("5"))
+        assertEquals(ZenWatchTime.Day(), ZenWatchTime.Day.decode(null))
     }
 }

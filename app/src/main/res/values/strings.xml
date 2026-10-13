@@ -993,6 +993,9 @@
     <string name="zen_applied_now">Applied</string>
     <string name="zen_applied_pending">Loosening scheduled for %1$s</string>
     <string name="zen_praxis_title">Practice</string>
+    <string name="zen_watch_title">Playing time today</string>
+    <string name="zen_watch_today">Picture %1$d min · sound %2$d min · music %3$d min · practice %4$d min</string>
+    <string name="zen_watch_hint">Real playing time since 04:00 (pausing and buffering do not count). Picture = video player, sound = background player. There is no limit.</string>
     <string name="zen_praxis_today">Practice today: %1$d min</string>
     <string name="zen_praxis_pending_count">%1$d practice channel(s)/playlist(s) pending (see Settings > Zen)</string>
     <string name="zen_praxis_empty">No practice channels or playlists yet. Mark one via the menu of its page or by long-pressing it in a list.</string>

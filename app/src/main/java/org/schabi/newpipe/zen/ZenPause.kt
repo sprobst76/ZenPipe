@@ -125,7 +125,9 @@ class ZenPauseEngine(
     private val monotonic: () -> Long,
     private val trustedNow: () -> Long,
     private val zone: () -> ZoneId,
-    private val log: (String, String) -> Unit
+    private val log: (String, String) -> Unit,
+    /** Device reboot counter (-1 = unknown): rest time only counts within one boot. */
+    private val bootId: () -> Int = { -1 }
 ) {
     enum class Reason { COMPLETED, CLOSED, SWITCHED, KILLED }
 
@@ -137,6 +139,9 @@ class ZenPauseEngine(
         data class Paused(val playedMs: Long, val lengthMs: Long) : Outcome()
         object Later : Outcome()
         data class Slept(val playedMs: Long) : Outcome()
+
+        /** An abort that would have paused, but the rest time since the last play covered the pause. */
+        data class Rested(val playedMs: Long, val lengthMs: Long, val restMs: Long) : Outcome()
     }
 
     private var open = false
@@ -151,7 +156,20 @@ class ZenPauseEngine(
     private var parkedUrl: String? = null
     private var parkedDur = 0L
     private var chained = false
-    private val praxisTime = ZenPraxisTime(store)
+    private val watchTime = ZenWatchTime(store)
+
+    // playback mode of the running player: true = background player (sound), false = picture
+    private var audio = false
+
+    // played time not yet booked onto the Zen day (booked with each persist tick)
+    private var pendingMs = 0L
+
+    // played time of this session as sound (background player), for the log
+    private var soundMs = 0L
+
+    // rest: monotonic time (and boot) of the last "playing -> not playing" of the session, -1 = none
+    private var restSince = -1L
+    private var restBoot = -1
 
     @Synchronized
     fun hasOpenSession() = open
@@ -184,6 +202,8 @@ class ZenPauseEngine(
             dur = durationMs
             kind = null
             playingSince = -1
+            restSince = -1
+            soundMs = 0
             persist()
         } else if (durationMs > 0) {
             dur = durationMs
@@ -196,9 +216,23 @@ class ZenPauseEngine(
         if (!open && playing && parked != null) onItem(parked, parkedDur) // resumed after the sleep timer
         if (!open) return
         accumulate()
-        playingSince = if (playing) monotonic() else -1
+        setPlayingNow(playing)
         if (positionMs >= 0) pos = positionMs
         persist()
+    }
+
+    /**
+     * The player's mode: [audioMode] = background player (sound), otherwise the video player
+     * (picture). Time played so far is booked under the previous mode first.
+     */
+    @Synchronized
+    fun setAudio(audioMode: Boolean) {
+        if (audioMode == audio) return
+        if (open) {
+            accumulate()
+            flushWatch(force = true)
+        }
+        audio = audioMode
     }
 
     @Synchronized
@@ -206,8 +240,7 @@ class ZenPauseEngine(
         if (!open) return
         accumulate()
         // resynchronise: the "playing" event may have arrived before the item was known
-        if (playing && playingSince < 0) playingSince = monotonic()
-        if (!playing) playingSince = -1
+        if (playing != (playingSince >= 0)) setPlayingNow(playing)
         if (positionMs >= 0) pos = positionMs
         if (durationMs > 0) dur = durationMs
         if (monotonic() - lastPersist >= ZenPauseRules.PERSIST_INTERVAL_MS) persist()
@@ -240,6 +273,10 @@ class ZenPauseEngine(
         dur = store.getLong(K_DUR, 0)
         kind = store.getString(K_KIND, null)?.let { runCatching { ZenKind.valueOf(it) }.getOrNull() }
         playingSince = -1
+        pendingMs = 0
+        restSince = store.getLong(K_REST, -1)
+        restBoot = store.getInt(K_REST_BOOT, -1)
+        soundMs = store.getLong(K_SOUND, 0)
         return finish(Reason.KILLED, pos, dur)
     }
 
@@ -270,9 +307,8 @@ class ZenPauseEngine(
         val k = kind ?: ZenKind.VIDEO
         val u = url
         val d = dur
-        log("sleep_end", "url=$u kind=$k playedMs=$playedMs posMs=$pos durMs=$d")
+        log("sleep_end", "url=$u kind=$k playedMs=$playedMs soundMs=$soundMs posMs=$pos durMs=$d")
         clearSession()
-        if (k == ZenKind.PRAXIS) praxisTime.add(ZenDay.dayOf(trustedNow(), zone()).toString(), playedMs)
         parkedUrl = u
         parkedDur = d
         return Outcome.Slept(playedMs)
@@ -292,7 +328,7 @@ class ZenPauseEngine(
     fun later(): Boolean {
         if (!open) return false
         accumulate()
-        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !ZenPauseRules.isFinished(pos, dur)
+        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !ZenPauseRules.isFinished(pos, dur) && pauseCostMs() > 0
         if (!wouldPause) {
             finish(Reason.CLOSED, pos, dur)
             return true
@@ -313,7 +349,34 @@ class ZenPauseEngine(
         if (!open) return null
         accumulate()
         val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !ZenPauseRules.isFinished(pos, dur)
-        return if (wouldPause) ClosePreview(played, ZenPauseRules.pauseLengthMs(played), laterLeft()) else null
+        val cost = if (wouldPause) pauseCostMs() else 0
+        return if (cost > 0) ClosePreview(played, cost, laterLeft()) else null
+    }
+
+    /**
+     * Rest time of the open session: since its last "playing -> not playing" (0 while playing, if
+     * it never stopped, or across a reboot – fail-closed).
+     */
+    @Synchronized
+    fun restMs(): Long {
+        if (!open || playingSince >= 0 || restSince < 0) return 0
+        val mono = monotonic()
+        val boot = bootId()
+        val sameBoot = if (boot >= 0 && restBoot >= 0) boot == restBoot else mono >= restSince
+        return if (sameBoot) (mono - restSince).coerceAtLeast(0) else 0
+    }
+
+    /** Pause an abort would start now: the length minus the rest time (spec: rest-time credit). */
+    private fun pauseCostMs(): Long = (ZenPauseRules.pauseLengthMs(played) - restMs()).coerceAtLeast(0)
+
+    /** Playing time booked today (picture/sound/music/practice). */
+    @Synchronized
+    fun watchToday(): ZenWatchTime.Day {
+        if (open) {
+            accumulate()
+            flushWatch(force = false)
+        }
+        return watchTime.get(ZenDay.dayOf(trustedNow(), zone()).toString())
     }
 
     private fun laterUsedToday(): Int {
@@ -379,27 +442,62 @@ class ZenPauseEngine(
     private fun accumulate() {
         if (playingSince >= 0) {
             val now = monotonic()
-            played += (now - playingSince).coerceAtLeast(0)
+            val delta = (now - playingSince).coerceAtLeast(0)
+            played += delta
+            pendingMs += delta
+            if (audio) soundMs += delta
             playingSince = now
         }
     }
 
+    /** Switches between playing and not playing (time accumulated before); a stop starts the rest time. */
+    private fun setPlayingNow(playing: Boolean) {
+        val now = monotonic()
+        if (playing) {
+            playingSince = now
+            restSince = -1
+        } else {
+            if (playingSince >= 0) {
+                restSince = now
+                restBoot = bootId()
+            }
+            playingSince = -1
+        }
+    }
+
+    /**
+     * Books the pending playing time onto today's Zen day (mode and kind of the session). While
+     * the kind is unknown it waits, unless [force] (then it counts as video, fail-closed).
+     */
+    private fun flushWatch(force: Boolean) {
+        if (pendingMs <= 0 || (kind == null && !force)) return
+        watchTime.add(ZenDay.dayOf(trustedNow(), zone()).toString(), audio, kind, pendingMs)
+        pendingMs = 0
+    }
+
     private fun persist() {
         lastPersist = monotonic()
+        flushWatch(force = false)
         store.put(
             K_OPEN to 1,
             K_URL to url,
             K_PLAYED to played,
             K_POS to pos,
             K_DUR to dur,
-            K_KIND to kind?.name
+            K_KIND to kind?.name,
+            K_REST to if (playingSince >= 0) -1L else restSince,
+            K_REST_BOOT to restBoot,
+            K_SOUND to soundMs
         )
     }
 
     private fun clearSession() {
+        accumulate()
+        flushWatch(force = true)
         open = false
         playingSince = -1
-        store.put(K_OPEN to null, K_URL to null, K_PLAYED to null, K_POS to null, K_DUR to null, K_KIND to null)
+        restSince = -1
+        store.put(*listOf(K_OPEN, K_URL, K_PLAYED, K_POS, K_DUR, K_KIND, K_REST, K_REST_BOOT, K_SOUND).map { it to null }.toTypedArray())
     }
 
     private fun finish(reason: Reason, endPos: Long, endDur: Long): Outcome {
@@ -408,9 +506,9 @@ class ZenPauseEngine(
         val k = kind ?: ZenKind.VIDEO
         val finished = reason == Reason.COMPLETED || ZenPauseRules.isFinished(endPos, endDur)
         val u = url
+        val rest = restMs()
         clearSession()
-        if (k == ZenKind.PRAXIS) praxisTime.add(ZenDay.dayOf(trustedNow(), zone()).toString(), playedMs)
-        val detail = "url=$u reason=$reason kind=$k playedMs=$playedMs posMs=$endPos durMs=$endDur"
+        val detail = "url=$u reason=$reason kind=$k playedMs=$playedMs soundMs=$soundMs posMs=$endPos durMs=$endDur"
         if (finished) {
             log("watch_end", detail)
             return Outcome.Finished
@@ -427,11 +525,15 @@ class ZenPauseEngine(
             log("abort_short", detail)
             return Outcome.Short(playedMs)
         }
-        val length = ZenPauseRules.pauseLengthMs(playedMs)
+        val full = ZenPauseRules.pauseLengthMs(playedMs)
+        // rest-time credit: nothing played in ZenPipe since the last stop of this session
+        val length = (full - rest).coerceAtLeast(0)
+        if (rest > 0) log("pause_rest_credit", "$detail restMs=$rest fullMs=$full lengthMs=$length")
+        if (length == 0L) return Outcome.Rested(playedMs, full, rest)
         val running = countdown.remainingMs()
         countdown.start(maxOf(length, running))
         store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs, K_PAUSE_SEQ to pauseSeq() + 1)
-        log("pause_start", "$detail lengthMs=$length")
+        log("pause_start", "$detail lengthMs=$length" + if (rest > 0) " fullMs=$full restMs=$rest" else "")
         return Outcome.Paused(playedMs, length)
     }
 
@@ -442,6 +544,9 @@ class ZenPauseEngine(
         private const val K_POS = "ps_pos"
         private const val K_DUR = "ps_dur"
         private const val K_KIND = "ps_kind"
+        private const val K_REST = "ps_rest"
+        private const val K_REST_BOOT = "ps_rest_boot"
+        private const val K_SOUND = "ps_sound"
         private const val K_PAUSE_ON = "pause_on"
         private const val K_PAUSE_PLAYED = "pause_played"
         private const val K_PAUSE_SEQ = "pause_seq"
@@ -465,7 +570,8 @@ object ZenPause {
                 monotonic = android.os.SystemClock::elapsedRealtime,
                 trustedNow = { Zen.clock(app).now().trustedMillis },
                 zone = { ZenZone.fixed(Zen.store(app)) },
-                log = { type, detail -> Zen.log(app).add(type, detail) }
+                log = { type, detail -> Zen.log(app).add(type, detail) },
+                bootId = { Zen.bootCount(app) }
             ).also { engine = it }
         }
     }
@@ -483,6 +589,14 @@ object ZenPause {
 
     @JvmStatic
     fun needsKind(context: Context) = engine(context).needsKind()
+
+    /** Playing time booked today (picture, sound, music, practice). */
+    @JvmStatic
+    fun watchToday(context: Context) = engine(context).watchToday()
+
+    /** Player mode: background player (sound) or video player (picture), for the playing time per day. */
+    @JvmStatic
+    fun setAudio(context: Context, audio: Boolean) = engine(context).setAudio(audio)
 
     /** [onStreamInfo] results. */
     const val STREAM_OK = 0

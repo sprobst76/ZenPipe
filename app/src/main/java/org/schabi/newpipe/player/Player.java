@@ -383,6 +383,8 @@ public final class Player implements PlaybackListener, Listener {
         }
         initUIsForCurrentPlayerType();
         isAudioOnly = audioPlayerSelected();
+        // ZenPipe: playing time per day is split into picture (video player) and sound (background)
+        org.schabi.newpipe.zen.ZenPause.setAudio(context, audioPlayerSelected());
 
         if (intent.hasExtra(PLAYBACK_QUALITY)) {
             videoResolver.setPlaybackQuality(intent.getStringExtra(PLAYBACK_QUALITY));
@@ -1231,6 +1233,7 @@ public final class Player implements PlaybackListener, Listener {
         // ZenPipe: own playback state (used by the intention prompt) and playing time (pause)
         org.schabi.newpipe.zen.ZenPlayback.setPlaying(
                 state == STATE_PLAYING || state == STATE_BUFFERING);
+        org.schabi.newpipe.zen.ZenPause.setAudio(context, audioPlayerSelected());
         org.schabi.newpipe.zen.ZenPause.onPlaying(context, state == STATE_PLAYING,
                 exoPlayerIsNull() ? -1 : simpleExoPlayer.getCurrentPosition());
         switch (state) {

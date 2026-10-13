@@ -958,6 +958,9 @@
     <string name="zen_applied_now">Übernommen</string>
     <string name="zen_applied_pending">Lockerung vorgemerkt für %1$s</string>
     <string name="zen_praxis_title">Praxis</string>
+    <string name="zen_watch_title">Wiedergabe heute</string>
+    <string name="zen_watch_today">Bild %1$d Min. · Ton %2$d Min. · Musik %3$d Min. · Praxis %4$d Min.</string>
+    <string name="zen_watch_hint">Echte Abspielzeit seit 04:00 (Pausieren und Puffern zählen nicht). Bild = Video-Player, Ton = Hintergrund. Es gibt kein Limit.</string>
     <string name="zen_praxis_today">Praxis heute: %1$d Min.</string>
     <string name="zen_praxis_pending_count">%1$d Praxis-Kanal/-Playlist(s) ausstehend (siehe Einstellungen > Zen)</string>
     <string name="zen_praxis_empty">Noch keine Praxis-Kanäle oder -Playlists. Markiere sie über das Menü ihrer Seite oder per langem Druck in einer Liste.</string>

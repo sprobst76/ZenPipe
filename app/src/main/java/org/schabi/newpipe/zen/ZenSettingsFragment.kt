@@ -195,6 +195,7 @@ class ZenSettingsFragment : Fragment() {
         )
         renderPraxis(snap)
         renderSleep()
+        renderWatchTime()
         renderQuotes()
         classifier = org.schabi.newpipe.zen.classify.ZenClassifierSection(requireActivity()) { render() }
             .also { it.render(content) }
@@ -290,6 +291,19 @@ class ZenSettingsFragment : Fragment() {
                 setOnClickListener { ZenSleepUi.showDefaultDialog(requireActivity()) { render() } }
             }
         )
+    }
+
+    /** Playing time of today (picture/sound/music/practice), display only, no limit. */
+    private fun renderWatchTime() {
+        content.addView(
+            text(getString(R.string.zen_watch_title), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        val d = ZenPause.watchToday(requireContext())
+        fun m(ms: Long) = (ms / 60_000L).toInt()
+        content.addView(text(getString(R.string.zen_watch_today, m(d.pictureMs), m(d.soundMs), m(d.musicMs), m(d.praxisMs))))
+        content.addView(text(getString(R.string.zen_watch_hint), 12f))
     }
 
     /** Practice channels: list with state, remove/cancel (both immediate), minutes of today. */

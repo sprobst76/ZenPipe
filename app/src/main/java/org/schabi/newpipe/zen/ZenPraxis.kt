@@ -48,6 +48,9 @@ data class ZenPraxisChannel(val serviceId: Int, val url: String, val name: Strin
 /**
  * Practice minutes per Zen day (04:00 rollover), kept for [KEEP_DAYS] days. No limit is attached
  * (decision); a later optional soft limit would read [msOn] (hook, see spec-praxis.md).
+ * Since the playing time per day ([ZenWatchTime]) the practice time is booked continuously there
+ * (picture and sound 1:1); `px_time` holds only what older versions booked at the session end, and
+ * [msOn] returns the sum of both.
  */
 class ZenPraxisTime(private val store: ZenKeyValueStore) {
     @Synchronized
@@ -60,7 +63,7 @@ class ZenPraxisTime(private val store: ZenKeyValueStore) {
     }
 
     @Synchronized
-    fun msOn(day: String): Long = read()[day] ?: 0L
+    fun msOn(day: String): Long = (read()[day] ?: 0L) + ZenWatchTime(store).get(day).praxisMs
 
     private fun read(): LinkedHashMap<String, Long> {
         val m = LinkedHashMap<String, Long>()
