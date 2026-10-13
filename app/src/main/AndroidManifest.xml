@@ -13,6 +13,10 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
+    <!-- ZenPipe: ONNX Runtime (local content classifier) needs API 24; below that the
+         classifier stays unavailable (ZenClassifierModel.isSupported) -->
+    <uses-sdk tools:overrideLibrary="ai.onnxruntime" />
+
     <!-- We need to be able to open links in the browser on API 30+ -->
     <queries>
         <intent>
@@ -41,6 +45,12 @@
         android:theme="@style/OpeningTheme"
         android:memtagMode="async"
         tools:ignore="AllowBackup">
+        <!-- ZenPipe: no ONNX Runtime telemetry (the provider loads the native library at every
+             app start and creates the telemetry HTTP client) -->
+        <provider
+            android:name="ai.onnxruntime.TelemetryInitializer"
+            android:authorities="${applicationId}.onnxruntime_telemetry_initializer"
+            tools:node="remove" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

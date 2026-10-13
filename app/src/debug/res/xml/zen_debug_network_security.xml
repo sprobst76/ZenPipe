@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe, debug builds only: allow plain HTTP to the local test source of the classifier model
+     download (adb reverse to a local HTTP server, see zen-docs/spec-klassifikator-integration.md). -->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+</network-security-config>

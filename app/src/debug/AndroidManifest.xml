@@ -4,5 +4,6 @@
 
     <application
         android:name=".DebugApp"
+        android:networkSecurityConfig="@xml/zen_debug_network_security"
         tools:replace="android:name" />
 </manifest>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: local content recognition (zen/classify). Separate file to keep upstream merges simple. -->
+<resources>
+    <string name="zen_class_title">Content recognition (local)</string>
+    <string name="zen_class_hint">Optional. Recognises on this device whether a video is practice, education, news, entertainment and so on. Nothing leaves the device. It only ever adds warnings or ordering and never decides on its own; without the model ZenPipe works exactly as before.</string>
+    <string name="zen_class_status_unsupported">Not available on this device (needs Android 7 and a 64-bit processor).</string>
+    <string name="zen_class_status_not_installed">Not installed.</string>
+    <string name="zen_class_status_not_published">Not installed. The model download is not published yet.</string>
+    <string name="zen_class_status_downloading">Downloading… %1$d of %2$d MB</string>
+    <string name="zen_class_status_installed">Active, model %1$s</string>
+    <string name="zen_class_status_broken">Damaged – please download again.</string>
+    <string name="zen_class_failed">Last download failed: %1$s</string>
+    <string name="zen_class_download">Download (%1$d MB)</string>
+    <string name="zen_class_download_short">Download</string>
+    <string name="zen_class_download_again">Download again</string>
+    <string name="zen_class_download_confirm">Download the content recognition model (about %1$d MB) from GitHub? This is the only connection the content recognition ever makes; nothing about you or your videos is sent. Wi-Fi recommended.</string>
+    <string name="zen_class_cancel">Cancel download</string>
+    <string name="zen_class_delete">Delete model</string>
+    <string name="zen_class_delete_confirm">Delete the content recognition model? ZenPipe then works as without it; you can download it again at any time.</string>
+    <string name="zen_class_licenses">Licenses</string>
+    <string name="zen_class_ort_notices">ONNX Runtime notices</string>
+</resources>

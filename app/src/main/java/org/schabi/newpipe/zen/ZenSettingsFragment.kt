@@ -32,6 +32,7 @@ class ZenSettingsFragment : Fragment() {
     private var statusView: TextView? = null
     private var undoButton: Button? = null
     private var signature = ""
+    private var classifier: org.schabi.newpipe.zen.classify.ZenClassifierSection? = null
 
     private val tick = object : Runnable {
         override fun run() {
@@ -41,6 +42,7 @@ class ZenSettingsFragment : Fragment() {
                 render()
             } else {
                 updateUndoLabel(snap)
+                classifier?.tick()
             }
             handler.postDelayed(this, 1000)
         }
@@ -189,6 +191,8 @@ class ZenSettingsFragment : Fragment() {
         renderPraxis(snap)
         renderSleep()
         renderQuotes()
+        classifier = org.schabi.newpipe.zen.classify.ZenClassifierSection(requireActivity()) { render() }
+            .also { it.render(content) }
     }
 
     /** Own pause quotes: add/remove and "only own quotes" (comfort, no lock). */

@@ -1,0 +1,33 @@
+ZenPipe – local content recognition: third-party notices
+=========================================================
+
+The optional content recognition runs completely on this device. The model is downloaded only on request (GitHub release asset, checked with SHA-256). No data leaves the device; ONNX Runtime telemetry is removed from the app.
+
+1. ONNX Runtime (Java API and native library, com.microsoft.onnxruntime:onnxruntime-android)
+https://github.com/microsoft/onnxruntime
+Its third-party notices are shipped in full (see "ONNX Runtime third-party notices").
+
+MIT License
+
+Copyright (c) Microsoft Corporation
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+2. multilingual-e5-small (encoder weights; downloaded model, vocabulary reduced, int8 quantised)
+https://huggingface.co/intfloat/multilingual-e5-small
+License: MIT (model card). Wang, Yang, Huang, Yang, Majumder, Wei:
+"Multilingual E5 Text Embeddings: A Technical Report", arXiv:2402.05672 (2024). The MIT license text above applies with the authors of the model as copyright holders.
+
+
+3. XLM-RoBERTa tokenizer (sentencepiece unigram vocabulary and normalisation table, converted to tokenizer.bin; used through the e5 model)
+https://github.com/facebookresearch/fairseq/tree/main/examples/xlmr
+License: MIT, Copyright (c) Facebook, Inc. and its affiliates.
+The MIT license text above applies with this copyright holder.
+
+
+4. Classification heads, rules and tokenizer port: part of ZenPipe (GPLv3). The heads were trained on labels produced by AI models (two independent raters) for video titles and descriptions; the weights contain no texts.

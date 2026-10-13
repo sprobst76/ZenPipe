@@ -57,3 +57,6 @@
 
 # See https://github.com/TeamNewPipe/NewPipe/issues/13508
 -keep class org.ocpsoft.prettytime.i18n.Resources* { *; }
+
+## ZenPipe: ONNX Runtime (JNI looks up Java classes and members by name)
+-keep class ai.onnxruntime.** { *; }

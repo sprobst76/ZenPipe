@@ -16,6 +16,11 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // ZenPipe: ONNX Runtime only from Maven Central (where Microsoft publishes it)
+        exclusiveContent {
+            forRepository { mavenCentral() }
+            filter { includeGroup("com.microsoft.onnxruntime") }
+        }
         google()
         mavenCentral()
         maven(url = "https://jitpack.io")

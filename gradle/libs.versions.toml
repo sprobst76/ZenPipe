@@ -49,6 +49,7 @@ mockitoCore = "5.24.0"
 multiplatform = "1.12.1"
 navigation3 = "1.1.2"
 okhttp = "5.5.0"
+onnxruntime = "1.31.0" # ZenPipe: local content classifier (MIT); telemetry provider removed in the manifest
 phoenix = "3.0.0"
 preference = "1.2.1"
 prettytime = "5.0.8.Final"
@@ -151,6 +152,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 lisawray-groupie-core = { module = "com.github.lisawray.groupie:groupie", version.ref = "groupie" }
 lisawray-groupie-viewbinding = { module = "com.github.lisawray.groupie:groupie-viewbinding", version.ref = "groupie" }
 livefront-bridge = { module = "com.github.livefront:bridge", version.ref = "bridge" }
+microsoft-onnxruntime-android = { module = "com.microsoft.onnxruntime:onnxruntime-android", version.ref = "onnxruntime" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 newpipe-extractor = { module = "com.github.TeamNewPipe:NewPipeExtractor", version.ref = "teamnewpipe-newpipe-extractor" }
 newpipe-filepicker = { module = "com.github.TeamNewPipe:NoNonsense-FilePicker", version.ref = "teamnewpipe-filepicker" }

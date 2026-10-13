@@ -23,6 +23,9 @@ between these channels without reinstalling:
   listed here, add it as `?fingerprint=…` to the URL). The repository only distributes the
   signed APKs from the GitHub releases.
 
+ZenPipe needs a 64-bit ARM device (`arm64-v8a`, practically every phone since about 2017); the
+APK contains no 32-bit or x86 code (the optional content recognition brings a native library).
+
 ZenPipe installs next to NewPipe. To move subscriptions and playlists, export the database in
 NewPipe (Settings > Backup and restore) and import it in ZenPipe.
 
@@ -51,6 +54,12 @@ ZenPipe has no own servers, no account, no analytics and no telemetry. It talks 
 NewPipe's update or crash-report servers. Crash reports are never sent automatically: you can copy
 them and decide yourself whether to share them (e.g. as a GitHub issue). All data (subscriptions,
 history, Zen state) stays on the device.
+
+The optional local content recognition (Settings > Zen) runs entirely on the device. Its model
+(about 35 MB) is downloaded from this repository's GitHub releases only when you tap
+"Download", and is checked with a SHA-256 checksum. The ONNX Runtime telemetry component is
+removed from the app. Licenses: MIT (ONNX Runtime, multilingual-e5-small, XLM-R tokenizer), see
+`app/src/main/res/raw/zen_classifier_notices.txt`.
 
 ### Modifications (GPLv3 section 5a)
 

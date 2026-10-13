@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="zen_class_title">Inhalts-Erkennung (lokal)</string>
+    <string name="zen_class_hint">Optional. Erkennt auf diesem Gerät, ob ein Video Praxis, Bildung, Aktuelles, Unterhaltung usw. ist. Nichts verlässt das Gerät. Sie ergänzt nur Hinweise oder eine Reihenfolge und entscheidet nie selbst; ohne Modell läuft ZenPipe genau wie bisher.</string>
+    <string name="zen_class_status_unsupported">Auf diesem Gerät nicht verfügbar (braucht Android 7 und einen 64-Bit-Prozessor).</string>
+    <string name="zen_class_status_not_installed">Nicht installiert.</string>
+    <string name="zen_class_status_not_published">Nicht installiert. Der Modell-Download ist noch nicht veröffentlicht.</string>
+    <string name="zen_class_status_downloading">Wird heruntergeladen … %1$d von %2$d MB</string>
+    <string name="zen_class_status_installed">Aktiv, Modell %1$s</string>
+    <string name="zen_class_status_broken">Defekt – bitte neu herunterladen.</string>
+    <string name="zen_class_failed">Letzter Download fehlgeschlagen: %1$s</string>
+    <string name="zen_class_download">Herunterladen (%1$d MB)</string>
+    <string name="zen_class_download_short">Herunterladen</string>
+    <string name="zen_class_download_again">Neu herunterladen</string>
+    <string name="zen_class_download_confirm">Das Modell der Inhalts-Erkennung (etwa %1$d MB) von GitHub herunterladen? Das ist die einzige Verbindung, die die Inhalts-Erkennung je aufbaut; über dich oder deine Videos wird nichts gesendet. WLAN empfohlen.</string>
+    <string name="zen_class_cancel">Download abbrechen</string>
+    <string name="zen_class_delete">Modell löschen</string>
+    <string name="zen_class_delete_confirm">Das Modell der Inhalts-Erkennung löschen? ZenPipe läuft dann wie ohne; du kannst es jederzeit neu herunterladen.</string>
+    <string name="zen_class_licenses">Lizenzen</string>
+    <string name="zen_class_ort_notices">ONNX-Runtime-Hinweise</string>
+</resources>

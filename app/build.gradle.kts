@@ -54,6 +54,12 @@ configure<ApplicationExtension> {
         System.getProperty("versionNameSuffix")?.let { versionNameSuffix = it }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // ZenPipe: 64-bit ARM only (ONNX Runtime adds ~34 MB native code per ABI, spec E2);
+        // debug builds add x86_64 for the emulator.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     // ZenPipe: release signing comes from the environment only (keystore never in the repo).
@@ -85,6 +91,9 @@ configure<ApplicationExtension> {
             // release builds are installable in parallel and never collide with NewPipe.
             applicationIdSuffix = ".debug"
             resValue("string", "app_name", "ZenPipe Debug")
+            ndk {
+                abiFilters += "x86_64"
+            }
         }
 
         release {
@@ -157,6 +166,11 @@ configure<ApplicationExtension> {
     }
 
     packaging {
+        // ZenPipe: compress native libraries in the APK (ONNX Runtime: download ~13 MB instead
+        // of ~34 MB; they are extracted once at install time)
+        jniLibs {
+            useLegacyPackaging = true
+        }
         resources {
             // remove two files which belong to jsoup
             // no idea how they ended up in the META-INF dir...
@@ -290,6 +304,9 @@ dependencies {
     implementation(libs.livefront.bridge)
     implementation(libs.evernote.statesaver.core)
     kapt(libs.evernote.statesaver.compiler)
+
+    // ZenPipe: local content classifier (ONNX Runtime, MIT)
+    implementation(libs.microsoft.onnxruntime.android)
 
     // HTML parser
     implementation(libs.jsoup)
