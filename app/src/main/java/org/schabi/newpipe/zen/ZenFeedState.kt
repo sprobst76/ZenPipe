@@ -31,7 +31,9 @@ class ZenFeedState(
         val open: List<ZenFeedPlanner.Pick>,
         val dailyCapReached: Boolean,
         /** Null while no edition exists yet. */
-        val nextEditionMillis: Long?
+        val nextEditionMillis: Long?,
+        /** This call built a new edition. */
+        val created: Boolean = false
     )
 
     /**
@@ -51,9 +53,12 @@ class ZenFeedState(
             store.put(KEY_DAY to day, KEY_DAY_URLS to "")
         }
         var edition = load()
+        var created = false
         if (allowCreate && isDue(nowMillis)) {
             val at = if (createdAt <= nowMillis && ZenDay.dayOf(createdAt, zone).toString() == day) createdAt else nowMillis
+            val previous = edition
             edition = createEdition(nowMillis, at, day, edition, rules, candidates)
+            created = edition !== previous
         }
         val handled = handled()
         val open = edition?.picks?.filter { it.url !in handled } ?: emptyList()
@@ -63,7 +68,7 @@ class ZenFeedState(
             capNow -> ZenDay.nextDayStart(nowMillis, zone)
             else -> maxOf(nowMillis, edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS)
         }
-        return View(edition, open, capNow, next)
+        return View(edition, open, capNow, next, created)
     }
 
     /** Whether a new edition would be built now (new day, none yet, or the interval passed below the cap). */
@@ -110,6 +115,29 @@ class ZenFeedState(
         }
         log?.add("edition", "n=${e.picks.size} leftover=${e.leftover} dayDistinct=${all.size}$content")
         return e
+    }
+
+    /**
+     * Replaces the stored "why" of picks of the edition created at [createdAt] (more precise
+     * classification found later). Order, selection and everything else stay as they are; a newer
+     * edition is never touched. Returns the number of changed picks.
+     */
+    @Synchronized
+    fun updateWhy(createdAt: Long, whys: Map<String, String>): Int {
+        val e = load() ?: return 0
+        if (e.createdAt != createdAt || whys.isEmpty()) return 0
+        var changed = 0
+        val picks = e.picks.map { p ->
+            val w = whys[p.url]
+            if (w != null && p.why != null && w != p.why) {
+                changed++
+                p.copy(why = w)
+            } else {
+                p
+            }
+        }
+        if (changed > 0) save(e.copy(picks = picks))
+        return changed
     }
 
     @Synchronized

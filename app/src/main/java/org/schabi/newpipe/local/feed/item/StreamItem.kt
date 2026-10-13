@@ -45,6 +45,9 @@ data class StreamItem(
 
     override fun getId(): Long = stream.uid
 
+    // ZenPipe: a changed "why" (details loaded later) must rebind the item
+    override fun hasSameContentAs(other: com.xwray.groupie.Item<*>): Boolean = super.hasSameContentAs(other) && (other as? StreamItem)?.zenPick == zenPick
+
     enum class ItemVersion { NORMAL, MINI, GRID, CARD }
 
     override fun getLayout(): Int = when (itemVersion) {

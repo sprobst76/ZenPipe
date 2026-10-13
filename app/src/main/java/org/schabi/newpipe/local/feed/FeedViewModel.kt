@@ -65,6 +65,8 @@ class FeedViewModel(
 
     init {
         org.schabi.newpipe.zen.ZenEditionPrep.shared.addListener(zenPrepListener)
+        // details loaded later for the edition's picks: only their "why" line changes
+        org.schabi.newpipe.zen.classify.ZenFeedDetails.shared.addListener(zenPrepListener)
     }
 
     fun zenHandled(url: String, reason: String) {
@@ -135,6 +137,7 @@ class FeedViewModel(
         super.onCleared()
         combineDisposable.dispose()
         org.schabi.newpipe.zen.ZenEditionPrep.shared.removeListener(zenPrepListener)
+        org.schabi.newpipe.zen.classify.ZenFeedDetails.shared.removeListener(zenPrepListener)
     }
 
     private data class CombineResultEventHolder(

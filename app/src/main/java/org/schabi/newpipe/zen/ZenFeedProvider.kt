@@ -11,6 +11,7 @@ import org.schabi.newpipe.zen.classify.ZenClassCache
 import org.schabi.newpipe.zen.classify.ZenClassWhy
 import org.schabi.newpipe.zen.classify.ZenClassifier
 import org.schabi.newpipe.zen.classify.ZenClassifierModel
+import org.schabi.newpipe.zen.classify.ZenFeedDetails
 
 /** Bridges the NewPipe feed database and the Zen edition logic ([ZenFeedState]). */
 class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
@@ -54,10 +55,12 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
                 }
             }
         }
+        var pool: List<ZenFeedPlanner.Candidate> = emptyList()
         val view = state.view(now, allowCreate, rules, createdAt) {
             ZenWatchLater.purgeExpired(appContext, now)
-            if (rules.active) classified(candidates(), now) else candidates()
+            (if (rules.active) classified(candidates(), now) else candidates()).also { pool = it }
         }
+        if (view.created && rules.active && view.edition != null) refineDetails(view.edition, pool, rules)
 
         // not finished streams (partially watched ones stay visible with their progress)
         val available = db.getStreams(FeedGroupEntity.GROUP_ALL_ID, false, true, false)
@@ -94,6 +97,26 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
     }
 
     fun markHandled(url: String, reason: String) = state.markHandled(url, reason)
+
+    /**
+     * A new edition was built: its picks classified from title + channel only get their details
+     * loaded and are classified again ([ZenFeedDetails]); only their stored "why" changes.
+     */
+    private fun refineDetails(edition: ZenFeedState.Edition, pool: List<ZenFeedPlanner.Candidate>, rules: ZenFeedPlanner.ContentRules) {
+        val byUrl = pool.associateBy { it.url }
+        val jobs = edition.picks.filter { ZenFeedPlanner.parseWhy(it.why)?.level == "T" }.mapNotNull { p ->
+            val c = byUrl[p.url] ?: return@mapNotNull null
+            val serviceId = serviceIds[c.url] ?: 0
+            ZenFeedDetails.Job(ZenClassCache.keyOf(serviceId, c.url), serviceId, c.url, VideoText(c.title, c.channelName)) { e ->
+                ZenFeedPlanner.whyOf(
+                    c.copy(zenCats = e.cats, tone = e.tone, classLevel = e.level, classTheme = ZenClassWhy.strongestTheme(e.top)),
+                    rules
+                )
+            }
+        }
+        val at = edition.createdAt
+        ZenFeedDetails.shared.start(appContext, jobs) { whys -> state.updateWhy(at, whys) }
+    }
 
     /** Content rules for the next edition: switches on and a working model (otherwise as without). */
     private fun contentRules(): ZenFeedPlanner.ContentRules {

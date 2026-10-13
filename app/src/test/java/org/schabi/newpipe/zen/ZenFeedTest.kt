@@ -285,4 +285,22 @@ class ZenFeedTest {
         assertNull(old.theme)
         assertNull(ZenFeedPlanner.parseWhy(ZenFeedPlanner.WHY_UNCLASSIFIED))
     }
+
+    @Test
+    fun `later details change only the why of the current edition`() {
+        val store = MemoryZenStore()
+        val pool = (1L..4).map { cls(c(it, rank = it.toInt()), emptyMap()) }
+        val v1 = state(store).view(now, true, on) { pool }
+        assertTrue(v1.created)
+        val at = v1.edition!!.createdAt
+        val newWhy = "D|neutral|0.50|zerstreuung=0.70"
+        assertEquals(1, state(store).updateWhy(at, mapOf("https://y/v2" to newWhy, "https://y/other" to newWhy)))
+        val v2 = state(store).view(now + 60_000, true, on) { pool }
+        assertFalse(v2.created)
+        assertEquals(v1.open.map { it.url }, v2.open.map { it.url }) // order and selection unchanged
+        assertEquals(newWhy, v2.open[1].why)
+        assertEquals(v1.open[0], v2.open[0])
+        // an older edition is never touched
+        assertEquals(0, state(store).updateWhy(at - 1, mapOf("https://y/v1" to newWhy)))
+    }
 }

@@ -153,17 +153,8 @@ object ZenPlausibilityCheck {
         val cache = ZenClassCache.get(app)
         val classifier = ZenClassifier.get(app)
         val out = ArrayList<Checked>()
-        var lastRequest = 0L
-        var requests = 0
-        var retries = 0
-        var blocked = false
-        val errors = LinkedHashMap<String, Int>()
+        val req = ZenDetailRequests(TAG, { serviceId, url -> loadText(serviceId, url) })
         val t0 = SystemClock.elapsedRealtime()
-        fun throttle(minWait: Long) {
-            val wait = maxOf(lastRequest + REQUEST_INTERVAL_MS, SystemClock.elapsedRealtime() + minWait) - SystemClock.elapsedRealtime()
-            if (wait > 0) Thread.sleep(wait)
-            lastRequest = SystemClock.elapsedRealtime()
-        }
         for ((i, item) in items.withIndex()) {
             if (stopped()) break
             onProgress(i + 1, items.size)
@@ -173,46 +164,24 @@ object ZenPlausibilityCheck {
                 out.add(Checked(item.name, cached))
                 continue
             }
-            var text: VideoText? = null
-            var attempt = 0
-            while (!blocked && text == null && !stopped()) {
-                throttle(if (attempt == 0) 0 else RETRY_BACKOFF_MS[attempt - 1])
-                if (stopped()) break
-                requests++
-                if (attempt > 0) retries++
-                try {
-                    text = ZenClassifier.textOf(ExtractorHelper.getStreamInfo(item.serviceId, item.url, false).blockingGet())
-                } catch (e: Exception) {
-                    val kind = failKind(e)
-                    Log.w(
-                        TAG,
-                        "details failed (${kind.name.lowercase()}, attempt ${attempt + 1}) for ${item.url}: " +
-                            generateSequence(e as Throwable) { it.cause }.take(10)
-                                .joinToString(" <- ") { "${it.javaClass.simpleName}: ${it.message?.take(120)}" }
-                    )
-                    if (kind == FailKind.BLOCKED) blocked = true
-                    if (kind != FailKind.TRANSIENT || attempt >= RETRY_BACKOFF_MS.size) {
-                        val name = rootName(e)
-                        errors[name] = (errors[name] ?: 0) + 1
-                        break
-                    }
-                    attempt++
-                }
-            }
+            val text = req.fetch(item.serviceId, item.url, stopped)
             if (stopped()) break
             // no network / blocked / not available: title + channel only (marked as such)
             val failed = text == null
             val entry = classifier.classifyBlocking(key, text ?: VideoText(item.name, item.uploaderName ?: ch.name))
             out.add(Checked(item.name, entry, failed))
         }
-        if (blocked) errors["blocked"] = (errors["blocked"] ?: 0) + 1
         Log.d(
             TAG,
-            "checked ${out.size} videos, $requests detail requests ($retries retries), " +
-                "${out.count { it.detailsFailed }} failed $errors, ${SystemClock.elapsedRealtime() - t0} ms"
+            "checked ${out.size} videos, ${req.requests} detail requests (${req.retries} retries), " +
+                "${out.count { it.detailsFailed }} failed ${req.errors}, ${SystemClock.elapsedRealtime() - t0} ms"
         )
-        return Sample(out, requests, retries, errors)
+        return Sample(out, req.requests, req.retries, LinkedHashMap(req.errors))
     }
+
+    /** One detail request: the video's StreamInfo as classifier text (level D). */
+    @JvmStatic
+    fun loadText(serviceId: Int, url: String): VideoText = ZenClassifier.textOf(ExtractorHelper.getStreamInfo(serviceId, url, false).blockingGet())
 
     /** Newest videos of a channel (videos tab) or the first ones of a playlist, without shorts/live. */
     private fun newest(ch: ZenPraxisChannel): List<StreamInfoItem> {
