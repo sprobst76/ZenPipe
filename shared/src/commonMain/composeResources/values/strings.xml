@@ -26,7 +26,7 @@
     <string name="privacy_policy_encouragement">ZenPipe does not collect any data and contains no analytics. Crash reports are never sent automatically: you can copy them and decide yourself whether to share them.</string>
     <string name="read_privacy_policy">Read privacy policy</string>
     <string name="app_license_title">ZenPipe's License</string>
-    <string name="app_license">ZenPipe is a fork of NewPipe (by the NewPipe contributors, https://newpipe.net). Like NewPipe it is copyleft libre software: You can use, study, share, and improve it at will. Specifically you can redistribute and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</string>
+    <string name="app_license">ZenPipe is a fork of NewPipe (by the NewPipe contributors, https://newpipe.net), modified by Stefan Probst-Schendzielorz since 2026-10-12 (finite feed, no Shorts, no autoplay, no downloads, intent prompt, mandatory pause; every change is listed in the git history at https://github.com/sprobst76/ZenPipe). Like NewPipe it is copyleft libre software: You can use, study, share, and improve it at will. Specifically you can redistribute and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</string>
     <string name="read_full_license">Read license</string>
     <string name="faq_title">Frequently asked questions</string>
     <string name="faq_description">If you are having trouble using the app, be sure to check out these answers to common questions!</string>

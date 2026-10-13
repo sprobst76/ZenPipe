@@ -6,16 +6,58 @@ no comments, an intention check before watching. It is a **fork of [NewPipe](htt
 (`io.github.sprobst76.zenpipe`) and never contacts NewPipe's update or crash-report servers.
 
 - Concept and rules: [`zen-docs/`](zen-docs/) (rules: [`zen-docs/rules.md`](zen-docs/rules.md), release identity: [`zen-docs/release.md`](zen-docs/release.md))
-- Bugs / feedback: https://github.com/sprobst76/ZenPipe/issues
-- Install: not yet published (own F-Droid repo / GitHub releases are planned).
+- Bugs / feedback: https://github.com/sprobst76/ZenPipe/issues (please never report ZenPipe issues to TeamNewPipe)
+
+### Installation
+
+Not published yet. Planned channels (all signed with the same ZenPipe key, so you can switch
+between them):
+
+- **GitHub releases** (`ZenPipe_v<version>.apk` + SHA-256): https://github.com/sprobst76/ZenPipe/releases (follows)
+- **Obtainium**: add `https://github.com/sprobst76/ZenPipe` as app source (follows)
+- **Own F-Droid repository** (repo URL and QR code follow)
+
+ZenPipe installs next to NewPipe. To move subscriptions and playlists, export the database in
+NewPipe (Settings > Backup and restore) and import it in ZenPipe.
+
+#### Signing key
+
+SHA-256 fingerprint of the ZenPipe signing certificate (to verify downloaded APKs):
+
+```
+(follows with the first release)
+```
+
+### Opening YouTube links with ZenPipe
+
+ZenPipe handles `youtube.com`, `m.youtube.com`, `music.youtube.com`, `youtu.be` links (videos,
+channels, playlists). Every link passes the intention check first; Shorts links are blocked.
+To make ZenPipe the default for these links (no domain verification, so you set it yourself):
+on Android 11 open *Settings > Apps > ZenPipe > Advanced > Open by default > Open supported links*
+and choose *Open in this app* (on Android 12+: *Open by default > Add link* and tick the YouTube
+domains). If a link still opens the YouTube or YouTube Music app, set *Open supported links* of
+that app to *Ask every time* or *Don't open in this app*.
 
 ### Privacy
 
-ZenPipe has no account, no analytics and no tracking. Crash reports are never sent automatically;
-you can copy them and decide yourself whether to share them (e.g. as a GitHub issue). Like NewPipe it
-talks directly to the video services (YouTube etc.) from your device.
+ZenPipe has no own servers, no account, no analytics and no telemetry. It talks only to YouTube
+(or another supported service you open yourself) directly from your device; it never contacts
+NewPipe's update or crash-report servers. Crash reports are never sent automatically: you can copy
+them and decide yourself whether to share them (e.g. as a GitHub issue). All data (subscriptions,
+history, Zen state) stays on the device.
 
-*The remainder of this file is the original NewPipe README, kept for attribution and upstream merges.*
+### Modifications (GPLv3 section 5a)
+
+ZenPipe is a modified version of NewPipe, changed by Stefan Probst-Schendzielorz since
+2026-10-12: finite feed with hourly editions, no Shorts, no autoplay, no comments/related items,
+no downloads, intention check, mandatory pause after aborted videos, Zen settings with a 24-hour
+lock, own application id, name and icon. Every change is a separate commit with the prefix `zen:`
+on the branch `zen` of https://github.com/sprobst76/ZenPipe; the unmodified upstream code is on
+`dev`. Each release links the exact source code (tag).
+
+## Original NewPipe README
+
+*The remainder of this file is the original NewPipe README, kept for attribution and upstream merges. Installation methods, signing fingerprint, donations and contact channels below refer to NewPipe, not to ZenPipe.*
 
 ---
 
@@ -164,7 +206,8 @@ If you like NewPipe, you're welcome to send a donation. We prefer Liberapay, as 
 
 ## Privacy Policy
 
-The NewPipe project aims to provide a private, anonymous experience for using web-based media services. Therefore, the app does not collect any data without your consent. NewPipe's privacy policy explains in detail what data is sent and stored when you send a crash report, or leave a comment in our blog. You can find the document [here](https://newpipe.net/legal/privacy/).
+ZenPipe: see [Privacy](#privacy) at the top of this file. The NewPipe project's privacy policy
+(crash reports by e-mail, blog comments) applies to NewPipe only: https://newpipe.net/legal/privacy/
 
 ## License
 [![GNU GPLv3 Image](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)  

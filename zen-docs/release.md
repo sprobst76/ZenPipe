@@ -54,3 +54,54 @@ up as modify/delete conflicts: resolve with `git rm -r fastlane/metadata/android
 
 `python3 zen-docs/tools/gen_icons.py` regenerates all launcher/notification/TV-banner PNGs and
 the store icon (open ring on calm green `#2E4A45`, ring `#F2EFE6`).
+
+## Signing
+
+- Release signing is read **only from environment variables** in `app/build.gradle.kts`
+  (`signingConfigs.zenRelease`): `ZENPIPE_KEYSTORE` (path to the PKCS12 file),
+  `ZENPIPE_KEYSTORE_PASSWORD`, `ZENPIPE_KEY_ALIAS`, `ZENPIPE_KEY_PASSWORD`. Schemes v1+v2+v3.
+- Without `ZENPIPE_KEYSTORE` `assembleRelease` builds an **unsigned** APK
+  (`app-release-unsigned.apk`), e.g. for local tests or F-Droid. If `ZENPIPE_KEYSTORE` is set but
+  one of the other three variables is missing, the build fails with a clear message.
+- `.gitignore` blocks `*.jks *.keystore *.p12 *.pem keystore.properties`.
+- Key (not created yet, see `research-name-und-offene-fragen.md` §3):
+  `keytool -genkeypair -storetype PKCS12 -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -validity 10000 -alias zenpipe -keystore zenpipe-release.p12`
+  Store keystore + passwords in the password manager and two offline copies. Publish the
+  SHA-256 fingerprint in the README (`apksigner verify --print-certs ZenPipe_v….apk`).
+- Local signed build:
+  `ZENPIPE_KEYSTORE=… ZENPIPE_KEYSTORE_PASSWORD=… ZENPIPE_KEY_ALIAS=zenpipe ZENPIPE_KEY_PASSWORD=… ./gradlew assembleRelease`
+  (load the values from a non-committed file into the environment, never as command-line
+  arguments in the shell history).
+
+## GitHub Actions
+
+- `.github/workflows/release.yml`: runs on tag `v*` (environment `release`). Restores the
+  keystore from secret `ZENPIPE_KEYSTORE_BASE64` (`base64 -w0 zenpipe-release.p12`), plus secrets
+  `ZENPIPE_KEYSTORE_PASSWORD`, `ZENPIPE_KEY_ALIAS`, `ZENPIPE_KEY_PASSWORD`; builds
+  `assembleRelease`, fails if the tag is not `v<versionName>`, the APK is unsigned or the
+  changelog `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt` is missing; renames to
+  `ZenPipe_v<versionName>.apk`, writes `.sha256`, creates the GitHub release with the changelog,
+  a link to the source tree of the tag (GPLv3 §6), the SHA-256 and the certificate digest.
+- `.github/workflows/ci.yml`: build + unit tests + emulator tests on push/PR to `zen`; artifact
+  `ZenPipe-continuous`.
+- Removed upstream files: `FUNDING.yml` (TeamNewPipe donations), `build-release-apk.yml`
+  (named the APK `NewPipe_v…`), `pr-labeler.yml` + `changed-lines-count-labeler.yml`
+  (`pull_request_target`), `no-response.yml` (cron), `image-minimizer.*`, `backport-pr.yml`,
+  `DISCUSSION_TEMPLATE/`. Issue templates, PR template and CONTRIBUTING point to
+  `sprobst76/ZenPipe`. On upstream merges these paths can show modify/delete conflicts: keep the
+  ZenPipe version (`git rm` the upstream files again).
+
+## Release checklist
+
+1. Bump `ZENPIPE_BUILD` / `ZENPIPE_VERSION_NAME`, add changelogs (en-US, de-DE).
+2. `assembleDebug runCheckstyle testDebugUnitTest` green, device check.
+3. `android-release-preflight.sh`, then `git tag v<versionName>` on the release commit and
+   `git push origin v<versionName>` -> `release.yml` publishes.
+4. Check the release page (APK, SHA-256, source link), then update the F-Droid repo / Obtainium.
+
+## GPL notices
+
+- §5a dated modification notice: README section "Modifications" and the About > License text
+  (`app_license`, app + shared, en + de).
+- §6 corresponding source: every GitHub release links the tag's source tree; GitHub attaches the
+  source archives automatically.
