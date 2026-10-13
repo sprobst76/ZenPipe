@@ -1,5 +1,6 @@
 Third ZenPipe development release.
 • Content detection (local, optional): download the model in Settings > Zen (35 MB); the feed weights current affairs lower and shows why a video ranks first
+• Share a channel link: ZenPipe first shows a rough classification and offers Subscribe, Practice or Just view
 • Marking practice checks the channel's latest videos and warns about mismatches; exception list (with 24 h lock)
 • Pop-up player removed; picture pauses when leaving the app, sound via "Background" keeps playing
 • Calm sage design in light and dark, view counts hidden in lists
