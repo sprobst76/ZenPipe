@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- YouTube -->
-    <color name="light_youtube_primary_color">#e53935</color>
-    <color name="light_youtube_accent_color">#000000</color>
+    <color name="light_youtube_primary_color">#3D5A53</color>
+    <color name="light_youtube_accent_color">#3E6A5E</color>
 
-    <color name="dark_youtube_primary_color">#992722</color>
-    <color name="dark_youtube_accent_color">#FFFFFF</color>
+    <color name="dark_youtube_primary_color">#24302D</color>
+    <color name="dark_youtube_accent_color">#9DBFB2</color>
 
     <!-- SoundCloud -->
     <color name="light_soundcloud_primary_color">#f57c00</color>

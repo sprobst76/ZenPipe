@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ZenPipe: the player surface is always dark, its seek bar uses the light sage -->
+    <style name="ZenPlayerSeekBar">
+        <item name="colorControlActivated">@color/zen_player_accent_color</item>
+    </style>
+</resources>

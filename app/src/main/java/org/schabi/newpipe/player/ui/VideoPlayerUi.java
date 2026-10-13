@@ -177,16 +177,20 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
         setupPlayerSeekOverlay();
     }
 
+    private int zenSeekColor() {
+        return androidx.core.content.ContextCompat.getColor(context,
+                R.color.zen_player_accent_color);
+    }
+
     private void initViews() {
         setupSubtitleView();
 
         binding.resizeTextView
                 .setText(PlayerHelper.resizeTypeOf(context, binding.surfaceView.getResizeMode()));
 
+        // zen: calm sage seek bar instead of red (progress color comes from ZenPlayerSeekBar)
         binding.playbackSeekBar.getThumb()
-                .setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_IN));
-        binding.playbackSeekBar.getProgressDrawable()
-                .setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.MULTIPLY));
+                .setColorFilter(new PorterDuffColorFilter(zenSeekColor(), PorterDuff.Mode.SRC_IN));
 
         final ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context,
                 R.style.DarkPopupMenu);
@@ -864,7 +868,7 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
 
         binding.playbackSeekBar.setEnabled(false);
         binding.playbackSeekBar.getThumb()
-                .setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_IN));
+                .setColorFilter(new PorterDuffColorFilter(zenSeekColor(), PorterDuff.Mode.SRC_IN));
 
         binding.loadingPanel.setBackgroundColor(Color.BLACK);
         animate(binding.loadingPanel, true, 0);
@@ -883,7 +887,7 @@ public abstract class VideoPlayerUi extends PlayerUi implements SeekBar.OnSeekBa
 
         binding.playbackSeekBar.setEnabled(true);
         binding.playbackSeekBar.getThumb()
-                .setColorFilter(new PorterDuffColorFilter(Color.RED, PorterDuff.Mode.SRC_IN));
+                .setColorFilter(new PorterDuffColorFilter(zenSeekColor(), PorterDuff.Mode.SRC_IN));
 
         binding.loadingPanel.setVisibility(View.GONE);
 

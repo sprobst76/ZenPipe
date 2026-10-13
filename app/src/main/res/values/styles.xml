@@ -18,7 +18,8 @@
         <item name="actionColor">@color/white</item>
         <item name="floatingActionButtonStyle">@style/FloatingActionButtonTheme</item>
         <item name="toolbarSearchColor">@color/white</item>
-        <item name="colorControlActivated">?attr/colorPrimary</item>
+        <!-- zen: switches/seek bars/checkboxes use the accent (the calm primary is too dark) -->
+        <item name="colorControlActivated">?attr/colorAccent</item>
     </style>
     <style name="Base" parent="Base.V21"/>
 
@@ -42,6 +43,12 @@
         <item name="card_item_contrast_color">@color/light_card_item_contrast_color</item>
         <item name="border_color">@color/light_border_color</item>
         <item name="dashed_border">@drawable/dashed_border_light</item>
+        <!-- zen: calm text colors -->
+        <item name="android:textColorPrimary">@color/zen_text_primary_light</item>
+        <item name="android:textColorSecondary">@color/zen_text_secondary_light</item>
+        <item name="android:textColorTertiary">@color/zen_text_secondary_light</item>
+        <item name="android:colorBackgroundFloating">@color/light_dialog_background_color</item>
+        <item name="colorBackgroundFloating">@color/light_dialog_background_color</item>
     </style>
     <style name="Base.LightTheme" parent="Base.V21.LightTheme" />
     <style name="LightTheme" parent="Base.LightTheme"/>
@@ -66,12 +73,20 @@
         <item name="card_item_contrast_color">@color/dark_card_item_contrast_color</item>
         <item name="border_color">@color/dark_border_color</item>
         <item name="dashed_border">@drawable/dashed_border_dark</item>
+        <!-- zen: calm text colors -->
+        <item name="android:textColorPrimary">@color/zen_text_primary_dark</item>
+        <item name="android:textColorSecondary">@color/zen_text_secondary_dark</item>
+        <item name="android:textColorTertiary">@color/zen_text_secondary_dark</item>
+        <item name="android:colorBackgroundFloating">@color/dark_dialog_background_color</item>
+        <item name="colorBackgroundFloating">@color/dark_dialog_background_color</item>
     </style>
     <style name="Base.DarkTheme" parent="Base.V21.DarkTheme" />
     <style name="DarkTheme" parent="Base.DarkTheme"/>
 
     <!-- Black Theme -->
     <style name="Base.V21.BlackTheme" parent="DarkTheme">
+        <item name="colorPrimary">@color/zen_black_primary_color</item>
+        <item name="colorPrimaryDark">@color/zen_black_primary_color</item>
         <item name="android:windowBackground">@color/black_background_color</item>
         <item name="windowBackground">@color/black_background_color</item>
 

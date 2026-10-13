@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: calm sage palette (zen-docs/spec-design.md, variant A). New names only here;
+     upstream color names keep their keys and get new values in colors.xml/colors_services.xml. -->
+<resources>
+    <!-- toolbar/status bar of the black theme (almost black instead of red) -->
+    <color name="zen_black_primary_color">#0B0E0D</color>
+    <!-- watched progress on dark backgrounds (the dark primary would be invisible) -->
+    <color name="zen_dark_progress_color">#7FA698</color>
+    <!-- player seek bar: the player surface is always dark, so it uses the light sage -->
+    <color name="zen_player_accent_color">#9DBFB2</color>
+
+    <!-- text, used by the color state lists in res/color/zen_text_*.xml -->
+    <color name="zen_light_text_primary">#1F2725</color>
+    <color name="zen_light_text_secondary">#57615E</color>
+    <color name="zen_dark_text_primary">#CFD6D2</color>
+    <color name="zen_dark_text_secondary">#A7AEAA</color>
+</resources>

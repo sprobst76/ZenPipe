@@ -10,7 +10,7 @@
     </style>
 
     <style name="BlackTheme.YouTube" parent="BlackTheme" tools:keep="@style/BlackTheme_YouTube">
-        <item name="colorPrimaryDark">@color/dark_youtube_primary_color</item>
+        <item name="colorPrimaryDark">@color/zen_black_primary_color</item>
     </style>
 
     <!-- SoundCloud -->

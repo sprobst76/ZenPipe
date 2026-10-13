@@ -507,6 +507,7 @@
                 <org.schabi.newpipe.views.ChaptersSeekBar
                     android:id="@+id/playbackSeekBar"
                     style="@style/Widget.AppCompat.SeekBar"
+                    android:theme="@style/ZenPlayerSeekBar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
