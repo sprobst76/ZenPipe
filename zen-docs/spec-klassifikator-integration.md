@@ -1,6 +1,6 @@
 # Spec: Lokaler Inhalts-Klassifikator (Praxis/Bildung/Aktuelles/Ton) in ZenPipe
 
-Stand: 2026-10-13. **Status: AP 0 geliefert (Messung 2.3), AP 1–3 umgesetzt (Abschnitt 10), AP 4–6 umgesetzt (Abschnitt 11), AP 7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
+Stand: 2026-10-13. **Status: AP 0 geliefert (Messung 2.3), AP 1–3 umgesetzt (Abschnitt 10), AP 4–6 umgesetzt (Abschnitt 11), „Kanal übernehmen“ und vorbereitete Ausgabe (Abschnitt 12), AP 7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
 Abschnitt 8 listet die nötigen Änderungen an `rules.md`. Quelle des Klassifikators: Projekt YoutubeManager, übergeben als
 `resources/zen-android.zip`, `zen-handoff.zip`, `zen-rules.zip` (**ungetrackt, wird nicht committet**).
 
@@ -133,6 +133,8 @@ Einbau:
   „nicht eingeordnet“ (Abschnitt 4.3).
 - **Notfall im Auswahlmoment:** Sind beim Bau einer Ausgabe noch Kandidaten ohne Eintrag, dürfen in `compute` höchstens
   **3 s** nachklassifiziert werden (≈ 10 Videos), der Rest bleibt „nicht eingeordnet“. Die Ausgabe wartet nicht länger.
+  **Ersetzt (Abschnitt 12.2):** die fällige Ausgabe wird erst gebaut, wenn ihre Kandidaten eingeordnet sind (max. 20 s,
+  im Hintergrund, laufende Ausgabe bleibt sichtbar).
 - **Details beim Öffnen:** Wenn ein Video geöffnet/abgespielt wird, liegt `StreamInfo` ohnehin vor (`ZenPause.onStreamInfo`,
   `zen/ZenPause.kt:501-528`, und die Detailseite). Dann einmal mit vollem Text klassifizieren und den Cache auf Stufe `D`
   heben. Kostet keine zusätzliche Netzanfrage.
@@ -591,4 +593,84 @@ MrWissen2go „KI außer Kontrolle?“ ohne Kategorie; Talk-Formate (phoenix per
 - Erste Ausgabe nach einer Feed-Aktualisierung ist meist unklassifiziert (Worker und Ausgabe starten gleichzeitig).
 - Ursache der `RuntimeException` beim ersten Prüflauf (8 von 14 Detailabrufen) unklar; Ursachen-Logging ist jetzt drin.
 - AP 7 (Bildung ohne Politik), AP 0-Asset/SHA in `ZenClassifierModel`, Akku-Messung ohne USB.
+
+## 12. Umsetzung „Kanal übernehmen“ und vorbereitete Ausgabe (2026-10-13)
+
+Commits auf `zen`: `zen: prepare a due feed edition before building it`, `zen: retry and report failed detail requests in the
+practice check`, `zen: take over a shared channel link`. Regeln: `rules.md` „Inhalts-Erkennung“ (Zeilen „Auswahlmoment“,
+„Prüfung beim Markieren“, „Kanal übernehmen“) und „Externe Links“.
+
+### 12.1 Kanal übernehmen (Wunsch Stefan)
+- **Einstieg:** `RouterActivity.onSuccess` – ist der Link-Typ `CHANNEL` (`ZenChannelImport.handles`), erscheint statt der
+  Öffnen-Auswahl der Dialog `ZenChannelImportDialog` (DialogFragment; der FragmentManager stellt ihn nach dem Drehen wieder
+  her, `RouterActivity` beendet sich wie bei Playlist-/Download-Dialogen, wenn er geschlossen wird). Erkennung = die des
+  Extraktors (`@name`, `@name/videos`, `/channel/`, `/c/`, `/user/`, `m.`, Link in Text); Video-, Playlist-, Shorts-Links
+  gehen den alten Weg. Links innerhalb der App, Suche, Abos und Kanallisten sind unverändert.
+- **Laden:** `ZenChannelImportModel` (ViewModel, übersteht Drehen): `ChannelInfo` (Name, Avatar, kanonische URL), Abo-Status
+  (`SubscriptionDAO.getSubscription`), dann `ZenPlausibilityCheck.sample` (neue öffentliche Stichproben-Funktion der
+  Prüfung aus AP 5: neueste 15 ohne Shorts/Live, Details 1/s, Cache Stufe D, Wiederholungen, Stopp-Flag). Zurück/Schließen
+  setzt das Stopp-Flag; die laufende Anfrage endet noch, weitere folgen nicht.
+- **Auswertung:** `ZenChannelProfile` (reine Logik): Gruppen Praxis (praxis ∪ ruhe), Bildung, Aktuelles, Unterhaltung,
+  Körper, Psyche; „Überwiegend X (k von n)“ ab 50 %, sonst „Gemischt: …“ (drei größte), „kein klares Bild“ ab 8/15 ohne
+  Kategorie (wie die Prüfung); Aktuelles- und Belastend-Anteil; „wird im Feed niedrig gewichtet“, wenn ≥ 50 % ein
+  Feed-Gewicht < 0,75 hätten (`ZenFeedPlanner.contentWeight`, nur mit `class_feed` an, nicht bei Ausnahme-Kanälen); bis zu
+  4 Beispiele (je Gruppe eins, dann ohne Kategorie, Reihenfolge des Kanals). Hinweis auf Unsicherheit immer, dazu nicht
+  ladbare Videos.
+- **Aktionen:** Abonnieren sofort (`SubscriptionManager.insertSubscription`, wie die Kanalseite, ohne Sperre); Als Praxis
+  markieren = `ZenPraxisUi.onMenu` mit der fertigen Stichprobe (`ZenPlausibilityCheck.run(…, presampled)`, keine zweite
+  Prüfung) bzw. stoppt eine laufende Einordnung, wenn der Ablauf selbst prüfen wird (gesperrt: nur Ablehnung, Einordnung
+  läuft weiter); Nur ansehen = `NavigationHelper.getIntentByLink` → Kanalseite in `MainActivity` (Absichtsabfrage wie bisher).
+- **Protokoll:** `channel_import action=open|subscribe|praxis|view|close|load_failed url=…` (close mit `last=`),
+  `channel_import_check url=… n= kind= main= news= heavy= none= lowFeed= requests= retries= failed= errors=` bzw.
+  `result=no_model|failed`.
+
+### 12.2 Vorbereitete Ausgabe (Fehler „erste Ausgabe unklassifiziert“)
+- Ursache (Abschnitt 11.3): Worker und Ausgabe starteten gleichzeitig, das 3-s-Budget schaffte 4 von 92.
+- Neu: `ZenFeedProvider.compute` fragt bei fälliger Ausgabe (`ZenFeedState.isDue`, ohne Seiteneffekt) und aktiver
+  Inhalts-Erkennung `ZenEditionPrep.decide`: fehlen Einordnungen geeigneter Kandidaten, startet ein Hintergrund-Thread, der sie
+  nach Grund-Score absteigend über `ZenClassifier.classifyWithin` einordnet, bis alle fertig sind, ein Fehler auftritt oder
+  `LIMIT_MS` = 20 s vergangen sind. Bis dahin wird `view(…, allowCreate = false)` gerechnet (laufende Ausgabe unverändert)
+  und die Endkarte zeigt „Die nächste Ausgabe wird vorbereitet … (n von m)“ (Fortschritt alle 10 Videos, `FeedViewModel`
+  hört auf `ZenEditionPrep`). Danach wird die Ausgabe einmal gebaut; Erstellzeit = Start der Vorbereitung
+  (`view(createdAt = …)`, nur am selben Zen-Tag), damit der 60-min-Takt nicht wandert. Eine fertige Vorbereitung, die über
+  60 s niemand abholt, verfällt (neue Daten → neu vorbereiten). Ohne fehlende Einträge: sofort bauen (wie bisher).
+- Der Worker läuft weiter parallel; doppelte Arbeit entfällt, weil `classifyNow` vorhandene Einträge überspringt.
+
+### 12.3 Gescheiterte Detailabrufe in der Prüfung
+- Ursache am Gerät gefunden: die 8 von 14 `RuntimeException` beim Yoga-Kanal sind **`PaidContentException`** („This video is
+  only available for members of the channel“) – Mitglieder-Videos in den neuesten 15, kein Netzfehler. RxJava verpackt
+  geprüfte Ausnahmen in `RuntimeException`, daher sah das alte Log nur diese.
+- Neu: `ZenPlausibilityCheck.failKind` (Ursachenkette): `ContentNotAvailableException`-Familie (Mitglieder, privat, Alter,
+  Region …) = dauerhaft, keine Wiederholung; `ReCaptchaException`, `SignInConfirmNotBotException`, HTTP 429 = blockiert,
+  keine weiteren Detailabrufe in dieser Prüfung; sonst vorübergehend, 2 Wiederholungen nach 2 s / 5 s (gedrosselt wie
+  alle Abrufe). Ergebnis-Hinweis in **jedem** Ergebnis (auch „passt“ / „kein klares Bild“): „8 von 15 Videos nur für
+  Kanalmitglieder – nur nach Titel und Kanal beurteilt“ bzw. „n von 15 Videos nicht ladbar …“; Videoliste markiert sie.
+  Log je Fehler mit Art, Versuch und Ursachenkette; `class_check … requests= retries= failed= errors=PaidContentException:8`.
+
+### 12.4 Messwerte (Defy, Debug)
+| Messung | Wert |
+|---|---|
+| Unit-Tests | 344 (3 übersprungen ohne lokale Modelldaten); neu `ZenChannelImportTest` (3: 8 Kanal-Formen, 9 Nicht-Kanal-Links), `ZenChannelProfileTest` (6), `ZenEditionPrepTest` (8, inkl. `isDue`/Erstellzeit), `ZenPlausibilityTest` +1 (Fehlerarten) |
+| Blatt Yoga With Adriene (geteilt `@yogawithadriene?si=…`) | „Überwiegend Praxis (15 von 15)“, 15 Abrufe in 22,3 s, 8 × `PaidContentException` → Hinweis Kanalmitglieder; zweites Öffnen 8 Abrufe (nur die T-Einträge), 7,3 s |
+| Blatt tagesschau | „Überwiegend Aktuelles (15 von 15)“, belastend 15/15, Hinweis „niedrig gewichtet“, 15 Abrufe 26,2 s; erneut geöffnet (bereits abonniert): 0 Abrufe, 21 ms, kein Abo-Knopf |
+| Blatt Kurzgesagt DE | „Überwiegend Bildung (12 von 15)“, belastend 2/15, 29,2 s |
+| Drehen während der Prüfung | Stand bleibt (9 von 15 → weiter), eine einzige Prüfung im Log |
+| Zurück während der Prüfung | Abbruch nach der laufenden Anfrage (4 Videos / 5 Anfragen) |
+| Vorbereitete Ausgabe nach Feed-Aktualisierung | `class_feed_prep missing=56 done=56 ms=9719 reason=complete`, Ausgabe `unclassified=0`, Erstellzeit 10,0 s vor dem Bau (= Start der Vorbereitung) |
+| Vorbereitete Ausgabe beim App-Start (Worker parallel) | Karte „Preparing … (20 of 48)“, „(41 of 48)“, dann `missing=48 done=48 ms=7386`, `unclassified=0` |
+
+### 12.5 Abweichungen
+1. Dialog statt BottomSheet (Material-BottomSheet braucht ein MaterialComponents-Theme, ZenPipe nutzt AppCompat).
+2. Für Kanal-Links entfällt die Öffnen-Auswahl samt gespeicherter Öffnen-Aktion (z. B. „Video-Player“ spielte bisher den
+   ganzen Kanal); „Nur ansehen“ ersetzt „Info anzeigen“.
+3. Mitglieder-Videos bleiben in der Stichprobe (mit Titel+Kanal), statt sie zu überspringen: sie zeigen, was der Kanal macht.
+4. Abonnieren aus dem Blatt lädt den Feed nicht sofort nach (wie der Abo-Knopf der Kanalseite).
+5. Die 3-s-Nachklassifikation beim Ausgabe-Bau ist entfallen (ersetzt durch die Vorbereitung); `class_feed_late` gibt es nicht mehr.
+
+### 12.6 Offen
+- Ton „belastend“ zu häufig (tagesschau 15/15; mit der Belastend-Regel hatte die vorbereitete Ausgabe nur 7 Videos,
+  65 warten) – nur dokumentiert, Schwellen/Ton unverändert (nicht Teil dieses Auftrags).
+- Bei kaltem Prozess erscheint der Router (und damit das Blatt) in der Systemsprache, nicht in der gewählten App-Sprache
+  (Upstream: die Sprache wird erst in `MainActivity` gesetzt).
+- Dialoge des Praxis-Ablaufs (Prüfung/Bestätigung) überstehen das Drehen nicht (wie auf der Kanalseite, bestehendes Verhalten).
 
