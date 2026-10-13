@@ -89,7 +89,9 @@ Diese Werte sind veränderbar (Einstellungen > Zen) und stehen im Code in `ZenSe
   Kanalname + Avatar (antippbar) und Hinzufügen/Hintergrund. Ausgeblendet: Beschreibungs-Tab (Beschreibung inkl. Links,
   „Veröffentlicht am“, Tags/Kategorie/Lizenz/Altersfreigabe), Aufrufe, Likes/Dislikes, Abonnentenzahl, Meta-Info-Kasten,
   „Nichts hier“-Hinweis. Kein „Details anzeigen“ (keine Hintertür per Tipp). Kapitel stehen nicht auf der Detailseite, nur im
-  Player (bleiben). „Aus“ zählt als Lockern (`VideoDetailFragment.zenReduced`).
+  Player (bleiben). „Aus“ zählt als Lockern (`VideoDetailFragment.zenReduced`). Dieselbe Einstellung blendet auch in **Listen**
+  die Aufrufzahlen aus (Feed, Praxis, Suche, Kanal, Playlist: `StreamInfoItemHolder`, `StreamItem`) und bei Kanal-Einträgen die
+  Abonnentenzahl (`ChannelMiniInfoItemHolder`; Videoanzahl bleibt). „N min · Gruppe“ und das Datum bleiben.
 - Kreuzregeln (immer gegen den neuen **und** den ausstehenden Zielzustand geprüft): Deckel >= Ausgabe-Größe, Ausgabe >= 5 (Spanne).
   Kürzeste <= längste Pause ist durch die getrennten Spannen (1-5 / 5-30) immer erfüllt.
 - Richtung wird pro Einstellung bestimmt (gegen den **wirksamen** Wert). Eine Gruppe mit gemischten Richtungen wird aufgeteilt:
@@ -146,3 +148,13 @@ Diese Werte sind veränderbar (Einstellungen > Zen) und stehen im Code in `ZenSe
 | Weg | Link -> `RouterActivity` (Auswahl) -> Info/Player; Info öffnet `MainActivity` mit Absichtsabfrage, Wiedergabe über `ZenIntentPrompt.gate` | `RouterActivity`, `ZenIntentPrompt` | umgesetzt |
 | Shorts-Links | blockiert (Toast), keine Wiedergabe | `RouterActivity` | umgesetzt |
 | Standard-Handler | Nutzer stellt selbst ein (Android 11: Einstellungen > Apps > ZenPipe > Erweitert > Standardmäßig öffnen > Unterstützte Links öffnen > „In dieser App öffnen“; Android 12+: „Link hinzufügen“). Am Defy geprüft: mit diesem Wert öffnet ein `youtu.be`-Link ZenPipe direkt, obwohl die YouTube-App verifiziert ist; sonst ggf. bei YouTube/YouTube Music „Jedes Mal fragen“ | README | Doku, am Gerät geprüft |
+
+## Darstellung (Details: `spec-design.md`)
+
+| Regel | Wert | Code / Quelle | Status |
+|---|---|---|---|
+| Palette | Variante A „Salbei“ (Nutzerentscheidung 2026-10-13): Toolbar hell `#3D5A53` / dunkel `#24302D`, Akzent `#3E6A5E` / `#9DBFB2`, Hintergrund hell `#ECE9E2` („weniger weiß“) / dunkel `#161B1A`, Text hell `#1F2725` / dunkel `#CFD6D2`; nirgends Rot (Thumbnails ausgenommen), Player-Suchleiste Salbei `#9DBFB2`. Alle Text-Paare >= 4.5:1 (WCAG, Tabelle in `spec-design.md`) | `values/zen_colors.xml`, `colors.xml`, `colors_services.xml`, `styles.xml`, `res/color/zen_text_*` | umgesetzt |
+| Nachtvariante | „System folgen“ bleibt Standard, Nachtvariante **Dunkel** (nicht AMOLED-Schwarz, Upstream-Default `default_night_theme_value`); Schwarz bleibt wählbar, mit fast schwarzer Toolbar | `ThemeHelper` (unverändert) | umgesetzt |
+| Medien-Benachrichtigung | **nicht eingefärbt** (Standard aus; bestehende Installationen einmalig auf aus gestellt, danach frei wählbar) | `player_notification_settings.xml`, `NotificationUtil`, `ZenDesign.migrate` (`design_prefs_version` in `zen_state`) | umgesetzt |
+| Splash | Enso-Ring `#F2EFE6` auf `#2E4A45` | `splash_background.xml`, `drawable-*/zen_splash_ring.png` (`gen_icons.py`) | umgesetzt |
+| Pausenbildschirm | Statusleiste = Hintergrund, Ring 40 dp in Akzent (70 %), Titel 24 sp, Nachricht 15 sp Sekundärtext, Countdown 52 sp light mit Tabellenziffern, Spruch 16 sp kursiv, Quelle 12 sp Sekundärtext, „Zurück“ randlos in Akzent | `ZenPauseActivity` | umgesetzt |

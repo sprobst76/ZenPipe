@@ -1,6 +1,6 @@
 # ZenPipe: Designkonzept „ruhiges Hell/Dunkel“
 
-Stand: 2026-10-13. Status: **Spec** (nichts umgesetzt). Vorschau mit drei Varianten:
+Stand: 2026-10-13. Status: **umgesetzt** (Variante A, Schritte 1-6; Abweichungen siehe „Umsetzung“ am Ende). Vorschau mit drei Varianten:
 `design-preview.html` (lokal erzeugt, eigenständig; Generator mit WCAG-Prüfung siehe Anhang).
 
 ## Empfehlung (zuerst)
@@ -190,3 +190,30 @@ def contrast(a, b):
     return (hi + 0.05) / (lo + 0.05)
 # halbtransparente Farben vorher über den Untergrund mischen: a*fg + (1-a)*bg je Kanal
 ```
+
+## Umsetzung (2026-10-13)
+
+Entscheidungen: A „Salbei“, Nachtvariante Dunkel (nicht Schwarz), Benachrichtigung nicht eingefärbt, Aufrufzahlen auch in
+Listen aus (an `reduced_details` gekoppelt). Abweichungen von der Tabelle oben („ein wenig weniger weiß“ bzw. Gerätbefund):
+
+| Rolle | Spec | umgesetzt | Grund |
+|---|---|---|---|
+| Hintergrund hell | `#F3F1EC` | `#ECE9E2` | Nutzerwunsch weniger Weiß |
+| Karte / Dialog hell | `#FAF9F6` | `#F3F1EC` | Abstand zum dunkleren Hintergrund bleibt, kein Reinweiß |
+| Karten-Kontrast hell | `#E7E4DD` | `#E0DCD3` | unter dem neuen Hintergrund |
+| Text primär dunkel | `#E4E1D8` | `#CFD6D2` | Nutzerwunsch, weniger grell |
+| Ripple/Auswahl/Rahmen dunkel | `#…E4E1D8` | `#…CFD6D2` | gleiche Basis wie der Text |
+| Hinweis/Meta | eigene Farbe | = Sekundärtext (`textColorTertiary`) | `#626C69` auf `#ECE9E2` nur 4.48:1 |
+| Schalter/Suchleisten (`colorControlActivated`) | (nicht genannt) | Akzent statt `colorPrimary` | der ruhige Primary wäre auf Dunkel unsichtbar |
+| Player-Suchleiste | (nicht genannt) | fest `#9DBFB2` statt `Color.RED` | `VideoPlayerUi` färbte hart rot; Player ist immer dunkel |
+| Dialog-Hintergrund | `*_dialog_background_color` | zusätzlich `colorBackgroundFloating` | AlertDialogs nutzten sonst Weiß bzw. `#424242` |
+
+WCAG (neu gerechnet, Formel im Anhang): Hell Text/Hintergrund 12.6, Text/Karte 13.5, Sekundär/Hintergrund 5.3, Akzent/Hintergrund
+5.1, Toolbar-Text/Toolbar 6.6, Fortschritt/Hintergrund 6.2 (Soll 3); Dunkel Text/Hintergrund 11.8, Text/Dialog 10.0,
+Sekundär/Hintergrund 7.7, Akzent/Hintergrund 8.7, Fortschritt 6.5; Schwarz Text/Hintergrund 14.2. Abo-Knopf dunkel (Mischung aus
+Primary und `#d6d6d6`) mit Off-White-Text 4.8. Dauer-Badge unverändert 5.3/9.2.
+
+Am Defy geprüft (Hell und Dunkel, Screenshots): Absichtsabfrage, Feed mit Ende-Karte, Praxis-Tab, Detailseite, Player mit
+Suchleiste, Playlist-Seite (Akzent-Leiste), Drawer, Einstellungen (Schalter), Zen-Einstellungen, Schließen-Rückfrage,
+Pausenbildschirm (laufend und „vorbei“), Splash (Bildschirmaufnahme), Benachrichtigung (`android.colorized=false`).
+Nicht geprüft: Schwarz-Theme, Kanalseite mit Abo-Knopf, Mini-Player-Details im Querformat.
