@@ -279,12 +279,14 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
     }
 
     private fun showLongTapDialog(selectedItem: ChannelInfoItem) {
-        val commands = arrayOf(
+        val commands = listOfNotNull(
             getString(R.string.share),
             getString(R.string.zen_copy_link),
             getString(R.string.unsubscribe),
-            org.schabi.newpipe.zen.ZenPraxisUi.menuTitle(requireContext(), selectedItem.serviceId, selectedItem.url)
-        )
+            org.schabi.newpipe.zen.ZenPraxisUi.menuTitle(requireContext(), selectedItem.serviceId, selectedItem.url),
+            // zen: exception for the content recognition (where it is available)
+            if (org.schabi.newpipe.zen.classify.ZenClassifierModel.isSupported()) getString(R.string.zen_exempt_long_press) else null
+        ).toTypedArray()
 
         val actions = DialogInterface.OnClickListener { _, i ->
             when (i) {
@@ -305,6 +307,13 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
                     selectedItem.url,
                     selectedItem.name
                 ) { }
+
+                4 -> org.schabi.newpipe.zen.ZenClassExemptUi.addChannel(
+                    requireActivity(),
+                    selectedItem.serviceId,
+                    selectedItem.url,
+                    selectedItem.name
+                )
             }
         }
 
