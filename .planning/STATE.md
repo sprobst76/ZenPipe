@@ -1,6 +1,6 @@
 # State
 
-- Stand: 2026-10-13 (zuletzt: „Kanal übernehmen“ + vorbereitete Ausgabe + Prüf-Wiederholungen)
+- Stand: 2026-10-13 (zuletzt: stärkstes Thema + Details nachladen in der „Warum“-Zeile, Wiedergabezeit pro Zen-Tag + Ruhezeit-Anrechnung; nach Release 0.1.0-zen.3)
 - Phase: MVP + Phase 0/1 + Phase 2 Teil 1 (Zen-Einstellungen mit 24-h-Sperre) + Verteilbarkeit 1/2 + Praxis-Kanäle + Praxis-Playlists/Kette/Pause-Ausnahme + Sleep-Timer umgesetzt (Branch `zen`), auf Motorola Defy teilweise verifiziert (s. u.)
 
 ## Erledigt (je ein Commit `zen:`)
@@ -158,3 +158,11 @@ Vorgehen: Praxis-Playlist „One-Minute Meditations with NYU …“ per Long-Pre
 - Defy-Zustand danach: `newpipe.db*`, `zen_state.xml`, Default-Prefs und `zen_class_cache.db` exakt auf die Sicherung zurückgespielt (SHA-256 verglichen, nur Veritasium abonniert), Drehen wieder automatisch.
 - Offen: Ton „belastend“ zu häufig (Ausgabe mit 6 Abos nur 7 Videos, 65 warten; nur dokumentiert), Router-Sprache bei kaltem Prozess, Praxis-Dialoge überstehen Drehen nicht, AP 7, AP-0-Asset/SHA.
 
+## Stärkstes Thema, Details nachladen, Wiedergabezeit + Ruhezeit (2026-10-13), Commits `zen:` (nach Tag `v0.1.0-zen.3`)
+- **„Warum“-Zeile** nennt ohne Kategorie das stärkste Thema („ohne Kategorie (stärkstes Thema: KI 0,42, unter Schwelle)“), nur Anzeige; auch in „Eingeordnete Videos“ und der Prüf-Videoliste. Zeile darf bis 3 Zeilen umbrechen. Spec `spec-klassifikator-integration.md` Abschnitt 13.
+- **Details nachladen** (`ZenFeedDetails`, `ZenDetailRequests`): nach dem Bau einer Ausgabe deren T-Videos per `StreamInfo` auf Stufe D, nur WLAN, 1/s, ≤ 30 Anfragen/Zen-Tag, Fehlerarten wie die Prüfung; Ausgabe unverändert, nur `why` ersetzt (`ZenFeedState.updateWhy`). Log `class_feed_detail`.
+- **Wiedergabezeit** (`ZenWatchTime`, `wt_<Tag>` = Bild,Ton,Musik,Praxis): laufend gebucht, Bild/Ton nach Player-Typ, Praxis-Minuten daraus; Anzeige Einstellungen > Zen „Wiedergabe heute“. **Ruhezeit-Anrechnung** der Pflichtpause (`pause_rest_credit`). Spec `spec-bildung-und-hintergrundzeit.md` Abschnitt 10. Bildung (AP 7/Phase 3) und Tageslimit (Phase 4) **nicht** gebaut.
+- Verifiziert: `assembleDebug runCheckstyle testDebugUnitTest` grün (363 Tests, 3 übersprungen). Defy mit vorübergehend abonnierten Kanälen (Two Minute Papers, AI Explained, Matt Wolfe, c't 3003, NetworkChuck): Ausgabe 7 Videos T → nach ≈ 14 s alle D (`run=7 ok=7 requests=7`), Reihenfolge gleich; Screenshots vorher/nachher; Prüfansicht mit Stefans Fall „Cracked The Code Of Life“ (KI 0,93, belastend, T). Bild 93,6 s / Ton 84,5 s in `wt_*`, Ruhezeit 38,6 s → Pause 21,4 s statt 60 s, Kill in Ruhe und volle Ruhe im Video-Player → keine Pause, keine Rückfrage.
+- Gerätetest-Tricks: neue Ausgabe erzwingen = `feed_edition_at` um > 60 min zurücksetzen (App `force-stop`, `run-as sed`); T-Stufe erzwingen = `no_backup/zen_class_cache.db` löschen (Sicherung!). Kanal-Blatt: nach „Abonnieren“ verschiebt sich das Layout – nie blind auf feste Koordinaten tippen (ein Fehltipp markierte NetworkChuck als Praxis, Ersteinrichtung = sofort; per `sed` entfernt). Hintergrund-Player schließen geht per `am stopservice` nicht (Service bleibt); Kill-Pfad per `am force-stop` + App-Start. Pflichtpause ab 1 min: `<int name="zs_pause_trigger_min" value="1" />` in `zen_state` (Ersteinrichtung).
+- Defy-Zustand danach: `newpipe.db*`, `zen_state.xml`, Default-Prefs, `zen_class_cache.db` exakt zurückgespielt (SHA-256 OK; nur Veritasium abonniert, Ersteinrichtung offen). Verlauf/Logcat enthalten kurze Testwiedergaben; Detail-/Stichprobenabrufe ≈ 90 YouTube-Anfragen ohne Fehler.
+- Offen (Stefan): Annahmen bestätigen (Ruhezeit-Anrechnung wirkt sofort; Ton halb / 90-180-60 nur Hook), Nachladen auch im Mobilfunk?, Ton „belastend“ am Titel, Bildschirm aus mit Ton, Sitzung über 04:00 am Gerät, AP 7, Tageslimit, AP-0-Asset/SHA.

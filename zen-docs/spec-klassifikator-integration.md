@@ -154,6 +154,8 @@ Einbau:
   abbrechbar).
 - Ein späteres optionales „Details nachladen bei WLAN + Laden, max. 30 pro Tag, nur Grenzfälle“ ist möglich, aber nicht Teil
   dieser Spec.
+  **Gebaut (Abschnitt 13):** Details für die Videos einer gerade gebauten Ausgabe mit Stufe T, nur WLAN (ungemessen),
+  1 Anfrage/s, max. 30 Anfragen pro Zen-Tag; „Laden“ ist keine Bedingung (≤ 15 Anfragen pro Ausgabe).
 
 ## 3. B – Integration
 
@@ -674,3 +676,54 @@ practice check`, `zen: take over a shared channel link`. Regeln: `rules.md` „I
   (Upstream: die Sprache wird erst in `MainActivity` gesetzt).
 - Dialoge des Praxis-Ablaufs (Prüfung/Bestätigung) überstehen das Drehen nicht (wie auf der Kanalseite, bestehendes Verhalten).
 
+## 13. Umsetzung „stärkstes Thema“ und Details nachladen (2026-10-13)
+
+Anlass: Stefans Feed (Tech/KI-Abos) zeigte viele „ohne Kategorie · unsicher (nur Titel)“, Two Minute Papers einmal
+„Bildung 0,89“, einmal „ohne Kategorie · belastend“ („Cracked The Code Of Life“, Fehlurteil am Ton). Commits auf `zen`:
+`zen: name the strongest topic for videos without a category`, `zen: load details for the picks of a new feed edition`,
+`zen: let the feed "why" line wrap`. Regeln: `rules.md` „Inhalts-Erkennung“ (Zeilen „Warum“-Zeile, „Details nachladen“,
+Cache, Prüfansicht).
+
+### 13.1 Stärkstes Thema in der „Warum“-Zeile
+- Der Cache speicherte schon „Top-Themen/-Formate“ (`ClassEntry.top`, 3 stärkste gemischt). `Analysis.top` hängt jetzt das
+  stärkste Thema an, wenn nur Formate unter den ersten 3 sind; **kein Schemawechsel**, alte Einträge bleiben gültig (ohne
+  Thema nur „ohne Kategorie“). Thema vs. Format: `ZenClassWhy.FORMAT_KEYS` (10 Formatschlüssel der Taxonomie v5).
+- Feed: `Candidate.classTheme` (nur Anzeige) → `whyOf` hängt bei leerer Kategorie `|thema=p` als 5. Feld an,
+  `ZenFeedPlanner.parseWhy` liest 4 und 5 Felder. Text: „ohne Kategorie (stärkstes Thema: KI 0,42, unter Schwelle)“,
+  „unter Schwelle“ nur bei p < 0,6 (`MIN_P_SMALL`): Kategorien entstehen aus Thema **und** Format, ein starkes Thema ohne
+  Kategorie (z. B. „KI 0,93“ als News-Format) ist also kein Schwellenfall. Gewicht/Auswahl unverändert (Unit-Test).
+- Namen: 18 Hauptthemen mit DE/EN-Kurznamen (KI, Technik, Programmieren, Wissenschaft, Politik, …), sonst Rohschlüssel
+  (z. B. `office_pkm_software`). Die Zeile darf bis 3 Zeilen umbrechen (vorher fest 2, am Defy abgeschnitten).
+- Prüfansicht „Eingeordnete Videos“ und die Videoliste der Prüfung nutzen dieselbe Zusammenfassung.
+
+### 13.2 Details nachladen für die Ausgabe
+- `ZenFeedProvider.compute` → `ZenFeedState.view` meldet `created`; dann `refineDetails`: Picks mit Stufe T (aus dem
+  gespeicherten „Warum“) werden zu Jobs; `ZenFeedDetails.shared.start` (ein Lauf zur Zeit, eigener Thread) prüft
+  Inhalts-Erkennung an + Modell, Zen-Tages-Budget (`cfd_day`/`cfd_requests`, 30), „heute blockiert“ (`cfd_block_day`),
+  ungemessenes Netz; dann `process`: Cache-D wiederverwenden, sonst `ZenDetailRequests.fetch` (gemeinsam mit der Prüfung
+  beim Markieren herausgelöst: Drosselung 1/s, Fehlerarten, Wiederholungen) und `ZenClassifier.classifyBlocking` (Stufe D).
+  Neue „Warum“-Werte → `ZenFeedState.updateWhy(createdAt, …)` (nur die gleiche Ausgabe, nur das `why`-Feld), Listener →
+  `FeedViewModel.zenRefresh`; `StreamItem.hasSameContentAs` vergleicht `zenPick`, damit die Liste neu zeichnet.
+- Dauerhaft fehlgeschlagene Videos (Mitglieder, privat …) werden in diesem Prozess nicht erneut angefragt.
+- Log: `class_feed_detail run=7 ok=7 cached=0 failed=0 requests=7 retries=0 ms=13555 reason=complete`.
+
+### 13.3 Messwerte (Defy, Debug, vorübergehend abonniert: Two Minute Papers, AI Explained, Matt Wolfe, c't 3003, NetworkChuck)
+| Messung | Wert |
+|---|---|
+| Unit-Tests | 363 (3 übersprungen ohne lokale Modelldaten); neu `ZenFeedDetailsTest` (5: Drosselung, Cache, Mitglieder/Netzfehler, Bot-Prüfung, Budget/Aus), `ZenFeedTest` +2 (Thema nur ohne Kategorie, Reihenfolge gleich, alte 4-Feld-Werte; `updateWhy` nur gleiche Ausgabe), `ZenClassCacheTest` +2 (stärkstes Thema, `top`) |
+| Ausgabe mit 7 Videos (Cache leer, Worker 9 Videos in 2,7 s) | vorher alle „unsicher (nur Titel)“: Bildung 0,84 / ohne Kategorie (Wissenschaft 0,13, unter Schwelle) / Bildung 0,60 / ohne Kategorie (office_pkm_software 0,16) / Bildung 0,88 / ohne Kategorie (Linux & Maker 0,40) / Bildung 0,70 |
+| Nachladen | `run=7 ok=7 requests=7 ms=12087` bzw. `13555`, ≈ 14 s nach dem Bau neu gezeichnet: Bildung 0,60 / ohne Kategorie (KI 0,42, unter Schwelle) / Bildung 0,86 / ohne Kategorie (Politik 0,09, unter Schwelle) / Bildung 0,90 / ohne Kategorie (Linux & Maker 0,58, unter Schwelle) / ohne Kategorie (KI 0,65), alle „mit Beschreibung“; **Reihenfolge und Auswahl identisch** (UI-Dump vorher/nachher) |
+| Stefans Fall | „DeepMind's New AI Just Cracked The Code Of Life“ (Two Minute Papers, nicht in der Ausgabe, daher Stufe T) in der Prüfansicht: „ohne Kategorie (stärkstes Thema: KI 0,93) · belastend · unsicher (nur Titel)“, Rohwerte `ki 0.93, news_aktuell 0.74, ki_gesellschaft_ethik 0.69`: das Thema ist klar, die Kategorie scheitert am News-Format und der Ton am Titel |
+
+### 13.4 Abweichungen
+1. Netzbedingung „WLAN“ = Android „ungemessen“; „Laden“ aus 2.5 ist keine Bedingung (höchstens 15 Anfragen je Ausgabe,
+   der Nutzer hat den Feed ohnehin offen). Budget 30/Tag = zwei volle Ausgaben.
+2. Nur Videos der **neuen** Ausgabe mit Stufe T; „noch nicht eingeordnet“ und Ausnahmen werden nicht nachgeladen; spätere
+   Ausgaben erhalten Picks, die schon D sind, ohne Anfrage.
+3. Die „Warum“-Zeile zeigt nach dem Nachladen auch das neue Gewicht, obwohl die Reihenfolge mit dem alten berechnet wurde
+   (die Zeile beschreibt die Einordnung, nicht den Platz).
+
+### 13.5 Offen
+- Ton „belastend“ am Titel (Stefans Fall) bleibt ein Modellthema; Stufe D hilft nur für Videos der Ausgabe.
+- Kurznamen nur für 18 Themen; Format-Namen werden in der Prüfansicht roh gezeigt.
+- Nachladen im Mobilfunknetz bewusst nie; ob Stefan es dort will, ist offen.

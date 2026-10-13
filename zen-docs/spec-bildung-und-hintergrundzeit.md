@@ -1,7 +1,8 @@
 # Spec: Zeitzählung im Hintergrund und Kategorie „Bildung“
 
-Stand: 2026-10-13. **Status: Spec (nicht gebaut).** Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor. Abschnitt 6
-listet, was sich in `rules.md` ändern bzw. ergänzen müsste.
+Stand: 2026-10-13. **Status: Phasen 1 und 2 (Zeitmessung, Ruhezeit-Anrechnung) gebaut, Bildung und Tageslimit (Phasen 3–4)
+Spec.** Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor. Abschnitt 6 listet, was sich in `rules.md` ändern bzw.
+ergänzen müsste, Abschnitt 10 die Umsetzung.
 
 Ausgangslage (Nutzerentscheidungen): Der Pop-up-Player entfällt. Das Bild läuft nie nebenbei: Das Verlassen der App pausiert ein
 Video. Ton über „Hintergrund“ läuft weiter, auch bei eingeschaltetem Bildschirm (Gehen, Einschlafen, Podcasts). Den Sleep-Timer
@@ -306,3 +307,52 @@ vor dem Limit will, kann Phase 3 allein bauen, das Budget ist dann ein Hook wie 
    reicht (b), weil ohne Limit nur der Pausenvorteil bliebe.
 4. **Standardwerte des Tageslimits:** (a) 90 Zen-Minuten, Ton-Deckel 180, Bildung 60. (b) 60 / 120 / 45 (strenger).
    **Empfehlung: (a)** als Start. Strenger stellen geht jederzeit sofort, Lockern nur über die 24-h-Sperre.
+
+## 10. Umsetzung Phasen 1–2 (2026-10-13)
+
+Commit auf `zen`: `zen: count playing time per Zen day and credit the rest time`. Regeln: `rules.md` Grundregeln
+(„Wiedergabezeit / Wiedergabeart“), Feed („Tages-Deckel“, „Tageslimit Minuten“), Pflichtpause („Ruhezeit-Anrechnung“,
+„Später fortsetzen“, „Musik vs. Podcast“, „Protokoll“), Praxis („Praxis-Minuten“, „Zustand/Protokoll“).
+
+### 10.1 Was ohne Bildung sinnvoll lauffähig ist (und gebaut wurde)
+- **Messung** (2.1): `ZenPauseEngine` sammelt die Spielzeit wie bisher und bucht sie bei jedem Persistier-Tick (10 s), bei
+  Zustandswechseln und am Sitzungsende in `ZenWatchTime` (`wt_<Zen-Tag>` = Bild,Ton,Musik,Praxis in ms, `wt_days`, 30 Tage).
+  Art = Player-Typ (`Player.audioPlayerSelected()`, Hook `ZenPause.setAudio` in `handleIntent` und `changeState`; Wechsel
+  bucht erst unter der alten Art). Solange die Art (`ZenKind`) unbekannt ist, wartet die Zeit; am Ende unbekannt = Bild/Ton
+  (fail-closed, nie Musik). Musik und Praxis getrennt; Bildung entfällt (kein Feld, Format um ein 5. Feld erweiterbar).
+- **Praxis-Minuten** (2.6) lesen jetzt `wt_*` (laufend gebucht, Bild und Ton 1:1) plus das alte `px_time` (nur noch gelesen).
+- **Anzeige**: Einstellungen > Zen „Wiedergabe heute: Bild n Min. · Ton n Min. · Musik n Min. · Praxis n Min.“
+- **Ruhezeit-Anrechnung** (2.3): `restMs` = Zeit seit dem letzten „spielt → spielt nicht“ (persistiert als `ps_rest` +
+  `ps_rest_boot`), nur im selben Boot (Boot-Zähler wie `ZenCountdown`), 0 während des Spielens. `finish`: Pause
+  `max(0, Länge − Ruhezeit)`, 0 = `Outcome.Rested` ohne Pause; `previewClose` und `later` rechnen mit der verkürzten Pause.
+- **Protokoll**: `pause_rest_credit restMs= fullMs= lengthMs=`, `pause_start … fullMs= restMs=`, alle Sitzungs-Einträge mit
+  `soundMs=` (persistiert als `ps_sound`, übersteht Kill).
+- **Zen-Minuten** (Bild + Ton/2) nur als Hook `ZenWatchTime.Day.zenMinutesMs` (`AUDIO_WEIGHT_PERCENT = 50`), **ohne Limit**.
+
+### 10.2 Bewusst nicht gebaut
+- Kategorie Bildung, Kategorie-Spalte, `ZenKind.BILDUNG`, Bildungsbudget (Phase 3).
+- Tageslimit, Ton-Deckel, Limit-Bildschirm, sanfte Pause am Limit, `daily_limit_min`/`audio_cap_min`/`edu_budget_min`
+  (Phase 4); die Werte 90/180/60 stehen nur als Empfehlung in `rules.md`, nicht im Code.
+- Widersprüche 1 und 2 (Pop-up, „Bild nie nebenbei“) waren schon erledigt; 3, 4, 6, 7, 9 sind in `rules.md` nachgezogen;
+  5 und 8 (Bildung) entfallen bis Phase 3.
+
+### 10.3 Übernommene Annahmen (von Stefan noch zu bestätigen)
+1. Ruhezeit-Anrechnung ja (Entscheidung 9.2 a, empfohlen) – **wirkt sofort** auf jede Pflichtpause.
+2. Ton zählt für ein späteres Limit halb (9.1 a) – derzeit nur Anzeige-Hook, keine Wirkung.
+3. Defaults 90 / 180 / 60 (9.4 a) – nirgends wirksam.
+4. Musik und Praxis werden getrennt gezählt und nicht zu Bild/Ton addiert (Spec: „Musik und Praxis zählen 0“).
+5. Ruhezeit schließt auch Puffern und Audio-Fokus-Pausen ein (Spec: „seit dem letzten spielt → nicht spielt“).
+
+### 10.4 Messwerte (Defy, Debug, Pflichtpause ab 1 min per `zs_pause_trigger_min` in der Ersteinrichtung)
+| Messung | Wert |
+|---|---|
+| Unit-Tests | 363 grün; `ZenPauseTest` +11 (Ruhezeit: Spielen = volle Pause, 30 s Ruhe = 90 s statt 120 s, volle Ruhe = keine Pause/keine Rückfrage, nur seit letztem Stopp, Kill in Ruhe im selben Boot vs. nach Neustart, Kill beim Spielen; Zeit: Bild/Ton-Wechsel, Pause zählt nicht, 04:00-Aufteilung, Art wartet / unbekannt = Bild, Kill bis letzter Tick, 30 Tage) |
+| Bild (Video-Player, 93,6 s) | `wt_2026-10-13` wuchs alle 10 s mit `ps_played` (11586 → 22584 → … → 93647 ms), `ps_rest=-1` beim Spielen |
+| Ruhezeit (Pause, 38,6 s warten, Mini-Player-X) | Rückfrage nannte 1 Min. (aufgerundet), „Trotzdem schließen“ → `pause_rest_credit restMs=38633 fullMs=60000 lengthMs=21367`, `pause_start lengthMs=21367`; beim nächsten Start 49 s später `pause_end`, Wiedergabe erlaubt |
+| Ton („Hintergrund“, 84,5 s) | zweites Feld 11719 → … → 84531 ms, Bild unverändert, `ps_kind=PODCAST` |
+| Kill in Ruhe (Hintergrund pausiert, ~96 s, `am force-stop`, App-Start) | `pause_rest_credit reason=KILLED restMs=95980 fullMs=60000 lengthMs=0`, keine Pause |
+| Volle Ruhe im Video-Player (70 s gespielt, 72,6 s Ruhe, Mini-Player-X) | **keine** Rückfrage, `pause_rest_credit … lengthMs=0`, keine Pause |
+| Anzeige | „Wiedergabe heute: Bild 1 Min. · Ton 1 Min. · Musik 0 Min. · Praxis 0 Min.“; Summe Bild danach 163974 ms = 93647 + 70327 |
+
+Nicht am Gerät geprüft: Sitzung über 04:00 (nur Unit-Test), Praxis-Minuten über `wt_*` (Unit-Tests `ZenPraxisTest`/
+`ZenSleepTest` grün), Bildschirm aus mit Ton (PIN-Sperre; braucht Stefan), Kopfhörer abziehen/Anruf (Audio-Fokus → Ruhezeit).
