@@ -6,6 +6,7 @@ import android.content.Intent
 import java.time.ZoneId
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.player.helper.PlayerHolder
+import org.schabi.newpipe.player.playqueue.PlayQueue
 
 /**
  * What kind of content a stream is, for the mandatory pause. Music and PRAXIS (videos of a
@@ -136,6 +137,8 @@ class ZenPauseEngine(
     private var kind: ZenKind? = null
     private var playingSince = -1L
     private var lastPersist = 0L
+    private var chainUrl: String? = null
+    private var chained = false
     private val praxisTime = ZenPraxisTime(store)
 
     @Synchronized
@@ -159,6 +162,8 @@ class ZenPauseEngine(
     fun onItem(newUrl: String, durationMs: Long) {
         if (open && newUrl != url) finish(Reason.SWITCHED, pos, dur)
         if (!open) {
+            chained = newUrl == chainUrl
+            chainUrl = null
             open = true
             url = newUrl
             played = 0
@@ -295,6 +300,37 @@ class ZenPauseEngine(
     @Synchronized
     fun isActive() = remainingMs() > 0
 
+    /**
+     * May a new playback start now? During a running pause only practice may start ([praxis] is
+     * decided by the user's channel/playlist assignment). Starting practice never shortens the pause.
+     */
+    @Synchronized
+    fun allowsStart(praxis: Boolean) = praxis || !isActive()
+
+    /** A running session of [kind] must be stopped: a pause runs and it is not practice. */
+    @Synchronized
+    fun blocksRunning(kind: ZenKind) = kind != ZenKind.PRAXIS && isActive()
+
+    // ---------------------------------------------------------------- practice chain
+
+    /**
+     * The current item has played to its end and the queue would continue with the next item.
+     * Nothing ever starts by itself in ZenPipe, with one exception: a chain of practice videos
+     * (the running session is practice and the next item is practice by its list data) may
+     * continue. Returns true if it may; the next item is then remembered as "chained".
+     */
+    @Synchronized
+    fun mayChain(nextUrl: String?, nextPraxis: Boolean): Boolean {
+        val ok = open && kind == ZenKind.PRAXIS && nextPraxis && nextUrl != null
+        chainUrl = if (ok) nextUrl else null
+        if (!ok) log("chain_stop", "url=$url next=$nextUrl kind=$kind nextPraxis=$nextPraxis")
+        return ok
+    }
+
+    /** The running session was reached by [mayChain] and turned out not to be practice: stop it. */
+    @Synchronized
+    fun chainBreaks(kind: ZenKind) = open && chained && kind != ZenKind.PRAXIS
+
     @Synchronized
     fun lastPausePlayedMs() = store.getLong(K_PAUSE_PLAYED, 0)
 
@@ -407,23 +443,53 @@ object ZenPause {
     @JvmStatic
     fun needsKind(context: Context) = engine(context).needsKind()
 
+    /** [onStreamInfo] results. */
+    const val STREAM_OK = 0
+    const val STREAM_BLOCK_PAUSE = 1
+    const val STREAM_CHAIN_STOP = 2
+
+    /**
+     * Classifies the running session once its StreamInfo is known. Returns [STREAM_BLOCK_PAUSE]
+     * if the player must close: a mandatory pause is running and this stream is not practice
+     * (practice is the only playback allowed during a pause; this is the authoritative check, the
+     * start gates only pre-check with list data). Returns [STREAM_CHAIN_STOP] if the player must
+     * pause: the item was reached by a practice chain ([ZenPauseEngine.mayChain]) but is not
+     * practice. Decided by the channel/playlist assignment only, never by title.
+     */
     @JvmStatic
-    fun onStreamInfo(context: Context, info: StreamInfo, audioOnly: Boolean) {
+    fun onStreamInfo(context: Context, info: StreamInfo, audioOnly: Boolean): Int {
         val e = engine(context)
-        val open = e.sessionUrl() ?: return
-        if (open != info.url && open != info.originalUrl) return // info of another item
-        e.setKind(
-            ZenContentKind.classify(
-                info.category,
-                info.tags,
-                info.uploaderName,
-                info.name,
-                info.duration,
-                audioOnly,
-                praxis = ZenPraxis.isPraxis(info.serviceId, info.uploaderUrl)
-            )
+        val open = e.sessionUrl() ?: return STREAM_OK
+        if (open != info.url && open != info.originalUrl) return STREAM_OK // info of another item
+        val praxis = ZenPraxis.isPraxisStream(info.serviceId, info.url, info.uploaderUrl) ||
+            ZenPraxis.isPraxisStream(info.serviceId, info.originalUrl, null)
+        val kind = ZenContentKind.classify(
+            info.category,
+            info.tags,
+            info.uploaderName,
+            info.name,
+            info.duration,
+            audioOnly,
+            praxis = praxis
         )
+        e.setKind(kind)
+        if (e.blocksRunning(kind)) {
+            Zen.log(context).add("pause_block_running", "url=$open kind=$kind")
+            return STREAM_BLOCK_PAUSE
+        }
+        if (e.chainBreaks(kind)) {
+            Zen.log(context).add("chain_stop", "url=$open kind=$kind reason=stream_info")
+            return STREAM_CHAIN_STOP
+        }
+        return STREAM_OK
     }
+
+    /**
+     * The player paused at the end of the current item and [next] would follow. True if the queue
+     * may continue (practice chain), false if it must stay paused (see [ZenPauseEngine.mayChain]).
+     */
+    @JvmStatic
+    fun mayChain(context: Context, next: org.schabi.newpipe.player.playqueue.PlayQueueItem?): Boolean = engine(context).mayChain(next?.url, next != null && ZenPraxis.isPraxisStream(next.serviceId, next.url, next.uploaderUrl))
 
     @JvmStatic
     fun onCompleted(context: Context) {
@@ -456,22 +522,53 @@ object ZenPause {
      * Call before a video/audio playback is started by the user. Returns true if it must NOT start:
      * a pause is running (the pause screen is shown). If another video is still open and switching
      * to [url] aborts it, that abort is evaluated first (and the old player is stopped).
+     * Without stream data the start is treated as non-practice (strict).
      */
     @JvmStatic
-    fun blockStart(context: Context, url: String?): Boolean {
+    fun blockStart(context: Context, url: String?): Boolean = blockStart(context, url, false)
+
+    /**
+     * Like [blockStart], for a stream whose practice assignment is known: [praxis] streams (active
+     * practice channel or practice playlist) may start during a running pause.
+     */
+    @JvmStatic
+    fun blockStart(context: Context, url: String?, praxis: Boolean): Boolean {
         val e = engine(context)
         if (url != null && e.abandonForNewStart(url)) {
             PlayerHolder.getInstance().stopService()
         }
         if (!e.isActive()) return false
+        if (e.allowsStart(praxis)) {
+            Zen.log(context).add("pause_praxis_start", "url=$url")
+            return false
+        }
         showPauseScreen(context)
         return true
     }
 
-    /** Safety net inside PlayerService for play intents that bypassed [blockStart]. */
+    /** [blockStart] for a stream given by its list data (service, url, uploader url). */
     @JvmStatic
-    fun blockForService(context: Context): Boolean {
-        if (!engine(context).isActive()) return false
+    fun blockStart(context: Context, serviceId: Int, url: String?, uploaderUrl: String?): Boolean = blockStart(context, url, ZenPraxis.isPraxisStream(serviceId, url, uploaderUrl))
+
+    /** [blockStart] for a play queue: decided by its current item. */
+    @JvmStatic
+    fun blockStart(context: Context, queue: PlayQueue?): Boolean {
+        val item = queue?.item
+        return if (item == null) {
+            blockStart(context, null as String?)
+        } else {
+            blockStart(context, item.serviceId, item.url, item.uploaderUrl)
+        }
+    }
+
+    /**
+     * Safety net inside PlayerService for play intents that bypassed [blockStart]; [queue] is the
+     * queue of the intent (practice may pass, the player re-checks once the stream is loaded).
+     */
+    @JvmStatic
+    fun blockForService(context: Context, queue: PlayQueue?): Boolean {
+        val item = queue?.item
+        if (engine(context).allowsStart(item != null && ZenPraxis.isPraxisStream(item.serviceId, item.url, item.uploaderUrl))) return false
         showPauseScreen(context)
         return true
     }

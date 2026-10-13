@@ -30,6 +30,12 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_item_zen_praxis"
+        android:orderInCategory="3"
+        android:title="@string/zen_praxis_pl_mark"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_item_append_playlist"
         android:orderInCategory="3"
         android:title="@string/add_to_playlist"

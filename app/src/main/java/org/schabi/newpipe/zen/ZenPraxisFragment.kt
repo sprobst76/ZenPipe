@@ -16,7 +16,9 @@ import java.util.function.Supplier
 import org.schabi.newpipe.R
 import org.schabi.newpipe.error.ErrorInfo
 import org.schabi.newpipe.error.UserAction
+import org.schabi.newpipe.extractor.InfoItem
 import org.schabi.newpipe.extractor.channel.tabs.ChannelTabs
+import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem
 import org.schabi.newpipe.extractor.stream.StreamInfoItem
 import org.schabi.newpipe.extractor.stream.StreamType
 import org.schabi.newpipe.fragments.list.BaseListFragment
@@ -24,15 +26,16 @@ import org.schabi.newpipe.util.ExtractorHelper
 
 /**
  * The "Practice" tab: the newest videos of the user's ACTIVE practice channels (yoga, breathwork,
- * meditation, sleep aids), at most [ZenPraxis.MAX_PER_CHANNEL] per channel, newest first, no
- * paging and no edition budget. Loaded from the network like a channel page (the channels do not
+ * meditation, sleep aids), at most [ZenPraxis.MAX_PER_CHANNEL] per channel, newest first, then each
+ * ACTIVE practice playlist as an entry (open it to play it as a chain) followed by its first
+ * [ZenPraxis.MAX_PER_CHANNEL] videos in playlist order; no paging and no edition budget. Loaded from the network like a channel page (the channels do not
  * have to be subscribed). Playback rules stay the same (no autoplay, no related videos, intention
  * prompt), only the mandatory pause and the feed limits do not apply to these channels.
  */
 class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
-    data class Loaded(val items: List<StreamInfoItem>, val channels: Int, val failed: Int)
+    data class Loaded(val items: List<InfoItem>, val channels: Int, val failed: Int)
 
-    data class ChannelItems(val items: List<StreamInfoItem>, val ok: Boolean)
+    data class ChannelItems(val items: List<StreamInfoItem>, val ok: Boolean, val head: InfoItem? = null)
 
     private var disposable: Disposable? = null
     private var loadedSignature: String? = null
@@ -91,15 +94,19 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
     override fun startLoading(forceLoad: Boolean) {
         super.startLoading(forceLoad)
         disposable?.dispose()
-        val channels = Zen.settingsLock(requireContext()).praxisChannels()
-        loadedSignature = channels.map { it.key }.sorted().joinToString("|")
-        disposable = Observable.fromIterable(channels)
-            .concatMapSingle { ch -> newestOf(ch, forceLoad) }
+        val lock = Zen.settingsLock(requireContext())
+        val all = lock.praxisChannels()
+        loadedSignature = all.map { it.key }.sorted().joinToString("|")
+        ZenPraxis.playlistItems(requireContext()).prune((all + lock.pendingPraxis()).map { it.key }.toHashSet())
+        val ctx = requireContext().applicationContext
+        disposable = Observable.fromIterable(all)
+            .concatMapSingle { ch -> if (ch.playlist) playlistOf(ctx, ch, forceLoad) else newestOf(ch, forceLoad) }
             .toList()
-            .map { perChannel ->
-                val items = perChannel.flatMap { it.items }
+            .map { perEntry ->
+                val channelItems = perEntry.filter { it.head == null }.flatMap { it.items }
                     .sortedByDescending { it.uploadDate?.offsetDateTime()?.toInstant()?.toEpochMilli() ?: Long.MIN_VALUE }
-                Loaded(items, channels.size, perChannel.count { !it.ok })
+                val playlistItems = perEntry.filter { it.head != null }.flatMap { listOf(it.head!!) + it.items }
+                Loaded(channelItems + playlistItems, all.size, perEntry.count { !it.ok })
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -128,6 +135,28 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
             }
         }
         .onErrorReturnItem(ChannelItems(emptyList(), false))
+
+    /**
+     * First page of a practice playlist: all its videos are registered as practice
+     * ([ZenPraxis.registerPlaylistItems]), the entry itself and the first videos are shown.
+     */
+    private fun playlistOf(ctx: android.content.Context, pl: ZenPraxisChannel, forceLoad: Boolean): Single<ChannelItems> = ExtractorHelper.getPlaylistInfo(pl.serviceId, pl.url, forceLoad)
+        .map { info ->
+            ZenPraxis.registerPlaylistItems(ctx, pl.serviceId, pl.url, info.relatedItems, false)
+            val head = PlaylistInfoItem(info.serviceId, info.url, info.name).apply {
+                thumbnails = info.thumbnails
+                uploaderName = info.uploaderName
+                streamCount = info.streamCount
+            }
+            val items = info.relatedItems.filterIsInstance<StreamInfoItem>()
+                .filter {
+                    !it.isShortFormContent && it.streamType != StreamType.LIVE_STREAM &&
+                        it.streamType != StreamType.AUDIO_LIVE_STREAM
+                }
+                .take(ZenPraxis.MAX_PER_CHANNEL)
+            ChannelItems(items, true, head)
+        }
+        .onErrorReturnItem(ChannelItems(emptyList(), false, null))
 
     override fun handleResult(result: Loaded) {
         super.handleResult(result)

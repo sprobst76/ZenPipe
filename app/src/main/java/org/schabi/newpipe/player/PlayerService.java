@@ -177,7 +177,7 @@ public final class PlayerService extends MediaBrowserServiceCompat {
         if ((zenIntentType == PlayerIntentType.AllOthers
                 || zenIntentType == PlayerIntentType.Enqueue
                 || zenIntentType == PlayerIntentType.EnqueueNext)
-                && org.schabi.newpipe.zen.ZenPause.blockForService(this)) {
+                && org.schabi.newpipe.zen.ZenPause.blockForService(this, zenPeekQueue(intent))) {
             destroyPlayerAndStopService();
             return START_NOT_STICKY;
         }
@@ -189,6 +189,15 @@ public final class PlayerService extends MediaBrowserServiceCompat {
                 .ifPresent(ui -> ui.handleMediaButtonIntent(intent));
 
         return START_NOT_STICKY;
+    }
+
+    // ZenPipe: the queue of a play intent without consuming it (the player takes it later)
+    @Nullable
+    private static org.schabi.newpipe.player.playqueue.PlayQueue zenPeekQueue(
+            @NonNull final Intent intent) {
+        final String key = intent.getStringExtra(Player.PLAY_QUEUE_KEY);
+        return key == null ? null : org.schabi.newpipe.util.SerializedCache.getInstance()
+                .get(key, org.schabi.newpipe.player.playqueue.PlayQueue.class);
     }
 
     public void stopForImmediateReusing() {

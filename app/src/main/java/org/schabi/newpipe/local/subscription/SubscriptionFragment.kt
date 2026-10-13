@@ -282,7 +282,8 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
         val commands = arrayOf(
             getString(R.string.share),
             getString(R.string.zen_copy_link),
-            getString(R.string.unsubscribe)
+            getString(R.string.unsubscribe),
+            org.schabi.newpipe.zen.ZenPraxisUi.menuTitle(requireContext(), selectedItem.serviceId, selectedItem.url)
         )
 
         val actions = DialogInterface.OnClickListener { _, i ->
@@ -297,6 +298,13 @@ class SubscriptionFragment : BaseStateFragment<SubscriptionState>() {
                 1 -> ShareUtils.openUrlInBrowser(requireContext(), selectedItem.url)
 
                 2 -> deleteChannel(selectedItem)
+
+                3 -> org.schabi.newpipe.zen.ZenPraxisUi.onMenu(
+                    requireActivity(),
+                    selectedItem.serviceId,
+                    selectedItem.url,
+                    selectedItem.name
+                ) { }
             }
         }
 

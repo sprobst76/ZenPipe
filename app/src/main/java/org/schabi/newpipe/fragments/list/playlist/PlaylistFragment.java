@@ -178,6 +178,9 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
 
         playlistBookmarkButton = menu.findItem(R.id.menu_item_bookmark);
         updateBookmarkButtons();
+        // ZenPipe: "mark as practice playlist" / "remove from practice playlists"
+        menu.findItem(R.id.menu_item_zen_praxis).setTitle(org.schabi.newpipe.zen.ZenPraxisUi
+                .menuTitle(requireContext(), serviceId, url, true));
     }
 
     @Override
@@ -240,6 +243,13 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
                     currentInfo == null ? List.of() : currentInfo.getThumbnails());
         } else if (itemId == R.id.menu_item_bookmark) {
             onBookmarkClicked();
+        } else if (itemId == R.id.menu_item_zen_praxis) {
+            org.schabi.newpipe.zen.ZenPraxisUi.onMenu(requireActivity(), serviceId, url, name,
+                    true, () -> {
+                        zenRegisterPraxisItems(currentInfo == null ? null
+                                : currentInfo.getRelatedItems(), false);
+                        requireActivity().invalidateOptionsMenu();
+                    });
         } else if (itemId == R.id.menu_item_append_playlist) {
             if (currentInfo != null) {
                 disposables.add(PlaylistDialog.createCorrespondingDialog(
@@ -277,11 +287,22 @@ public class PlaylistFragment extends BaseListInfoFragment<StreamInfoItem, Playl
     public void handleNextItems(final ListExtractor.InfoItemsPage result) {
         super.handleNextItems(result);
         setStreamCountAndOverallDuration(result.getItems(), !result.hasNextPage());
+        zenRegisterPraxisItems(result.getItems(), true);
+    }
+
+    // ZenPipe: the loaded videos of a practice playlist count as practice
+    private void zenRegisterPraxisItems(@Nullable final List<? extends InfoItem> items,
+                                        final boolean append) {
+        if (items != null && getContext() != null) {
+            org.schabi.newpipe.zen.ZenPraxis.registerPlaylistItems(requireContext(), serviceId,
+                    url, new ArrayList<>(items), append);
+        }
     }
 
     @Override
     public void handleResult(@NonNull final PlaylistInfo result) {
         super.handleResult(result);
+        zenRegisterPraxisItems(result.getRelatedItems(), false);
 
         animate(headerBinding.getRoot(), true, 100);
         animate(headerBinding.uploaderLayout, true, 300);

@@ -630,6 +630,9 @@ public final class Player implements PlaybackListener, Listener {
                 .build();
         simpleExoPlayer.addListener(this);
         simpleExoPlayer.setPlayWhenReady(playOnReady);
+        // ZenPipe: nothing starts by itself - stop at the end of every item, zenOnItemEnd()
+        // decides whether the queue may continue (only a chain of practice videos)
+        simpleExoPlayer.setPauseAtEndOfMediaItems(true);
         simpleExoPlayer.setSeekParameters(PlayerHelper.getSeekParameters(context));
         simpleExoPlayer.setWakeMode(C.WAKE_MODE_NETWORK);
         simpleExoPlayer.setHandleAudioBecomingNoisy(true);
@@ -1012,8 +1015,18 @@ public final class Player implements PlaybackListener, Listener {
             org.schabi.newpipe.zen.ZenPause.onProgress(context, currentProgress, duration,
                     currentState == STATE_PLAYING);
             if (org.schabi.newpipe.zen.ZenPause.needsKind(context)) {
-                getCurrentStreamInfo().ifPresent(info ->
-                        org.schabi.newpipe.zen.ZenPause.onStreamInfo(context, info, isAudioOnly));
+                getCurrentStreamInfo().ifPresent(info -> {
+                    final int zen = org.schabi.newpipe.zen.ZenPause.onStreamInfo(context, info,
+                            isAudioOnly);
+                    if (zen == org.schabi.newpipe.zen.ZenPause.STREAM_BLOCK_PAUSE) {
+                        // a running pause only lets practice play (e.g. next item of a queue)
+                        pause();
+                        org.schabi.newpipe.zen.ZenPause.showPauseScreen(context);
+                        service.destroyPlayerAndStopService();
+                    } else if (zen == org.schabi.newpipe.zen.ZenPause.STREAM_CHAIN_STOP) {
+                        pause(); // a practice chain reached a non-practice video
+                    }
+                });
             }
             UIs.call(ui -> ui.onUpdateProgress(currentProgress, duration, bufferPercent));
             notifyProgressUpdateToListeners(currentProgress, duration, bufferPercent);
@@ -1067,6 +1080,35 @@ public final class Player implements PlaybackListener, Listener {
                 ? com.google.android.exoplayer2.Player.STATE_IDLE
                 : simpleExoPlayer.getPlaybackState();
         updatePlaybackState(playWhenReady, playbackState);
+        if (!playWhenReady && reason == com.google.android.exoplayer2.Player
+                .PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM) {
+            zenOnItemEnd();
+        }
+    }
+
+    // ZenPipe: the player paused at the end of an item (setPauseAtEndOfMediaItems)
+    private void zenOnItemEnd() {
+        if (playQueue == null || exoPlayerIsNull()) {
+            return;
+        }
+        final int index = playQueue.getIndex();
+        final int next;
+        if (getRepeatMode() == REPEAT_MODE_ONE) {
+            next = -1; // the same video again, chosen by the user
+        } else if (index < playQueue.size() - 1) {
+            next = index + 1;
+        } else if (getRepeatMode() == REPEAT_MODE_ALL && playQueue.size() > 1) {
+            next = 0;
+        } else {
+            next = -1; // last item: let it end normally
+        }
+        if (next < 0 || org.schabi.newpipe.zen.ZenPause.mayChain(context,
+                playQueue.getItem(next))) {
+            simpleExoPlayer.play();
+        } else {
+            // the video is watched to its end; the queue stops here
+            org.schabi.newpipe.zen.ZenPause.onCompleted(context);
+        }
     }
 
     @Override

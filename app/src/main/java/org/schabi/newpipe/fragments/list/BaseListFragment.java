@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.schabi.newpipe.R;
 import org.schabi.newpipe.error.ErrorUtil;
 import org.schabi.newpipe.extractor.InfoItem;
+import org.schabi.newpipe.extractor.channel.ChannelInfoItem;
+import org.schabi.newpipe.extractor.playlist.PlaylistInfoItem;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 import org.schabi.newpipe.fragments.BaseStateFragment;
 import org.schabi.newpipe.fragments.OnScrollBelowItemsListener;
@@ -265,23 +267,47 @@ public abstract class BaseListFragment<I, N> extends BaseStateFragment<I>
             }
         });
 
-        infoListAdapter.setOnChannelSelectedListener(selectedItem -> {
-            try {
-                onItemSelected(selectedItem);
-                NavigationHelper.openChannelFragment(getFM(), selectedItem.getServiceId(),
-                        selectedItem.getUrl(), selectedItem.getName());
-            } catch (final Exception e) {
-                ErrorUtil.showUiErrorSnackbar(this, "Opening channel fragment", e);
+        infoListAdapter.setOnChannelSelectedListener(new OnClickGesture<>() {
+            @Override
+            public void selected(final ChannelInfoItem selectedItem) {
+                try {
+                    onItemSelected(selectedItem);
+                    NavigationHelper.openChannelFragment(getFM(), selectedItem.getServiceId(),
+                            selectedItem.getUrl(), selectedItem.getName());
+                } catch (final Exception e) {
+                    ErrorUtil.showUiErrorSnackbar(BaseListFragment.this,
+                            "Opening channel fragment", e);
+                }
+            }
+
+            @Override
+            public void held(final ChannelInfoItem selectedItem) {
+                // ZenPipe: mark/unmark as practice channel
+                org.schabi.newpipe.zen.ZenPraxisUi.showLongPress(requireActivity(),
+                        selectedItem.getServiceId(), selectedItem.getUrl(),
+                        selectedItem.getName(), false);
             }
         });
 
-        infoListAdapter.setOnPlaylistSelectedListener(selectedItem -> {
-            try {
-                onItemSelected(selectedItem);
-                NavigationHelper.openPlaylistFragment(getFM(), selectedItem.getServiceId(),
-                        selectedItem.getUrl(), selectedItem.getName());
-            } catch (final Exception e) {
-                ErrorUtil.showUiErrorSnackbar(this, "Opening playlist fragment", e);
+        infoListAdapter.setOnPlaylistSelectedListener(new OnClickGesture<>() {
+            @Override
+            public void selected(final PlaylistInfoItem selectedItem) {
+                try {
+                    onItemSelected(selectedItem);
+                    NavigationHelper.openPlaylistFragment(getFM(), selectedItem.getServiceId(),
+                            selectedItem.getUrl(), selectedItem.getName());
+                } catch (final Exception e) {
+                    ErrorUtil.showUiErrorSnackbar(BaseListFragment.this,
+                            "Opening playlist fragment", e);
+                }
+            }
+
+            @Override
+            public void held(final PlaylistInfoItem selectedItem) {
+                // ZenPipe: mark/unmark as practice playlist
+                org.schabi.newpipe.zen.ZenPraxisUi.showLongPress(requireActivity(),
+                        selectedItem.getServiceId(), selectedItem.getUrl(),
+                        selectedItem.getName(), true);
             }
         });
 

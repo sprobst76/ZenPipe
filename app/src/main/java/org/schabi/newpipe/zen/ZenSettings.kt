@@ -80,6 +80,7 @@ object ZenSettings {
     @JvmStatic
     fun init(context: Context) {
         lock = Zen.settingsLock(context)
+        ZenPraxis.playlistItems(context)
     }
 
     /** For tests: use [lock] (or the defaults for null). */

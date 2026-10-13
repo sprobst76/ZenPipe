@@ -1080,7 +1080,7 @@ public final class VideoDetailFragment
         if (!PermissionHelper.isPopupEnabledElseAsk(activity)) {
             return;
         }
-        if (org.schabi.newpipe.zen.ZenPause.blockStart(activity, url)) {
+        if (zenBlockStart(activity)) {
             return; // zen: mandatory pause is running
         }
 
@@ -1160,8 +1160,17 @@ public final class VideoDetailFragment
         return url;
     }
 
+    // zen: pause gate; practice streams (known from the loaded info) may start during a pause
+    private boolean zenBlockStart(final Context context) {
+        if (currentInfo != null && url != null && url.equals(currentInfo.getUrl())) {
+            return org.schabi.newpipe.zen.ZenPause.blockStart(context, currentInfo.getServiceId(),
+                    url, currentInfo.getUploaderUrl());
+        }
+        return org.schabi.newpipe.zen.ZenPause.blockStart(context, url);
+    }
+
     private void openNormalBackgroundPlayer(final boolean append) {
-        if (org.schabi.newpipe.zen.ZenPause.blockStart(activity, url)) {
+        if (zenBlockStart(activity)) {
             return; // zen: mandatory pause is running
         }
         // See UI changes while remote playQueue changes
@@ -1179,7 +1188,7 @@ public final class VideoDetailFragment
     }
 
     private void openMainPlayer() {
-        if (org.schabi.newpipe.zen.ZenPause.blockStart(requireContext(), url)) {
+        if (zenBlockStart(requireContext())) {
             return; // zen: mandatory pause is running
         }
         if (!isPlayerServiceAvailable()) {

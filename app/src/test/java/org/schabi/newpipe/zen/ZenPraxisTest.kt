@@ -294,6 +294,144 @@ class ZenPraxisTest {
     }
 
     @Test
+    fun `during a running pause only practice may start, and practice does not touch the pause`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v", 60 * min, 20 * min, ZenKind.VIDEO)
+        assertTrue(e.onClosed(20 * min, 60 * min) is ZenPauseEngine.Outcome.Paused)
+        val left = e.remainingMs()
+        assertTrue(left > 0)
+        assertFalse(e.allowsStart(praxis = false))
+        assertTrue(e.allowsStart(praxis = true))
+
+        // a practice session runs during the pause and is aborted: no new/longer pause
+        env.watch(e, "yoga1", 60 * min, 2 * min, ZenKind.PRAXIS)
+        assertFalse(e.blocksRunning(ZenKind.PRAXIS))
+        assertTrue(e.onClosed(2 * min, 60 * min) is ZenPauseEngine.Outcome.Exempt)
+        assertEquals(left - 2 * min, e.remainingMs())
+
+        // anything else that reaches the player is stopped once its kind is known
+        assertTrue(e.blocksRunning(ZenKind.VIDEO))
+        assertTrue(e.blocksRunning(ZenKind.MUSIC))
+        assertTrue(e.blocksRunning(ZenKind.PODCAST))
+
+        // after the pause everything may start again
+        env.advance(left)
+        assertTrue(e.allowsStart(praxis = false))
+        assertFalse(e.blocksRunning(ZenKind.VIDEO))
+    }
+
+    @Test
+    fun `a queue only continues by itself along a chain of practice videos`() {
+        val env = Env()
+        val e = env.engine()
+        // practice -> practice: continues, the next item is chained
+        env.watch(e, "yoga1", 10 * min, 10 * min, ZenKind.PRAXIS)
+        assertTrue(e.mayChain("yoga2", nextPraxis = true))
+        env.watch(e, "yoga2", 10 * min, 1 * min, null)
+        assertFalse(e.chainBreaks(ZenKind.PRAXIS))
+
+        // practice -> non-practice by list data: stops, logged
+        env.watch(e, "yoga2b", 10 * min, 10 * min, ZenKind.PRAXIS)
+        assertFalse(e.mayChain("video", nextPraxis = false))
+        assertTrue(env.events.any { it.startsWith("chain_stop") })
+
+        // list data said practice, the stream info says otherwise: the chained item stops
+        env.watch(e, "yoga3", 10 * min, 10 * min, ZenKind.PRAXIS)
+        assertTrue(e.mayChain("fake", nextPraxis = true))
+        env.watch(e, "fake", 10 * min, 1 * min, null)
+        assertTrue(e.chainBreaks(ZenKind.VIDEO))
+        assertTrue(e.chainBreaks(ZenKind.MUSIC))
+
+        // a non-practice video never continues, not even into practice
+        env.watch(e, "video2", 10 * min, 10 * min, ZenKind.VIDEO)
+        assertFalse(e.mayChain("yoga4", nextPraxis = true))
+        // an item started by the user (not chained) is not stopped by the chain rule
+        env.watch(e, "video3", 10 * min, 1 * min, null)
+        assertFalse(e.chainBreaks(ZenKind.VIDEO))
+        // nothing open: no chain
+        e.onClosed(1 * min, 10 * min)
+        assertFalse(e.mayChain("yoga5", nextPraxis = true))
+    }
+
+    @Test
+    fun `practice is decided by the channel only, never by the title`() {
+        val (env, l) = ready()
+        ZenSettings.install(l)
+        try {
+            l.completeSetup()
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=a", yoga.url))
+            env.store.put("zs_praxis" to ZenPraxisChannel.encodeList(listOf(yoga)))
+            assertTrue(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=a", "https://youtube.com/channel/UCyoga/"))
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=a", null))
+            assertFalse(ZenPraxis.isPraxisStream(1, "https://www.youtube.com/watch?v=a", yoga.url)) // other service
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=a", breath.url))
+            // a "yoga" title on another channel is no practice
+            assertEquals(ZenKind.VIDEO, ZenContentKind.classify(null, listOf("yoga"), "Other", "Yoga for sleep", 1800, false, praxis = false))
+        } finally {
+            ZenSettings.install(null)
+        }
+    }
+
+    // ------------------------------------------------------------------ playlists
+
+    private val yogaList = ZenPraxisChannel(0, "https://www.youtube.com/playlist?list=PLyoga", "Yoga list", playlist = true)
+
+    @Test
+    fun `playlists survive encoding next to channels, old entries stay channels`() {
+        val list = listOf(yoga, yogaList)
+        assertEquals(list, ZenPraxisChannel.decodeList(ZenPraxisChannel.encodeList(list)))
+        assertEquals(listOf(yoga), ZenPraxisChannel.decodeList("0\thttps://www.youtube.com/channel/UCyoga\tYoga"))
+    }
+
+    @Test
+    fun `adding a playlist is pending for 24 h like a channel, removing applies at once`() {
+        val (env, l) = ready()
+        assertTrue(l.addPraxis(yogaList) is ZenSettingsLock.Result.Applied)
+        assertTrue(l.praxisChannels().isEmpty())
+        assertTrue(l.pendingPraxis().single().playlist)
+        assertTrue(l.isLocked())
+        assertTrue(l.addPraxis(yoga) is ZenSettingsLock.Result.Rejected) // global lock
+        env.mono += 24 * h
+        assertEquals(listOf(yogaList), l.praxisChannels())
+        assertTrue(l.removePraxis(yogaList.key) is ZenSettingsLock.Result.Applied)
+        assertTrue(l.praxisChannels().isEmpty())
+    }
+
+    @Test
+    fun `videos of an active practice playlist are practice, only while it is active`() {
+        val (env, l) = ready()
+        val items = ZenPraxisPlaylistItems(env.store)
+        ZenSettings.install(l)
+        ZenPraxis.installPlaylistItems(items)
+        try {
+            val v1 = "https://www.youtube.com/watch?v=one"
+            val other = "https://www.youtube.com/watch?v=other"
+            env.store.put("zs_praxis" to ZenPraxisChannel.encodeList(listOf(yogaList)))
+            items.register(yogaList.key, listOf(0 to v1))
+            assertTrue(ZenPraxis.isPraxisStream(0, "https://m.youtube.com/watch?v=one", "https://www.youtube.com/channel/UCsomeone"))
+            // something enqueued next to it (not loaded from the playlist) is no practice
+            assertFalse(ZenPraxis.isPraxisStream(0, other, "https://www.youtube.com/channel/UCsomeone"))
+            assertEquals(setOf(ZenPraxisChannel.keyOf(0, v1)), ZenPraxis.activePlaylistStreamKeys())
+
+            // a reload replaces the set; the limit holds
+            items.register(yogaList.key, (1..300).map { 0 to "https://www.youtube.com/watch?v=n$it" })
+            assertFalse(ZenPraxis.isPraxisStream(0, v1, null))
+            assertTrue(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n200", null))
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n201", null))
+
+            // removing the playlist applies at once
+            l.removePraxis(yogaList.key)
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n1", null))
+            items.prune(emptySet())
+            assertTrue(items.streamKeys(setOf(yogaList.key)).isEmpty())
+        } finally {
+            ZenSettings.install(null)
+            ZenPraxis.installPlaylistItems(null)
+        }
+    }
+
+    @Test
     fun `minutes keep at most 30 days`() {
         val t = ZenPraxisTime(MemoryZenStore())
         for (d in 1..31) t.add("2026-09-%02d".format(d).replace("09-31", "10-01"), min)
