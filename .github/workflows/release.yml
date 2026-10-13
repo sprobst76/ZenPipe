@@ -49,6 +49,9 @@ jobs:
           ZENPIPE_KEYSTORE_PASSWORD: ${{ secrets.ZENPIPE_KEYSTORE_PASSWORD }}
           ZENPIPE_KEY_ALIAS: ${{ secrets.ZENPIPE_KEY_ALIAS }}
           ZENPIPE_KEY_PASSWORD: ${{ secrets.ZENPIPE_KEY_PASSWORD }}
+          # passwords may contain non-ASCII characters; the JVM decodes env vars with the locale
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
         run: ./gradlew assembleRelease --stacktrace
 
       - name: Remove keystore
