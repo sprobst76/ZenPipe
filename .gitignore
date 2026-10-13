@@ -32,3 +32,10 @@ node_modules/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
+# ZenPipe: signing material never belongs in the repo
+*.jks
+*.keystore
+*.p12
+*.pem
+keystore.properties

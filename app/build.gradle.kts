@@ -56,6 +56,27 @@ configure<ApplicationExtension> {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ZenPipe: release signing comes from the environment only (keystore never in the repo).
+    // Without ZENPIPE_KEYSTORE the release build stays unsigned (local builds, F-Droid).
+    val zenKeystore = providers.environmentVariable("ZENPIPE_KEYSTORE").orNull
+    if (!zenKeystore.isNullOrBlank()) {
+        fun zenEnv(name: String): String = providers.environmentVariable(name).orNull
+            ?.takeIf { it.isNotEmpty() }
+            ?: error("ZENPIPE_KEYSTORE is set, but $name is missing")
+        signingConfigs {
+            create("zenRelease") {
+                storeFile = file(zenKeystore)
+                storePassword = zenEnv("ZENPIPE_KEYSTORE_PASSWORD")
+                keyAlias = zenEnv("ZENPIPE_KEY_ALIAS")
+                keyPassword = zenEnv("ZENPIPE_KEY_PASSWORD")
+                // minSdk 23 needs v1; v3 allows a later key rotation
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+            }
+        }
+    }
+
     buildTypes {
         debug {
             isDebuggable = true
@@ -77,6 +98,7 @@ configure<ApplicationExtension> {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfigs.findByName("zenRelease")?.let { signingConfig = it }
         }
 
         register("continuous") {

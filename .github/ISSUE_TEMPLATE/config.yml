@@ -1,11 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: ❓ Question
-    url: https://github.com/TeamNewPipe/NewPipe/discussions/new?category=questions
-    about: Ask about anything NewPipe-related
-  - name: 💬 Matrix
-    url: https://matrix.to/#/#newpipe:matrix.newpipe-ev.de
-    about: Chat with us via Matrix for quick Q/A
-  - name: 💬 IRC
-    url: https://web.libera.chat/#newpipe
-    about: Chat with us via IRC for quick Q/A
+  - name: Upstream NewPipe
+    url: https://github.com/TeamNewPipe/NewPipe/issues
+    about: Only for bugs you can also reproduce in the original NewPipe app. ZenPipe is not affiliated with TeamNewPipe - never report ZenPipe-specific behaviour there.
