@@ -62,6 +62,8 @@ for name, f in dens.items():
     ns = round(24 * f)
     save(ring(ns, 0.36, 0.11, (255, 255, 255, 255)), f"drawable-{name}/ic_newpipe_triangle_white.png")
     save(ring(ns, 0.36, 0.11, (255, 255, 255, 255), dot=True), f"drawable-{name}/ic_newpipe_update.png")
+    # splash screen ring (96dp, off-white on the sage splash background)
+    save(ring(round(96 * f), 0.36, 0.07, FG), f"drawable-{name}/zen_splash_ring.png")
 
 # Android TV banner 320x180
 banner = Image.new("RGBA", (320, 180), BG)
