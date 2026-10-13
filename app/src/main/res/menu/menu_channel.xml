@@ -27,6 +27,14 @@
         tools:visible="true" />
 
     <item
+        android:id="@+id/menu_item_zen_praxis"
+        android:orderInCategory="1"
+        android:title="@string/zen_praxis_mark"
+        android:visible="false"
+        app:showAsAction="never"
+        tools:visible="true" />
+
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="2"
         android:title="@string/settings"

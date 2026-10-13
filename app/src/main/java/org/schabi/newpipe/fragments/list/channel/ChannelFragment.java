@@ -99,6 +99,7 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
 
     private MenuItem menuRssButton;
     private MenuItem menuNotifyButton;
+    private MenuItem menuZenPraxisButton;
     private SubscriptionEntity channelSubscription;
     private MenuProvider menuProvider;
 
@@ -154,7 +155,9 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
                 public void onPrepareMenu(@NonNull final Menu menu) {
                     menuRssButton = menu.findItem(R.id.menu_item_rss);
                     menuNotifyButton = menu.findItem(R.id.menu_item_notify);
+                    menuZenPraxisButton = menu.findItem(R.id.menu_item_zen_praxis);
                     updateRssButton();
+                    updateZenPraxisButton();
                     updateNotifyButton(channelSubscription);
                 }
 
@@ -167,6 +170,12 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
                         setNotify(value);
                     } else if (itemId == R.id.action_settings) {
                         NavigationHelper.openSettings(requireContext());
+                    } else if (itemId == R.id.menu_item_zen_praxis) {
+                        if (currentInfo != null) {
+                            org.schabi.newpipe.zen.ZenPraxisUi.onMenu(requireActivity(),
+                                    currentInfo.getServiceId(), currentInfo.getUrl(),
+                                    currentInfo.getName(), () -> updateZenPraxisButton());
+                        }
                     } else if (itemId == R.id.menu_item_rss) {
                         if (currentInfo != null) {
                             ShareUtils.openUrlInApp(requireContext(), currentInfo.getFeedUrl());
@@ -410,6 +419,20 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
         animate(binding.channelSubscribeButton, true, 100, AnimationType.LIGHT_SCALE_AND_ALPHA);
     }
 
+    // ZenPipe: "mark as practice channel" / "remove from practice channels"
+    private void updateZenPraxisButton() {
+        if (menuZenPraxisButton == null) {
+            return;
+        }
+        if (currentInfo == null) {
+            menuZenPraxisButton.setVisible(false);
+            return;
+        }
+        menuZenPraxisButton.setVisible(true);
+        menuZenPraxisButton.setTitle(org.schabi.newpipe.zen.ZenPraxisUi.menuTitle(
+                requireContext(), currentInfo.getServiceId(), currentInfo.getUrl()));
+    }
+
     private void updateRssButton() {
         if (menuRssButton == null || currentInfo == null) {
             return;
@@ -620,6 +643,7 @@ public class ChannelFragment extends BaseStateFragment<ChannelInfo>
         }
 
         updateRssButton();
+        updateZenPraxisButton();
 
         channelContentNotSupported = false;
         for (final Throwable throwable : result.getErrors()) {

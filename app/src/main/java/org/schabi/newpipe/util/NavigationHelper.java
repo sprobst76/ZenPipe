@@ -595,6 +595,14 @@ public final class NavigationHelper {
                 .commit();
     }
 
+    // ZenPipe: practice channels tab as a standalone page (drawer)
+    public static void openPraxisFragment(final FragmentManager fragmentManager) {
+        defaultTransaction(fragmentManager)
+                .replace(R.id.fragment_holder, new org.schabi.newpipe.zen.ZenPraxisFragment())
+                .addToBackStack(null)
+                .commit();
+    }
+
     public static void openSubscriptionFragment(final FragmentManager fragmentManager) {
         defaultTransaction(fragmentManager)
                 .replace(R.id.fragment_holder, new SubscriptionFragment())

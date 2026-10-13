@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:tint="@color/defaultIconTint"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Material icon "spa" (Apache 2.0), used for the ZenPipe practice tab -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M15.49,9.63c-0.18,-2.79 -1.31,-5.51 -3.43,-7.63 -2.14,2.14 -3.32,4.86 -3.55,7.63 1.28,0.68 2.46,1.56 3.49,2.63 1.03,-1.06 2.21,-1.94 3.49,-2.63zM12,15.45C9.85,12.17 6.18,10 2,10c0,5.32 3.36,9.82 8.03,11.49 0.63,0.23 1.29,0.4 1.97,0.51 0.68,-0.12 1.33,-0.29 1.97,-0.51C18.64,19.82 22,15.32 22,10c-4.18,0 -7.85,2.17 -10,5.45z" />
+</vector>

@@ -123,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int ITEM_ID_FEED = -2;
     private static final int ITEM_ID_BOOKMARKS = -3;
     private static final int ITEM_ID_SEARCH = -4;
+    private static final int ITEM_ID_PRAXIS = -5;
     private static final int ITEM_ID_SETTINGS = 0;
     private static final int ITEM_ID_DONATION = 1;
     private static final int ITEM_ID_ABOUT = 2;
@@ -285,6 +286,10 @@ public class MainActivity extends AppCompatActivity {
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_tabs_group, ITEM_ID_FEED, ORDER, R.string.fragment_feed_title)
                 .setIcon(R.drawable.ic_subscriptions);
+        // ZenPipe: practice channels, reachable at any time
+        drawerLayoutBinding.navigation.getMenu()
+                .add(R.id.menu_tabs_group, ITEM_ID_PRAXIS, ORDER, R.string.zen_praxis_title)
+                .setIcon(R.drawable.ic_spa);
         drawerLayoutBinding.navigation.getMenu()
                 .add(R.id.menu_tabs_group, ITEM_ID_BOOKMARKS, ORDER, R.string.tab_bookmarks)
                 .setIcon(R.drawable.ic_bookmark);
@@ -344,6 +349,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case ITEM_ID_BOOKMARKS:
                 NavigationHelper.openBookmarksFragment(getSupportFragmentManager());
+                break;
+            case ITEM_ID_PRAXIS:
+                NavigationHelper.openPraxisFragment(getSupportFragmentManager());
                 break;
             case ITEM_ID_SEARCH:
                 NavigationHelper.openSearchFragment(getSupportFragmentManager(),

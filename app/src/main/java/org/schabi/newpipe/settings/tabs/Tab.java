@@ -165,7 +165,9 @@ public abstract class Tab {
         KIOSK(new KioskTab()),
         CHANNEL(new ChannelTab()),
         PLAYLIST(new PlaylistTab()),
-        FEEDGROUP(new FeedGroupTab());
+        FEEDGROUP(new FeedGroupTab()),
+        // ZenPipe: practice channels (yoga, breathwork, meditation, sleep aids)
+        PRAXIS(new PraxisTab());
 
         private final Tab tab;
 
@@ -257,6 +259,32 @@ public abstract class Tab {
         @Override
         public FeedFragment getFragment(final Context context) {
             return new FeedFragment();
+        }
+    }
+
+    /** ZenPipe: newest videos of the practice channels, see zen-docs/spec-praxis.md. */
+    public static class PraxisTab extends Tab {
+        public static final int ID = 10;
+
+        @Override
+        public int getTabId() {
+            return ID;
+        }
+
+        @Override
+        public String getTabName(final Context context) {
+            return context.getString(R.string.zen_praxis_title);
+        }
+
+        @DrawableRes
+        @Override
+        public int getTabIconRes(final Context context) {
+            return R.drawable.ic_spa;
+        }
+
+        @Override
+        public org.schabi.newpipe.zen.ZenPraxisFragment getFragment(final Context context) {
+            return new org.schabi.newpipe.zen.ZenPraxisFragment();
         }
     }
 

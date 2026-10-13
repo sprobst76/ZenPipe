@@ -35,11 +35,23 @@ public final class TabsManager {
                     TabsJsonHelper.getTabsFromJson(savedJson));
             tabs.removeIf(t -> t instanceof Tab.KioskTab || t instanceof Tab.DefaultKioskTab
                     || t instanceof Tab.BlankTab || t instanceof Tab.HistoryTab);
-            return tabs.isEmpty() ? getDefaultTabs() : tabs;
+            return zenWithPraxis(tabs.isEmpty() ? getDefaultTabs() : tabs);
         } catch (final TabsJsonHelper.InvalidJsonException e) {
             Toast.makeText(context, R.string.saved_tabs_invalid_json, Toast.LENGTH_SHORT).show();
-            return getDefaultTabs();
+            return zenWithPraxis(getDefaultTabs());
         }
+    }
+
+    // ZenPipe: the practice tab is always there (right after the feed), also on old setups
+    private static List<Tab> zenWithPraxis(final List<Tab> tabs) {
+        final Tab praxis = Tab.Type.PRAXIS.getTab();
+        if (tabs.contains(praxis)) {
+            return tabs;
+        }
+        final List<Tab> result = new java.util.ArrayList<>(tabs);
+        final int feed = result.indexOf(Tab.Type.FEED.getTab());
+        result.add(feed >= 0 ? feed + 1 : result.size(), praxis);
+        return result;
     }
 
     public void saveTabs(final List<Tab> tabList) {

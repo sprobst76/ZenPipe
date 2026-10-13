@@ -46,7 +46,8 @@ class ZenSettingsFragment : Fragment() {
         }
     }
 
-    private fun signatureOf(s: ZenSettingsLock.Snapshot) = "${s.setupMode}|${s.lockRemainingMs > 0}|${s.undoRemainingMs > 0}|${s.pending}"
+    private fun signatureOf(s: ZenSettingsLock.Snapshot) = "${s.setupMode}|${s.lockRemainingMs > 0}|${s.undoRemainingMs > 0}|${s.pending}|" +
+        "${s.praxis.map { it.key }}|${s.praxisPending.map { it.key }}"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         lock = Zen.settingsLock(requireContext())
@@ -136,11 +137,13 @@ class ZenSettingsFragment : Fragment() {
                 }
             )
         }
-        if (snap.pending.isNotEmpty()) {
-            val pendingText = snap.pending.entries.joinToString("\n") { (k, v) ->
-                val d = ZenSettingDefs.get(k)!!
-                "${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, v)}"
-            }
+        if (snap.pending.isNotEmpty() || snap.praxisPending.isNotEmpty()) {
+            val pendingText = (
+                snap.pending.entries.map { (k, v) ->
+                    val d = ZenSettingDefs.get(k)!!
+                    "${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, v)}"
+                } + snap.praxisPending.map { getString(R.string.zen_praxis_pending_line, it.name) }
+                ).joinToString("\n")
             content.addView(text(getString(R.string.zen_pending_title, fmtTime(snap.lockRemainingMs)), 14f, true))
             content.addView(text(pendingText))
             content.addView(
@@ -182,6 +185,53 @@ class ZenSettingsFragment : Fragment() {
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .apply { topMargin = dp(16) }
         )
+        renderPraxis(snap)
+    }
+
+    /** Practice channels: list with state, remove/cancel (both immediate), minutes of today. */
+    private fun renderPraxis(snap: ZenSettingsLock.Snapshot) {
+        content.addView(
+            text(getString(R.string.zen_praxis_settings_title), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        content.addView(text(getString(R.string.zen_praxis_today, (ZenPraxis.todayMs(requireContext()) / 60_000L).toInt())))
+        content.addView(text(getString(R.string.zen_praxis_settings_hint), 12f))
+        if (snap.praxis.isEmpty() && snap.praxisPending.isEmpty()) {
+            content.addView(text(getString(R.string.zen_praxis_settings_none)))
+        }
+        fun channelRow(ch: ZenPraxisChannel, pending: Boolean) {
+            val box = LinearLayout(requireContext()).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, dp(8), 0, dp(4))
+            }
+            val labels = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+            labels.addView(text(ch.name.ifEmpty { ch.url }, 16f))
+            labels.addView(
+                text(
+                    if (pending) {
+                        getString(R.string.zen_praxis_state_pending, fmtTime(snap.lockRemainingMs))
+                    } else {
+                        getString(R.string.zen_praxis_state_active)
+                    },
+                    12f
+                )
+            )
+            box.addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            box.addView(
+                Button(requireContext()).apply {
+                    setText(if (pending) R.string.zen_praxis_cancel else R.string.zen_praxis_remove)
+                    setOnClickListener {
+                        lock.removePraxis(ch.key)
+                        render()
+                    }
+                }
+            )
+            content.addView(box)
+        }
+        snap.praxis.forEach { channelRow(it, false) }
+        snap.praxisPending.forEach { channelRow(it, true) }
     }
 
     private fun updateUndoLabel(snap: ZenSettingsLock.Snapshot) {
