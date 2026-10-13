@@ -38,7 +38,9 @@ object ZenFeedPlanner {
         val isLive: Boolean,
         /** Index of the best feed group (0 = first), null if the channel is in no group. */
         val groupRank: Int?,
-        val groupName: String?
+        val groupName: String?,
+        /** Channel is an active practice channel: its videos never enter an edition (practice tab). */
+        val praxis: Boolean = false
     )
 
     data class Pick(val url: String, val minutes: Int, val groupName: String?)
@@ -64,6 +66,8 @@ object ZenFeedPlanner {
 
     @JvmStatic
     fun isEligible(c: Candidate, nowMillis: Long): Boolean {
+        // practice videos do not compete for (or count against) the edition budget and daily cap
+        if (c.praxis) return false
         if (isMusic(c)) return false
         if (c.isLive || c.durationSec < ZenSettings.minLengthSec()) return false
         val age = nowMillis - c.uploadMillis

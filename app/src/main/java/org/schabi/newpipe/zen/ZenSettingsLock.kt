@@ -58,7 +58,9 @@ class ZenSettingsLock(
         val setupMode: Boolean,
         val lockRemainingMs: Long,
         val undoRemainingMs: Long,
-        val pending: Map<String, Int>
+        val pending: Map<String, Int>,
+        val praxis: List<ZenPraxisChannel> = emptyList(),
+        val praxisPending: List<ZenPraxisChannel> = emptyList()
     )
 
     private fun kEff(k: String) = "zs_$k"
@@ -98,14 +100,23 @@ class ZenSettingsLock(
         return readPending()
     }
 
-    /** Pending changes take effect once the lock countdown has run out. */
+    /** Pending changes (settings and practice channels) take effect once the lock countdown has run out. */
     private fun applyDue() {
         val pend = readPending()
-        if (pend.isEmpty()) return
+        val pxPend = readPraxis(K_PX_PEND)
+        if (pend.isEmpty() && pxPend.isEmpty()) return
         if (lockCd.remainingMs() > 0) return
         pend.forEach { (k, v) -> store.put(kEff(k) to v, kPend(k) to null) }
+        if (pxPend.isNotEmpty()) {
+            val eff = readPraxis(K_PX)
+            val merged = eff + pxPend.filter { p -> eff.none { it.key == p.key } }
+            store.put(K_PX to ZenPraxisChannel.encodeList(merged), K_PX_PEND to null)
+            pxPend.forEach { log?.invoke("praxis_activated", "url=${it.url} name=${it.name}") }
+        }
         clearUndo()
-        log?.invoke("settings_pending_applied", pend.entries.joinToString(",") { "${it.key}=${it.value}" })
+        if (pend.isNotEmpty()) {
+            log?.invoke("settings_pending_applied", pend.entries.joinToString(",") { "${it.key}=${it.value}" })
+        }
     }
 
     @Synchronized
@@ -146,7 +157,14 @@ class ZenSettingsLock(
     fun snapshot(): Snapshot {
         applyDue()
         val setup = isSetupMode()
-        return Snapshot(setup, lockCd.remainingMs(), undoCd.remainingMs(), readPending())
+        return Snapshot(
+            setup,
+            lockCd.remainingMs(),
+            undoCd.remainingMs(),
+            readPending(),
+            readPraxis(K_PX),
+            readPraxis(K_PX_PEND)
+        )
     }
 
     @Synchronized
@@ -215,27 +233,112 @@ class ZenSettingsLock(
         return Result.Applied(immediate + cancelled, loosen.toList(), startsLock, setup)
     }
 
-    /** Drops every pending loosening. The lock keeps running (cancelling never shortens it). */
+    /**
+     * Drops every pending loosening (settings and practice channels). The lock keeps running
+     * (cancelling never shortens it).
+     */
     @Synchronized
     fun cancelPending(): Boolean {
         applyDue()
         val pend = readPending()
-        if (pend.isEmpty()) return false
-        store.put(*pend.keys.map { kPend(it) to null }.toTypedArray())
+        val pxPend = readPraxis(K_PX_PEND)
+        if (pend.isEmpty() && pxPend.isEmpty()) return false
+        store.put(*pend.keys.map { kPend(it) to null }.toTypedArray(), K_PX_PEND to null)
         clearUndo()
-        log?.invoke("settings_pending_cancelled", pend.entries.joinToString(",") { "${it.key}=${it.value}" })
+        if (pend.isNotEmpty()) {
+            log?.invoke("settings_pending_cancelled", pend.entries.joinToString(",") { "${it.key}=${it.value}" })
+        }
+        pxPend.forEach { log?.invoke("praxis_pending_cancelled", "url=${it.url} name=${it.name}") }
         return true
+    }
+
+    // ---------------------------------------------------------------- practice channels
+
+    private fun readPraxis(key: String) = ZenPraxisChannel.decodeList(store.getString(key, null))
+
+    private fun praxisEntry(key: String, list: List<ZenPraxisChannel>): Pair<String, Any?> = key to if (list.isEmpty()) null else ZenPraxisChannel.encodeList(list)
+
+    /** Active practice channels (pending ones that are due are activated first). */
+    @Synchronized
+    fun praxisChannels(): List<ZenPraxisChannel> {
+        applyDue()
+        return readPraxis(K_PX)
+    }
+
+    /** Practice channels that were added and wait for the end of the lock. */
+    @Synchronized
+    fun pendingPraxis(): List<ZenPraxisChannel> {
+        applyDue()
+        return readPraxis(K_PX_PEND)
+    }
+
+    /**
+     * Adding a practice channel is a LOOSENING (its videos leave the feed limits and the pause):
+     * like any loosening it is rejected while the lock runs, otherwise it becomes pending, starts
+     * the 24 h lock, takes effect when the lock ends and can be cancelled or undone until then.
+     * In the first-time setup it applies at once (like every setting there).
+     */
+    @Synchronized
+    fun addPraxis(channel: ZenPraxisChannel): Result {
+        applyDue()
+        val eff = readPraxis(K_PX)
+        val pend = readPraxis(K_PX_PEND)
+        if (eff.any { it.key == channel.key } || pend.any { it.key == channel.key }) return Result.NoChange
+        if (isSetupMode()) {
+            store.put(praxisEntry(K_PX, eff + channel))
+            log?.invoke("praxis_add", "url=${channel.url} name=${channel.name} setup=true")
+            return Result.Applied(listOf(channel.key), emptyList(), lockStarted = false, setupMode = true)
+        }
+        if (lockCd.remainingMs() > 0) return Result.Rejected(Reason.LOCKED, channel.key)
+        saveUndo(ZenSettingDefs.all.associate { it.key to readEff(it) }, readPending(), true)
+        store.put(praxisEntry(K_PX_PEND, pend + channel))
+        lockCd.start(lockMs)
+        undoCd.start(undoMs)
+        log?.invoke("praxis_add_pending", "url=${channel.url} name=${channel.name}")
+        return Result.Applied(emptyList(), listOf(channel.key), lockStarted = true, setupMode = false)
+    }
+
+    /**
+     * Removing is STRICTER and applies at once (also while locked; never starts or extends the
+     * lock; undo window like every confirmed change). Removing a channel that is only pending
+     * cancels that pending addition (the lock keeps running).
+     */
+    @Synchronized
+    fun removePraxis(key: String): Result {
+        applyDue()
+        val eff = readPraxis(K_PX)
+        val pend = readPraxis(K_PX_PEND)
+        val inEff = eff.firstOrNull { it.key == key }
+        val inPend = pend.firstOrNull { it.key == key }
+        if (inEff == null && inPend == null) return Result.NoChange
+        val setup = isSetupMode()
+        if (inEff == null) {
+            store.put(praxisEntry(K_PX_PEND, pend - inPend!!))
+            clearUndo()
+            log?.invoke("praxis_pending_cancelled", "url=${inPend.url} name=${inPend.name}")
+            return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
+        }
+        if (!setup) saveUndo(ZenSettingDefs.all.associate { it.key to readEff(it) }, readPending(), false)
+        store.put(praxisEntry(K_PX, eff - inEff), praxisEntry(K_PX_PEND, pend.filter { it.key != key }))
+        if (!setup) undoCd.start(undoMs)
+        log?.invoke("praxis_remove", "url=${inEff.url} name=${inEff.name} setup=$setup")
+        return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
     }
 
     private fun saveUndo(eff: Map<String, Int>, pend: Map<String, Int>, startedLock: Boolean) {
         val e = eff.entries.joinToString(",") { "${it.key}=${it.value}" }
         val p = pend.entries.joinToString(",") { "${it.key}=${it.value}" }
-        store.put(K_UNDO to "${if (startedLock) 1 else 0}|$e|$p")
+        store.put(
+            K_UNDO to "${if (startedLock) 1 else 0}|$e|$p",
+            // always written (also empty) so an undo knows the practice state existed
+            K_UNDO_PX to ZenPraxisChannel.encodeList(readPraxis(K_PX)),
+            K_UNDO_PX_PEND to ZenPraxisChannel.encodeList(readPraxis(K_PX_PEND))
+        )
     }
 
     private fun clearUndo() {
         undoCd.clear()
-        store.put(K_UNDO to null)
+        store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null)
     }
 
     private fun parse(s: String): Map<String, Int> = s.split(',').filter { '=' in it }.associate {
@@ -246,7 +349,9 @@ class ZenSettingsLock(
     @Synchronized
     fun undoRemainingMs(): Long {
         val r = undoCd.remainingMs()
-        if (r <= 0 && store.getString(K_UNDO, null) != null) store.put(K_UNDO to null)
+        if (r <= 0 && store.getString(K_UNDO, null) != null) {
+            store.put(K_UNDO to null, K_UNDO_PX to null, K_UNDO_PX_PEND to null)
+        }
         return r
     }
 
@@ -266,6 +371,8 @@ class ZenSettingsLock(
             eff[d.key]?.takeIf { d.inRange(it) }?.let { entries.add(kEff(d.key) to it) }
             entries.add(kPend(d.key) to pend[d.key]?.takeIf { d.inRange(it) })
         }
+        store.getString(K_UNDO_PX, null)?.let { entries.add(praxisEntry(K_PX, ZenPraxisChannel.decodeList(it))) }
+        store.getString(K_UNDO_PX_PEND, null)?.let { entries.add(praxisEntry(K_PX_PEND, ZenPraxisChannel.decodeList(it))) }
         store.put(*entries.toTypedArray())
         if (startedLock) lockCd.clear()
         clearUndo()
@@ -277,5 +384,9 @@ class ZenSettingsLock(
         private const val K_SETUP_DONE = "zs_setup_done"
         private const val K_SETUP_STARTED = "zs_setup_started"
         private const val K_UNDO = "zs_undo"
+        private const val K_UNDO_PX = "zs_undo_praxis"
+        private const val K_UNDO_PX_PEND = "zs_undo_praxis_pending"
+        private const val K_PX = "zs_praxis"
+        private const val K_PX_PEND = "zp_praxis"
     }
 }

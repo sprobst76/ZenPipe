@@ -7,8 +7,19 @@ import java.time.ZoneId
 import org.schabi.newpipe.extractor.stream.StreamInfo
 import org.schabi.newpipe.player.helper.PlayerHolder
 
-/** What kind of content a stream is, for the mandatory pause (music is exempt). */
-enum class ZenKind { VIDEO, PODCAST, MUSIC }
+/**
+ * What kind of content a stream is, for the mandatory pause. Music and PRAXIS (videos of a
+ * user-maintained practice channel: yoga, breathwork, meditation, sleep aids) are exempt.
+ */
+enum class ZenKind {
+    VIDEO,
+    PODCAST,
+    MUSIC,
+    PRAXIS;
+
+    /** An abort of this kind never starts a pause. */
+    val pauseExempt: Boolean get() = this == MUSIC || this == PRAXIS
+}
 
 /**
  * Rules of the mandatory pause after an aborted video (see zen-docs/rules.md). All numbers are
@@ -37,7 +48,7 @@ object ZenPauseRules {
         (positionMs >= durationMs * FINISHED_FRACTION || durationMs - positionMs <= FINISHED_REMAINING_MS)
 
     @JvmStatic
-    fun qualifies(playedMs: Long, kind: ZenKind): Boolean = ZenSettings.pauseEnabled() && kind != ZenKind.MUSIC && playedMs >= minWatchMs()
+    fun qualifies(playedMs: Long, kind: ZenKind): Boolean = ZenSettings.pauseEnabled() && !kind.pauseExempt && playedMs >= minWatchMs()
 }
 
 /**
@@ -63,8 +74,11 @@ object ZenContentKind {
         uploader: String?,
         title: String?,
         durationSec: Long,
-        audioOnly: Boolean
+        audioOnly: Boolean,
+        /** The uploader is an active practice channel (decided by the user, wins over everything). */
+        praxis: Boolean = false
     ): ZenKind {
+        if (praxis) return ZenKind.PRAXIS
         val cat = category?.trim().orEmpty()
         if (cat.equals("Music", ignoreCase = true)) return ZenKind.MUSIC
         if (uploader != null && MUSIC_CHANNEL.containsMatchIn(uploader.trim())) return ZenKind.MUSIC
@@ -122,6 +136,7 @@ class ZenPauseEngine(
     private var kind: ZenKind? = null
     private var playingSince = -1L
     private var lastPersist = 0L
+    private val praxisTime = ZenPraxisTime(store)
 
     @Synchronized
     fun hasOpenSession() = open
@@ -318,12 +333,13 @@ class ZenPauseEngine(
         val finished = reason == Reason.COMPLETED || ZenPauseRules.isFinished(endPos, endDur)
         val u = url
         clearSession()
+        if (k == ZenKind.PRAXIS) praxisTime.add(ZenDay.dayOf(trustedNow(), zone()).toString(), playedMs)
         val detail = "url=$u reason=$reason kind=$k playedMs=$playedMs posMs=$endPos durMs=$endDur"
         if (finished) {
             log("watch_end", detail)
             return Outcome.Finished
         }
-        if (k == ZenKind.MUSIC) {
+        if (k.pauseExempt) {
             log("abort_exempt", detail)
             return Outcome.Exempt(playedMs, k)
         }
@@ -397,7 +413,15 @@ object ZenPause {
         val open = e.sessionUrl() ?: return
         if (open != info.url && open != info.originalUrl) return // info of another item
         e.setKind(
-            ZenContentKind.classify(info.category, info.tags, info.uploaderName, info.name, info.duration, audioOnly)
+            ZenContentKind.classify(
+                info.category,
+                info.tags,
+                info.uploaderName,
+                info.name,
+                info.duration,
+                audioOnly,
+                praxis = ZenPraxis.isPraxis(info.serviceId, info.uploaderUrl)
+            )
         )
     }
 
