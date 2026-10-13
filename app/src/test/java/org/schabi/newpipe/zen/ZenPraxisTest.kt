@@ -355,6 +355,16 @@ class ZenPraxisTest {
     }
 
     @Test
+    fun `enqueueing into a running queue is not a new start for the service safety net`() {
+        // practice is playing during a pause, a video is enqueued: the running player keeps going
+        assertFalse(ZenPauseRules.intentStartsPlayback(enqueue = true, playerHasQueue = true))
+        // enqueue that opens the player, and every fresh start, are checked
+        assertTrue(ZenPauseRules.intentStartsPlayback(enqueue = true, playerHasQueue = false))
+        assertTrue(ZenPauseRules.intentStartsPlayback(enqueue = false, playerHasQueue = true))
+        assertTrue(ZenPauseRules.intentStartsPlayback(enqueue = false, playerHasQueue = false))
+    }
+
+    @Test
     fun `practice is decided by the channel only, never by the title`() {
         val (env, l) = ready()
         ZenSettings.install(l)

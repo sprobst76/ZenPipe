@@ -50,6 +50,15 @@ object ZenPauseRules {
 
     @JvmStatic
     fun qualifies(playedMs: Long, kind: ZenKind): Boolean = ZenSettings.pauseEnabled() && !kind.pauseExempt && playedMs >= minWatchMs()
+
+    /**
+     * PlayerService safety net: does a player intent start a playback? Enqueueing into a player
+     * that already has a queue does not (the running video keeps playing; the new item is checked
+     * when it is reached, see [ZenPauseEngine.mayChain]); a fresh start or an enqueue that opens
+     * the player does.
+     */
+    @JvmStatic
+    fun intentStartsPlayback(enqueue: Boolean, playerHasQueue: Boolean): Boolean = !enqueue || !playerHasQueue
 }
 
 /**

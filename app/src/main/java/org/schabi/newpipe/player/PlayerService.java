@@ -174,9 +174,11 @@ public final class PlayerService extends MediaBrowserServiceCompat {
         // an entry point forgot to ask ZenPause.blockStart() (the pause screen is shown instead)
         final var zenIntentType = androidx.core.content.IntentCompat.getSerializableExtra(intent,
                 Player.PLAYER_INTENT_TYPE, PlayerIntentType.class);
-        if ((zenIntentType == PlayerIntentType.AllOthers
-                || zenIntentType == PlayerIntentType.Enqueue
-                || zenIntentType == PlayerIntentType.EnqueueNext)
+        final boolean zenEnqueue = zenIntentType == PlayerIntentType.Enqueue
+                || zenIntentType == PlayerIntentType.EnqueueNext;
+        if ((zenIntentType == PlayerIntentType.AllOthers || zenEnqueue)
+                && org.schabi.newpipe.zen.ZenPauseRules.intentStartsPlayback(zenEnqueue,
+                        player.getPlayQueue() != null)
                 && org.schabi.newpipe.zen.ZenPause.blockForService(this, zenPeekQueue(intent))) {
             destroyPlayerAndStopService();
             return START_NOT_STICKY;
