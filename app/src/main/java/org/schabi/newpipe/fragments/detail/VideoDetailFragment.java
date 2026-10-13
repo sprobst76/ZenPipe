@@ -1570,6 +1570,10 @@ public final class VideoDetailFragment
 
         currentInfo = info;
         setInitialData(info.getServiceId(), info.getOriginalUrl(), info.getName(), playQueue);
+        // ZenPipe: details are known anyway, classify the video with them (async, needs the model)
+        if (getContext() != null) {
+            org.schabi.newpipe.zen.classify.ZenClassifier.onStreamInfo(getContext(), info);
+        }
 
         updateTabs(info);
 

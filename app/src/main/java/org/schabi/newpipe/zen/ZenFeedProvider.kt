@@ -50,7 +50,21 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
 
     fun markHandled(url: String, reason: String) = state.markHandled(url, reason)
 
-    private fun candidates(): List<ZenFeedPlanner.Candidate> {
+    /**
+     * Feed candidates for the content classifier (same eligibility as an edition), newest first,
+     * as (cache key, title + channel). Only data the feed already has; no network.
+     */
+    fun classifyCandidates(nowMillis: Long): List<Pair<String, org.schabi.newpipe.zen.classify.VideoText>> = candidateRows()
+        .filter { ZenFeedPlanner.isEligible(it.second, nowMillis) }
+        .sortedByDescending { it.second.uploadMillis }
+        .map { (serviceId, c) ->
+            org.schabi.newpipe.zen.classify.ZenClassCache.keyOf(serviceId, c.url) to
+                org.schabi.newpipe.zen.classify.VideoText(c.title, c.channelName)
+        }
+
+    private fun candidates(): List<ZenFeedPlanner.Candidate> = candidateRows().map { it.second }
+
+    private fun candidateRows(): List<Pair<Int, ZenFeedPlanner.Candidate>> {
         val ranks = db.database().feedGroupDAO().getZenGroupRanks().associateBy { it.streamId }
         val praxis = ZenPraxis.activeKeys()
         val praxisStreams = ZenPraxis.activePlaylistStreamKeys()
@@ -59,7 +73,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
                 val s = it.stream
                 val upload = s.uploadDate?.toInstant()?.toEpochMilli() ?: return@mapNotNull null
                 val rank = ranks[s.uid]
-                ZenFeedPlanner.Candidate(
+                s.serviceId to ZenFeedPlanner.Candidate(
                     url = s.url,
                     channel = s.uploaderUrl ?: s.uploader,
                     title = s.title,

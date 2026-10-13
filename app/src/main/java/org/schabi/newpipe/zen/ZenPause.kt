@@ -502,6 +502,7 @@ object ZenPause {
         val e = engine(context)
         val open = e.sessionUrl() ?: return STREAM_OK
         if (open != info.url && open != info.originalUrl) return STREAM_OK // info of another item
+        org.schabi.newpipe.zen.classify.ZenClassifier.onStreamInfo(context, info) // details known: classify (async)
         val praxis = ZenPraxis.isPraxisStream(info.serviceId, info.url, info.uploaderUrl) ||
             ZenPraxis.isPraxisStream(info.serviceId, info.originalUrl, null)
         val kind = ZenContentKind.classify(

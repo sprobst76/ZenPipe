@@ -263,6 +263,7 @@ class FeedLoadManager(private val context: Context) {
     private fun postProcessFeed() = Completable.fromRunnable {
         FeedEventManager.postEvent(FeedEventManager.Event.ProgressEvent(R.string.feed_processing_message))
         feedDatabaseManager.removeOrphansOrOlderStreams()
+        org.schabi.newpipe.zen.classify.ZenClassifyWorker.enqueueIfInstalled(context) // ZenPipe: classify new videos
 
         FeedEventManager.postEvent(FeedEventManager.Event.SuccessResultEvent(feedResultsHolder.itemsErrors))
     }.doOnSubscribe {

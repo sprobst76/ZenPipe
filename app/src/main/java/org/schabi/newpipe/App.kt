@@ -100,6 +100,7 @@ open class App :
         org.schabi.newpipe.zen.ZenSettings.init(this)
         org.schabi.newpipe.zen.ZenPause.recover(this)
         org.schabi.newpipe.zen.ZenDesign.migrate(this) // ZenPipe: calm defaults once
+        org.schabi.newpipe.zen.classify.ZenClassifyWorker.enqueueIfInstalled(this) // ZenPipe: content classifier
 
         NewPipe.init(
             getDownloader(),

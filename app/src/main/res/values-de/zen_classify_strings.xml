@@ -18,4 +18,9 @@
     <string name="zen_class_delete_confirm">Das Modell der Inhalts-Erkennung löschen? ZenPipe läuft dann wie ohne; du kannst es jederzeit neu herunterladen.</string>
     <string name="zen_class_licenses">Lizenzen</string>
     <string name="zen_class_ort_notices">ONNX-Runtime-Hinweise</string>
+    <string name="zen_class_review">Eingeordnete Videos</string>
+    <string name="zen_class_review_empty">Noch kein Video eingeordnet. Neue Feed-Videos werden nach einer Feed-Aktualisierung im Hintergrund eingeordnet, geöffnete Videos mit Beschreibung.</string>
+    <string name="zen_class_review_hint">Letzte Einordnungen (neueste zuerst): Kategorien mit Sicherheit · Ton · Feed-Gewicht · Eingabe (T = nur Titel und Kanal, D = mit Beschreibung). Zweite Zeile: stärkste Themen und Formate. Die Erkennung irrt sich bei etwa jedem siebten Video.</string>
+    <string name="zen_class_selftest">Selbsttest (Debug)</string>
+    <string name="zen_class_selftest_running">Selbsttest läuft …</string>
 </resources>

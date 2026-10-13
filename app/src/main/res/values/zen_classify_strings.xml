@@ -19,4 +19,9 @@
     <string name="zen_class_delete_confirm">Delete the content recognition model? ZenPipe then works as without it; you can download it again at any time.</string>
     <string name="zen_class_licenses">Licenses</string>
     <string name="zen_class_ort_notices">ONNX Runtime notices</string>
+    <string name="zen_class_review">Classified videos</string>
+    <string name="zen_class_review_empty">No video classified yet. New feed videos are classified in the background after a feed refresh; opened videos with their description.</string>
+    <string name="zen_class_review_hint">Latest classifications (newest first): categories with confidence · tone · feed weight · input (T = title and channel only, D = with description). Second line: strongest topics and formats. The recognition is wrong for about one video in seven.</string>
+    <string name="zen_class_selftest">Self-test (debug)</string>
+    <string name="zen_class_selftest_running">Running self-test…</string>
 </resources>

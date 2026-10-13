@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import org.schabi.newpipe.BuildConfig
 import org.schabi.newpipe.R
 
 /**
@@ -94,6 +95,64 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
         }
         buttons.addView(button(activity.getString(R.string.zen_class_licenses)) { showNotices(R.raw.zen_classifier_notices) })
         content.addView(buttons)
+        if (status == ZenClassifierModel.Status.INSTALLED) {
+            val extra = LinearLayout(activity).apply { orientation = LinearLayout.HORIZONTAL }
+            extra.addView(button(activity.getString(R.string.zen_class_review)) { showReview() })
+            if (BuildConfig.DEBUG) extra.addView(button(activity.getString(R.string.zen_class_selftest)) { runSelfTest() })
+            content.addView(extra)
+        }
+    }
+
+    /** Review list (spec 6.3): the latest classifications with categories, tone, weight, level and "why". */
+    private fun showReview() {
+        Thread {
+            val entries = ZenClassCache.get(activity).recent(REVIEW_LIMIT)
+            val body = if (entries.isEmpty()) {
+                activity.getString(R.string.zen_class_review_empty)
+            } else {
+                activity.getString(R.string.zen_class_review_hint) + "\n\n" +
+                    entries.joinToString("\n\n") { "${it.title} — ${it.channel}\n${ZenClassifier.describe(it)}" }
+            }
+            activity.runOnUiThread { if (!activity.isFinishing) showText(activity.getString(R.string.zen_class_review), body) }
+        }.start()
+    }
+
+    private fun runSelfTest() {
+        val wait = AlertDialog.Builder(activity).setMessage(R.string.zen_class_selftest_running).setCancelable(false).show()
+        Thread {
+            val r = try {
+                ZenClassifierSelfTest.run(activity)
+            } catch (e: Exception) {
+                null
+            }
+            activity.runOnUiThread {
+                wait.dismiss()
+                if (activity.isFinishing) return@runOnUiThread
+                val body = r?.let {
+                    "load (tokenizer/map+heads/encoder): ${it.loadMs.joinToString(" / ")} ms\n" +
+                        "per video: median ${it.medianMs} ms, max ${it.maxMs} ms\n${it.file}\n\n" + it.lines.joinToString("\n")
+                } ?: "no model / error"
+                showText(activity.getString(R.string.zen_class_selftest), body)
+                rerender()
+            }
+        }.start()
+    }
+
+    private fun showText(title: String, body: String) {
+        val tv = text(body, 12f).apply {
+            setTextIsSelectable(true)
+            val p = dp(20)
+            setPadding(p, dp(8), p, 0)
+        }
+        AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setView(ScrollView(activity).apply { addView(tv) })
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
+
+    companion object {
+        private const val REVIEW_LIMIT = 100
     }
 
     /** Called every second by the settings screen: live progress, re-render on status change. */

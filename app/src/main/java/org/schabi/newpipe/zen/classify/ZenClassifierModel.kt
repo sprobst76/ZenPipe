@@ -101,7 +101,9 @@ object ZenClassifierModel {
 
     /** Deletes the model. Allowed only while no classifier setting depends on it (spec 4.7). */
     fun delete(context: Context) {
+        ZenClassifier.get(context).closeNow()
         installer(context).delete()
+        ZenClassCache.get(context).clear()
         Zen.store(context).put(KEY_BROKEN to null)
         Zen.log(context).add("class_model_deleted", "model=$VERSION")
     }
@@ -160,6 +162,7 @@ object ZenClassifierModel {
                     if (!resp.isSuccessful) throw IOException("HTTP ${resp.code}")
                     val body = resp.body
                     body.contentLength().takeIf { it > 0 }?.let { total = it }
+                    ZenClassifier.get(app).closeNow()
                     installer(app).install(
                         body.byteStream(),
                         sha,
@@ -170,6 +173,7 @@ object ZenClassifierModel {
                 }
                 Zen.store(app).put(KEY_BROKEN to null)
                 log.add("class_model_installed", "model=$VERSION sha=${sha.take(12)} bytes=$bytes")
+                ZenClassifyWorker.enqueue(app)
             } catch (e: Exception) {
                 lastError = if (cancelled) null else (e.message ?: e.javaClass.simpleName)
                 if (!cancelled) log.add("class_model_failed", "model=$VERSION reason=${lastError?.take(160)}")
