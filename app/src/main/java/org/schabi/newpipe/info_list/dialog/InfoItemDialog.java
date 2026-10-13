@@ -211,6 +211,11 @@ public final class InfoItemDialog {
          * @return the current {@link Builder} instance
          */
         public Builder addEntry(@NonNull final StreamDialogDefaultEntry entry) {
+            // zen: downloads are disabled centrally (ZenFeatures)
+            if (entry == StreamDialogDefaultEntry.DOWNLOAD
+                    && !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+                return this;
+            }
             entries.add(entry.toStreamDialogEntry());
             return this;
         }

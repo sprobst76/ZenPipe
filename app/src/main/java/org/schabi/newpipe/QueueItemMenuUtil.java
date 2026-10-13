@@ -35,6 +35,9 @@ public final class QueueItemMenuUtil {
 
         final PopupMenu popupMenu = new PopupMenu(themeWrapper, view);
         popupMenu.inflate(R.menu.menu_play_queue_item);
+        // zen: no download entry while downloads are disabled (ZenFeatures)
+        popupMenu.getMenu().findItem(R.id.menu_item_download)
+                .setVisible(org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled());
 
         if (hideDetails) {
             popupMenu.getMenu().findItem(R.id.menu_item_details).setVisible(false);

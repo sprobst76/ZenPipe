@@ -557,9 +557,12 @@ public class RouterActivity extends AppCompatActivity {
             if (linkType == LinkType.STREAM) {
                 // download is redundant for linkType CHANNEL AND PLAYLIST
                 // (till playlist downloading is not supported )
-                returnedItems.add(new AdapterChoiceItem(getString(R.string.download_key),
-                        getString(R.string.download),
-                        R.drawable.ic_file_download));
+                // zen: no download choice while downloads are disabled (ZenFeatures)
+                if (org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+                    returnedItems.add(new AdapterChoiceItem(getString(R.string.download_key),
+                            getString(R.string.download),
+                            R.drawable.ic_file_download));
+                }
 
                 // Add to playlist is not necessary for CHANNEL and PLAYLIST linkType
                 // since those can not be added to a playlist
@@ -614,7 +617,11 @@ public class RouterActivity extends AppCompatActivity {
         NavigationHelper.openSearch(getThemeWrapperContext(), serviceId, searchString);
     }
 
-    private void handleChoice(final String selectedChoiceKey) {
+    private void handleChoice(final String choiceKey) {
+        // zen: downloads are disabled (ZenFeatures), a stored "download" choice shows info
+        final String selectedChoiceKey = choiceKey.equals(getString(R.string.download_key))
+                && !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()
+                ? getString(R.string.show_info_key) : choiceKey;
         final List<String> validChoicesList = Arrays.asList(getResources()
                 .getStringArray(R.array.preferred_open_action_values_list));
         if (validChoicesList.contains(selectedChoiceKey)) {

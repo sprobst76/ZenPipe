@@ -30,6 +30,12 @@ public class MainSettingsFragment extends BasePreferenceFragment {
             defaultPreferences.edit().putBoolean(getString(R.string.update_app_key), false).apply();
         }
 
+        // zen: downloads are disabled (ZenFeatures)
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            getPreferenceScreen().removePreference(
+                    requirePreference(R.string.zen_download_pref_screen_key));
+        }
+
         // Hide debug preferences in RELEASE build variant
         if (!DEBUG) {
             getPreferenceScreen().removePreference(

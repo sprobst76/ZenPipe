@@ -202,7 +202,9 @@ public class DownloadDialog extends DialogFragment
                     + "savedInstanceState = [" + savedInstanceState + "]");
         }
 
-        if (!PermissionHelper.checkStoragePermissions(getActivity(),
+        // zen: downloads are disabled (ZenFeatures)
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()
+                || !PermissionHelper.checkStoragePermissions(getActivity(),
                 PermissionHelper.DOWNLOAD_DIALOG_REQUEST_CODE)) {
             dismiss();
             return;

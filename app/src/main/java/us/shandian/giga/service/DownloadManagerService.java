@@ -196,6 +196,12 @@ public class DownloadManagerService extends Service {
 
         if (intent == null) return START_NOT_STICKY;
 
+        // zen: downloads are disabled (ZenFeatures), no missions and no notification
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            stopSelf(startId);
+            return START_NOT_STICKY;
+        }
+
         Log.i(TAG, "Got intent: " + intent);
         String action = intent.getAction();
         if (action != null) {

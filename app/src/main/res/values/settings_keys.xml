@@ -516,6 +516,7 @@
     <string name="update_app_key">update_app_key</string>
     <string name="manual_update_key">manual_update_key</string>
     <string name="update_pref_screen_key">update_pref_screen_key</string>
+    <string name="zen_download_pref_screen_key">zen_download_pref_screen_key</string>
     <string name="update_expiry_key">update_expiry_key</string>
 
     <!-- Localizations   -->

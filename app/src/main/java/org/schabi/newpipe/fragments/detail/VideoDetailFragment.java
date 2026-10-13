@@ -1644,8 +1644,11 @@ public final class VideoDetailFragment
             }
         }
 
+        // zen: download button hidden while downloads are disabled (ZenFeatures)
         binding.detailControlsDownload.setVisibility(
-                StreamTypeUtil.isLiveStream(info.getStreamType()) ? View.GONE : View.VISIBLE);
+                StreamTypeUtil.isLiveStream(info.getStreamType())
+                        || !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()
+                        ? View.GONE : View.VISIBLE);
         binding.detailControlsBackground.setVisibility(
                 info.getAudioStreams().isEmpty() && info.getVideoStreams().isEmpty()
                         ? View.GONE : View.VISIBLE);
@@ -1711,7 +1714,7 @@ public final class VideoDetailFragment
     }
 
     public void openDownloadDialog() {
-        if (currentInfo == null) {
+        if (currentInfo == null || !org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
             return;
         }
 

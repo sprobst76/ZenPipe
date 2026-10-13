@@ -27,6 +27,7 @@ public class VideoAudioSettingsFragment extends BasePreferenceFragment {
 
         updateSeekOptions();
         updateResolutionOptions();
+        zenRemoveDownloadOpenAction();
         listener = (sharedPreferences, key) -> {
 
             // on M and above, if user chooses to minimise to popup player on exit
@@ -51,6 +52,33 @@ public class VideoAudioSettingsFragment extends BasePreferenceFragment {
                 updateResolutionOptions();
             }
         };
+    }
+
+    /**
+     * zen: drop "Download" from the preferred open actions while downloads are disabled.
+     */
+    private void zenRemoveDownloadOpenAction() {
+        if (org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            return;
+        }
+        final ListPreference pref = findPreference(getString(R.string.preferred_open_action_key));
+        if (pref == null) {
+            return;
+        }
+        final String downloadKey = getString(R.string.download_key);
+        final List<CharSequence> entries = new LinkedList<>();
+        final List<CharSequence> values = new LinkedList<>();
+        for (int i = 0; i < pref.getEntryValues().length; i++) {
+            if (!downloadKey.contentEquals(pref.getEntryValues()[i])) {
+                entries.add(pref.getEntries()[i]);
+                values.add(pref.getEntryValues()[i]);
+            }
+        }
+        pref.setEntries(entries.toArray(new CharSequence[0]));
+        pref.setEntryValues(values.toArray(new CharSequence[0]));
+        if (downloadKey.equals(pref.getValue())) {
+            pref.setValue(getString(R.string.preferred_open_action_default));
+        }
     }
 
     /**

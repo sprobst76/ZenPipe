@@ -268,6 +268,13 @@ public class SettingsActivity extends AppCompatActivity implements
                     .setSearchable(false);
         }
 
+        // zen: downloads are disabled (ZenFeatures)
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            SettingsResourceRegistry.getInstance()
+                    .getEntryByPreferencesResId(R.xml.download_settings)
+                    .setSearchable(false);
+        }
+
         // Hide debug preferences in RELEASE build variant
         if (DEBUG) {
             SettingsResourceRegistry.getInstance()

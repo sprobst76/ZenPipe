@@ -26,6 +26,12 @@ public class DownloadActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            // zen: downloads are disabled (ZenFeatures), never start the service
+            super.onCreate(savedInstanceState);
+            finish();
+            return;
+        }
         // Service
         final Intent i = new Intent();
         i.setClass(this, DownloadManagerService.class);

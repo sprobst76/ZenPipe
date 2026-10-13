@@ -711,6 +711,9 @@ public final class NavigationHelper {
     }
 
     public static void openDownloads(final Activity activity) {
+        if (!org.schabi.newpipe.zen.ZenFeatures.downloadsEnabled()) {
+            return; // zen: downloads are disabled (ZenFeatures)
+        }
         if (PermissionHelper.checkStoragePermissions(
                 activity, PermissionHelper.DOWNLOADS_REQUEST_CODE)) {
             final Intent intent = new Intent(activity, DownloadActivity.class);

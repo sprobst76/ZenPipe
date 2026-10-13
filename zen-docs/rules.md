@@ -1,6 +1,6 @@
 # ZenPipe: Regel-Tabelle (Single Source of Truth)
 
-Stand: 2026-10-12, nach Phase 2 Teil 1. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
+Stand: 2026-10-13, nach Phase 2 Teil 1 und Verteilbarkeit Schritt 2. Alle Specs verweisen hierher; bei Widerspruch gilt diese Datei. Die Konstanten im Code
 tragen dieselben Namen (Spalte „Code“). Entscheidungen F1-F9 stehen am Ende von `consistency-review.md`.
 Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieben; **offen** = nicht entschieden/nicht gebaut.
 
@@ -103,3 +103,18 @@ Diese Werte sind veränderbar (Einstellungen > Zen) und stehen im Code in `ZenSe
 | Laufendes | laufende Pause und laufende Ausgabe werden durch Änderungen nie verkürzt bzw. neu gewürfelt (Parameter wirken ab dem nächsten Abbruch bzw. der nächsten Ausgabe; Deckel zählt gegen die schon gezählten Videos) | – | – | Konstanten nur zum Entscheidungszeitpunkt gelesen | umgesetzt |
 | Zen-Protokoll | `settings_change`, `settings_pending_applied`, `settings_pending_cancelled`, `settings_undo`, `settings_setup_done` | ZenLog | nicht im Export | `ZenSettingsLock` | umgesetzt |
 | Notfallschlüssel | standardmäßig aus, nicht gebaut | – | – | – | bewusst nicht umgesetzt |
+
+## Funktionen (zentrale Schalter, `zen/ZenFeatures.kt`)
+
+| Funktion | Wert | Einstiegspunkte (alle prüfen `ZenFeatures`) | Bleibt | Status |
+|---|---|---|---|---|
+| Downloads (`downloadsEnabled()`) | **aus** (Konstante `DOWNLOADS_ENABLED = false`; später per Einstellung freischaltbar, dann nur die Funktion ändern) | Download-Knopf der Detailseite (ausgeblendet, `openDownloadDialog` no-op), Long-Press-Menü (`InfoItemDialog.Builder.addEntry` lässt `DOWNLOAD` weg), Warteschlangen-Menü (`QueueItemMenuUtil`), Teilen/Link-Auswahl „Download“ (`RouterActivity`; gespeicherte Bevorzugung „Download“ wird zu „Info anzeigen“), Einstellung „Bevorzugte Öffnen-Aktion“ ohne „Download“, Einstellungen > Download (entfernt, nicht in der Einstellungs-Suche), `NavigationHelper.openDownloads` (no-op), `DownloadActivity` (beendet sich sofort), `DownloadDialog` (schließt sich), `DownloadManagerService.onStartCommand` (stoppt sich, keine Missionen/Benachrichtigung). Drawer hatte schon keinen Downloads-Eintrag. | Streaming inkl. Hintergrund-Audio und Popup. Manifest-Komponenten bleiben unverändert (beide `exported=false`), Code nicht gelöscht (Upstream-Merges) | umgesetzt |
+
+## Externe Links
+
+| Regel | Wert | Code / Quelle | Status |
+|---|---|---|---|
+| YouTube-Links öffnen ZenPipe | Intent-Filter (geerbt) für `youtube.com`, `www.`/`m.`/`music.youtube.com` (`/watch`, `/v/`, `/embed/`, `/live/`, `/channel/`, `/user/`, `/c/`, `/@`, `/playlist`, `/shorts/`), `youtu.be`, `youtube-nocookie.com/embed/`, `vnd.youtube:`; ohne `autoVerify` | `AndroidManifest.xml` (`RouterActivity`) | umgesetzt |
+| Weg | Link -> `RouterActivity` (Auswahl) -> Info/Player; Info öffnet `MainActivity` mit Absichtsabfrage, Wiedergabe über `ZenIntentPrompt.gate` | `RouterActivity`, `ZenIntentPrompt` | umgesetzt |
+| Shorts-Links | blockiert (Toast), keine Wiedergabe | `RouterActivity` | umgesetzt |
+| Standard-Handler | Nutzer stellt selbst ein (Android 11: Einstellungen > Apps > ZenPipe > Erweitert > Standardmäßig öffnen > Unterstützte Links öffnen > „In dieser App öffnen“; Android 12+: „Link hinzufügen“). Am Defy geprüft: mit diesem Wert öffnet ein `youtu.be`-Link ZenPipe direkt, obwohl die YouTube-App verifiziert ist; sonst ggf. bei YouTube/YouTube Music „Jedes Mal fragen“ | README | Doku, am Gerät geprüft |

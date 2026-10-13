@@ -19,6 +19,7 @@
     <PreferenceScreen
         android:fragment="org.schabi.newpipe.settings.DownloadSettingsFragment"
         android:icon="@drawable/ic_file_download"
+        android:key="@string/zen_download_pref_screen_key"
         android:title="@string/settings_category_downloads_title"
         app:iconSpaceReserved="false" />
 
