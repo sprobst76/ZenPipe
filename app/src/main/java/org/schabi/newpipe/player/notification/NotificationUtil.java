@@ -111,10 +111,10 @@ public final class NotificationUtil {
                 .flatMap(MediaSessionPlayerUi::getSessionToken)
                 .ifPresent(mediaStyle::setMediaSession);
 
-        // setup notification builder
+        // setup notification builder (zen: not colorized by default, calm)
         final var builder = setupNotificationBuilder(player.getContext(), mediaStyle)
                 .setColorized(player.getPrefs().getBoolean(
-                        player.getContext().getString(R.string.notification_colorize_key), true));
+                        player.getContext().getString(R.string.notification_colorize_key), false));
 
         // set the initial value for the video thumbnail, updatable with updateNotificationThumbnail
         setLargeIcon(builder);

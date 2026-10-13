@@ -12,7 +12,7 @@
         app:iconSpaceReserved="false" />
 
     <SwitchPreferenceCompat
-        android:defaultValue="true"
+        android:defaultValue="false"
         android:key="@string/notification_colorize_key"
         android:summary="@string/notification_colorize_summary"
         android:title="@string/notification_colorize_title"
