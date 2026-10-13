@@ -497,8 +497,9 @@
         <item>@string/popup_player</item>
         <item>@string/download</item>
         <item>@string/add_to_playlist</item>
-        <item>@string/enqueue_stream</item>
+        <!-- zen: same order as the values (upstream listed these two swapped) -->
         <item>@string/always_ask_open_action</item>
+        <item>@string/enqueue_stream</item>
     </string-array>
     <string-array name="preferred_open_action_values_list">
         <item>@string/show_info_key</item>
