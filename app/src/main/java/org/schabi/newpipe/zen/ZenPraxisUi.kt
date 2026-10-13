@@ -8,6 +8,7 @@ import androidx.appcompat.app.AlertDialog
 import java.text.DateFormat
 import java.util.Date
 import org.schabi.newpipe.R
+import org.schabi.newpipe.zen.classify.ZenPlausibilityCheck
 
 /**
  * Marking a channel or playlist as practice (page menu, long press in lists). Adding is a loosening (confirmation
@@ -53,16 +54,18 @@ object ZenPraxisUi {
                 val snap = lock.snapshot()
                 val entry = ZenPraxisChannel(serviceId, url, name, playlist)
                 when {
-                    snap.setupMode -> {
+                    // the setup applies at once, but the check runs there too (spec 4.4 step 5)
+                    snap.setupMode -> ZenPlausibilityCheck.run(activity, entry) { note ->
                         lock.addPraxis(entry)
-                        toast(activity, activity.getString(R.string.zen_praxis_added_setup, name))
+                        toast(activity, activity.getString(R.string.zen_praxis_added_setup, name) + (note?.let { "\n$it" } ?: ""))
                         changed.run()
                     }
 
                     snap.lockRemainingMs > 0 ->
                         toast(activity, activity.getString(R.string.zen_praxis_locked, fmtTime(snap.lockRemainingMs)))
 
-                    else -> confirmAdd(activity, entry, changed)
+                    // content check first (only warns), then the unchanged confirmation with the lock
+                    else -> ZenPlausibilityCheck.run(activity, entry) { note -> confirmAdd(activity, entry, changed, note) }
                 }
             }
         }
@@ -82,16 +85,18 @@ object ZenPraxisUi {
             .show()
     }
 
-    private fun confirmAdd(activity: Activity, channel: ZenPraxisChannel, changed: Runnable) {
+    private fun confirmAdd(activity: Activity, channel: ZenPraxisChannel, changed: Runnable, note: String? = null) {
+        if (activity.isFinishing) return
         val lock = Zen.settingsLock(activity)
         val dialog = AlertDialog.Builder(activity)
             .setTitle(if (channel.playlist) R.string.zen_praxis_pl_confirm_title else R.string.zen_praxis_confirm_title)
             .setMessage(
-                activity.getString(
-                    if (channel.playlist) R.string.zen_praxis_pl_confirm_message else R.string.zen_praxis_confirm_message,
-                    channel.name,
-                    fmtTime(ZenSettingsRules.LOCK_MS)
-                ) +
+                (note?.let { "$it\n\n" } ?: "") +
+                    activity.getString(
+                        if (channel.playlist) R.string.zen_praxis_pl_confirm_message else R.string.zen_praxis_confirm_message,
+                        channel.name,
+                        fmtTime(ZenSettingsRules.LOCK_MS)
+                    ) +
                     "\n\n" + activity.getString(R.string.zen_confirm_footer_lock) + " " +
                     activity.getString(R.string.zen_confirm_footer_undo)
             )
