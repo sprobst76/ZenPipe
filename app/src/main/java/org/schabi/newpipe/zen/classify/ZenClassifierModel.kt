@@ -30,13 +30,11 @@ object ZenClassifierModel {
     /** Version of the bundle the code expects (heads, tokenizer and encoder belong together). */
     const val VERSION = "e5s-1"
 
-    // TODO(AP 0, before the first release with the classifier): publish the bundle as release asset
-    //  of the tag `model-e5s-1` (zen-docs/tools/make_classifier_bundle.py prints SHA-256 and size)
-    //  and fill in DOWNLOAD_SHA256 / DOWNLOAD_BYTES. While the SHA-256 is empty the download is
-    //  disabled ("not published yet"); debug builds can use a local test source (see debugSource).
+    // Published as release asset of the tag `model-e5s-1` (built with zen-docs/tools/make_classifier_bundle.py);
+    // debug builds can use a local test source (see debugSource).
     const val DOWNLOAD_URL = "https://github.com/sprobst76/ZenPipe/releases/download/model-e5s-1/zen-classifier-e5s-1.zip"
-    const val DOWNLOAD_SHA256 = ""
-    const val DOWNLOAD_BYTES = 35_400_000L // display only; the e5s-1 test bundle is 35.4 MB
+    const val DOWNLOAD_SHA256 = "f9d0bbceeb59cad23752bfbec1535ff2f80d74e50e7eb66eb3367c81563dd379"
+    const val DOWNLOAD_BYTES = 35_432_191L // display only; the e5s-1 bundle is 35.4 MB
 
     /** zen_state keys (debug builds only): test download source instead of the GitHub asset. */
     const val KEY_DEBUG_URL = "cls_debug_url"

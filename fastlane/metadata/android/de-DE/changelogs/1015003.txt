@@ -1,0 +1,7 @@
+Dritte ZenPipe-Entwicklungsversion.
+• Inhalts-Erkennung (lokal, optional): Modell in Einstellungen > Zen laden (35 MB); Feed gewichtet Aktuelles niedriger und zeigt, warum ein Video vorn steht
+• Praxis markieren prüft die letzten Videos des Kanals und warnt bei Unpassendem; Ausnahmeliste (mit 24-h-Sperre)
+• Pop-up-Player entfernt; Bild pausiert beim Verlassen der App, Ton über „Hintergrund“ läuft weiter
+• Ruhiges Salbei-Design in Hell und Dunkel, Aufrufzahlen in Listen ausgeblendet
+• Reduzierte Video-Details
+• Hinweis: Einordnung ist grob (nur Titel und Kanal: Aktuelles unsicher, „belastend“ zu häufig)
