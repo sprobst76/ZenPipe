@@ -52,7 +52,9 @@
     <string name="zen_check_warn">The content recognition sees only %1$d of %2$d newer videos of \"%3$s\" as practice (follow-along, breathing, meditation, falling asleep). %4$d look like entertainment or news, e.g. \"%5$s\".\n\nThe recognition is wrong for about every fourth video. Practice videos are exempt from the feed limits and the mandatory pause. Please only mark channels and playlists you really use for practising.</string>
     <string name="zen_check_warn_no_example">The content recognition sees only %1$d of %2$d newer videos of \"%3$s\" as practice (follow-along, breathing, meditation, falling asleep).\n\nThe recognition is wrong for about every fourth video. Practice videos are exempt from the feed limits and the mandatory pause. Please only mark channels and playlists you really use for practising.</string>
     <string name="zen_check_strong">Clearly little practice: less than a third of the videos looks like practice.</string>
-    <string name="zen_check_level_t">%1$d of the videos could only be judged by title and channel.</string>
+    <string name="zen_check_level_t">%1$d of %2$d videos could not be loaded – judged by title and channel only.</string>
+    <string name="zen_check_members_only">%1$d of %2$d videos are for channel members only – judged by title and channel only.</string>
+    <string name="zen_check_list_not_loaded">not loadable, title and channel only</string>
     <string name="zen_check_videos">Show videos</string>
     <string name="zen_check_override">Mark anyway</string>
     <string name="zen_check_fits">Content recognition: %1$d of %2$d newer videos look like practice – fits.</string>

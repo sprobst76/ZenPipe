@@ -51,7 +51,9 @@
     <string name="zen_check_warn">Die Inhalts-Erkennung ordnet nur %1$d von %2$d neueren Videos von „%3$s“ als Praxis (Mitmachen, Atmen, Meditation, Einschlafen) ein. %4$d wirken wie Unterhaltung oder Aktuelles, z. B. „%5$s“.\n\nDie Erkennung irrt sich bei etwa jedem vierten Video. Praxis-Videos sind von Feed-Grenzen und Pflichtpause ausgenommen. Bitte nur Kanäle und Playlists markieren, die du wirklich zum Üben nutzt.</string>
     <string name="zen_check_warn_no_example">Die Inhalts-Erkennung ordnet nur %1$d von %2$d neueren Videos von „%3$s“ als Praxis (Mitmachen, Atmen, Meditation, Einschlafen) ein.\n\nDie Erkennung irrt sich bei etwa jedem vierten Video. Praxis-Videos sind von Feed-Grenzen und Pflichtpause ausgenommen. Bitte nur Kanäle und Playlists markieren, die du wirklich zum Üben nutzt.</string>
     <string name="zen_check_strong">Deutlich wenig Praxis: weniger als ein Drittel der Videos wirkt wie Praxis.</string>
-    <string name="zen_check_level_t">%1$d der Videos konnten nur nach Titel und Kanal beurteilt werden.</string>
+    <string name="zen_check_level_t">%1$d von %2$d Videos nicht ladbar – nur nach Titel und Kanal beurteilt.</string>
+    <string name="zen_check_members_only">%1$d von %2$d Videos nur für Kanalmitglieder – nur nach Titel und Kanal beurteilt.</string>
+    <string name="zen_check_list_not_loaded">nicht ladbar, nur Titel und Kanal</string>
     <string name="zen_check_videos">Videos ansehen</string>
     <string name="zen_check_override">Trotzdem markieren</string>
     <string name="zen_check_fits">Inhalts-Erkennung: %1$d von %2$d neueren Videos wirken wie Praxis – passt.</string>

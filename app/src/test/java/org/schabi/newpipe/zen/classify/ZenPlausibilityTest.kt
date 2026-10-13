@@ -68,4 +68,24 @@ class ZenPlausibilityTest {
             ZenPlausibility.logDetail(v, true)
         )
     }
+
+    @Test
+    fun `detail failures are classified for retry`() {
+        val wrap = { e: Throwable -> RuntimeException(e) }
+        assertEquals(ZenPlausibilityCheck.FailKind.TRANSIENT, ZenPlausibilityCheck.failKind(wrap(java.net.SocketTimeoutException("t"))))
+        assertEquals(ZenPlausibilityCheck.FailKind.TRANSIENT, ZenPlausibilityCheck.failKind(wrap(org.schabi.newpipe.extractor.exceptions.ParsingException("p"))))
+        assertEquals(
+            ZenPlausibilityCheck.FailKind.PERMANENT,
+            ZenPlausibilityCheck.failKind(wrap(org.schabi.newpipe.extractor.exceptions.AgeRestrictedContentException("a")))
+        )
+        assertEquals(
+            ZenPlausibilityCheck.FailKind.BLOCKED,
+            ZenPlausibilityCheck.failKind(wrap(org.schabi.newpipe.extractor.exceptions.ReCaptchaException("r", "u")))
+        )
+        assertEquals(
+            ZenPlausibilityCheck.FailKind.BLOCKED,
+            ZenPlausibilityCheck.failKind(wrap(org.schabi.newpipe.extractor.exceptions.HttpResponseException("HTTP 429 Too Many Requests")))
+        )
+        assertEquals("SocketTimeoutException", ZenPlausibilityCheck.rootName(wrap(java.net.SocketTimeoutException("t"))))
+    }
 }

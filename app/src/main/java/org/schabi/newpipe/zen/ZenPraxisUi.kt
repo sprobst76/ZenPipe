@@ -35,9 +35,21 @@ object ZenPraxisUi {
     @JvmStatic
     fun onMenu(activity: Activity, serviceId: Int, url: String, name: String, changed: Runnable) = onMenu(activity, serviceId, url, name, false, changed)
 
-    /** Mark/unmark a channel or (remote) playlist ([playlist]) as practice. */
+    /**
+     * Mark/unmark a channel or (remote) playlist ([playlist]) as practice. [sample]: an already
+     * finished plausibility sample (channel import sheet), evaluated without loading again.
+     */
     @JvmStatic
-    fun onMenu(activity: Activity, serviceId: Int, url: String, name: String, playlist: Boolean, changed: Runnable) {
+    @JvmOverloads
+    fun onMenu(
+        activity: Activity,
+        serviceId: Int,
+        url: String,
+        name: String,
+        playlist: Boolean,
+        changed: Runnable,
+        sample: ZenPlausibilityCheck.Sample? = null
+    ) {
         val lock = Zen.settingsLock(activity)
         when (ZenPraxis.state(activity, serviceId, url)) {
             ZenPraxis.State.ACTIVE, ZenPraxis.State.PENDING -> {
@@ -55,7 +67,7 @@ object ZenPraxisUi {
                 val entry = ZenPraxisChannel(serviceId, url, name, playlist)
                 when {
                     // the setup applies at once, but the check runs there too (spec 4.4 step 5)
-                    snap.setupMode -> ZenPlausibilityCheck.run(activity, entry) { note ->
+                    snap.setupMode -> ZenPlausibilityCheck.run(activity, entry, sample) { note ->
                         lock.addPraxis(entry)
                         toast(activity, activity.getString(R.string.zen_praxis_added_setup, name) + (note?.let { "\n$it" } ?: ""))
                         changed.run()
@@ -65,7 +77,7 @@ object ZenPraxisUi {
                         toast(activity, activity.getString(R.string.zen_praxis_locked, fmtTime(snap.lockRemainingMs)))
 
                     // content check first (only warns), then the unchanged confirmation with the lock
-                    else -> ZenPlausibilityCheck.run(activity, entry) { note -> confirmAdd(activity, entry, changed, note) }
+                    else -> ZenPlausibilityCheck.run(activity, entry, sample) { note -> confirmAdd(activity, entry, changed, note) }
                 }
             }
         }
@@ -86,7 +98,7 @@ object ZenPraxisUi {
         AlertDialog.Builder(activity)
             .setTitle(name)
             .setItems(items.toTypedArray()) { _, which ->
-                if (which == 0) onMenu(activity, serviceId, url, name, playlist) { } else ZenClassExemptUi.addChannel(activity, serviceId, url, name)
+                if (which == 0) onMenu(activity, serviceId, url, name, playlist, {}) else ZenClassExemptUi.addChannel(activity, serviceId, url, name)
             }
             .show()
     }

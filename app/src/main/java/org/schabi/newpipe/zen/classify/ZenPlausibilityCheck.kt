@@ -32,17 +32,67 @@ object ZenPlausibilityCheck {
 
     private const val TAG = "ZenPlausibility"
 
-    /** One checked video with its cache entry (null = could not be classified). */
-    data class Checked(val title: String, val entry: ClassEntry?)
+    /** Retries of a failed detail request (transient errors only), waiting [RETRY_BACKOFF_MS] before each. */
+    val RETRY_BACKOFF_MS = longArrayOf(2_000L, 5_000L)
+
+    /**
+     * One checked video with its cache entry (null = could not be classified); [detailsFailed] =
+     * its details could not be loaded, it was judged by title + channel only.
+     */
+    data class Checked(val title: String, val entry: ClassEntry?, val detailsFailed: Boolean = false)
+
+    /** Result of [sample]: the checked videos, failed detail requests and their error kinds. */
+    data class Sample(val checked: List<Checked>, val requests: Int, val retries: Int, val errors: Map<String, Int>) {
+        val failed: Int get() = checked.count { it.detailsFailed }
+    }
+
+    /** What a failed detail request means for the next ones. */
+    enum class FailKind {
+        /** Content not available (private, age, region, …): no retry. */
+        PERMANENT,
+
+        /** Network, parsing, server: retry with back-off. */
+        TRANSIENT,
+
+        /** Bot check / rate limit: no retry and no further detail requests in this check. */
+        BLOCKED
+    }
+
+    /** Classifies a failure by the cause chain (RxJava wraps checked exceptions in RuntimeException). */
+    @JvmStatic
+    fun failKind(e: Throwable): FailKind {
+        val chain = generateSequence(e) { it.cause }.take(10).toList()
+        return when {
+            chain.any {
+                it is org.schabi.newpipe.extractor.exceptions.ReCaptchaException ||
+                    it is org.schabi.newpipe.extractor.exceptions.SignInConfirmNotBotException ||
+                    (it is org.schabi.newpipe.extractor.exceptions.HttpResponseException && it.message?.contains("429") == true)
+            } -> FailKind.BLOCKED
+
+            chain.any { it is org.schabi.newpipe.extractor.exceptions.ContentNotAvailableException } -> FailKind.PERMANENT
+
+            else -> FailKind.TRANSIENT
+        }
+    }
+
+    /** Innermost cause, for logs ("SocketTimeoutException"). */
+    @JvmStatic
+    fun rootName(e: Throwable): String = generateSequence(e) { it.cause }.take(10).last().javaClass.simpleName
 
     /**
      * Checks [channel] and then calls [proceed] with a one-line note for the confirmation dialog
-     * (null = nothing to add). Not called when the user cancels.
+     * (null = nothing to add). Not called when the user cancels. A [presampled] result (channel
+     * import sheet) is evaluated directly, without loading anything again.
      */
     @JvmStatic
-    fun run(activity: Activity, channel: ZenPraxisChannel, proceed: (String?) -> Unit) {
+    @JvmOverloads
+    fun run(activity: Activity, channel: ZenPraxisChannel, presampled: Sample? = null, proceed: (String?) -> Unit) {
         if (!ZenClassifierModel.isReady(activity)) {
             proceed(activity.getString(R.string.zen_check_unavailable))
+            return
+        }
+        if (presampled != null && presampled.checked.isNotEmpty()) {
+            show(activity, channel, presampled, proceed)
             return
         }
         val progress = TextView(activity).apply {
@@ -64,8 +114,8 @@ object ZenPlausibilityCheck {
             .show()
         val app = activity.applicationContext
         Thread {
-            val checked = try {
-                check(app, channel, { stop.get() }) { done, total ->
+            val sample = try {
+                sample(app, channel, { stop.get() }) { done, total ->
                     activity.runOnUiThread { progress.text = activity.getString(R.string.zen_check_progress, done, total) }
                 }
             } catch (e: Exception) {
@@ -75,54 +125,93 @@ object ZenPlausibilityCheck {
             activity.runOnUiThread {
                 if (stop.get() || activity.isFinishing) return@runOnUiThread
                 dialog.dismiss()
-                if (checked.isNullOrEmpty()) {
+                if (sample == null || sample.checked.isEmpty()) {
                     Zen.log(app).add("class_check", "kind=PRAXIS url=${channel.url} result=failed")
                     proceed(activity.getString(R.string.zen_check_failed))
                 } else {
-                    show(activity, channel, checked, proceed)
+                    show(activity, channel, sample, proceed)
                 }
             }
         }.start()
     }
 
-    /** Loads and classifies; blocking (background thread). [onProgress] gets (done, total). */
-    private fun check(
+    /**
+     * Loads and classifies the newest videos of [ch]; blocking (background thread). [onProgress]
+     * gets (done, total). Detail requests are throttled to one per [REQUEST_INTERVAL_MS] (retries
+     * included); details already in the cache (level D, same model) cost no request. A failed
+     * request is retried after [RETRY_BACKOFF_MS] unless it is permanent; a bot check / rate limit
+     * stops all further detail requests of this check. Failed videos are judged by title + channel.
+     */
+    @JvmStatic
+    fun sample(
         app: android.content.Context,
         ch: ZenPraxisChannel,
         stopped: () -> Boolean,
         onProgress: (Int, Int) -> Unit
-    ): List<Checked> {
+    ): Sample {
         val items = newest(ch)
         val cache = ZenClassCache.get(app)
         val classifier = ZenClassifier.get(app)
         val out = ArrayList<Checked>()
         var lastRequest = 0L
         var requests = 0
+        var retries = 0
+        var blocked = false
+        val errors = LinkedHashMap<String, Int>()
         val t0 = SystemClock.elapsedRealtime()
+        fun throttle(minWait: Long) {
+            val wait = maxOf(lastRequest + REQUEST_INTERVAL_MS, SystemClock.elapsedRealtime() + minWait) - SystemClock.elapsedRealtime()
+            if (wait > 0) Thread.sleep(wait)
+            lastRequest = SystemClock.elapsedRealtime()
+        }
         for ((i, item) in items.withIndex()) {
             if (stopped()) break
             onProgress(i + 1, items.size)
             val key = ZenClassCache.keyOf(item.serviceId, item.url)
             val cached = cache.get(key)?.takeIf { it.level == "D" && it.model == ZenClassifierModel.VERSION }
-            val entry = cached ?: run {
-                val wait = lastRequest + REQUEST_INTERVAL_MS - SystemClock.elapsedRealtime()
-                if (wait > 0) Thread.sleep(wait)
-                if (stopped()) return@run null
-                lastRequest = SystemClock.elapsedRealtime()
-                requests++
-                val text = try {
-                    ZenClassifier.textOf(ExtractorHelper.getStreamInfo(item.serviceId, item.url, false).blockingGet())
-                } catch (e: Exception) {
-                    // no network / blocked: title + channel only (marked as such)
-                    Log.w(TAG, "details failed for ${item.url}: ${generateSequence(e as Throwable) { it.cause }.joinToString(" <- ") { "${it.javaClass.simpleName}: ${it.message?.take(120)}" }}")
-                    VideoText(item.name, item.uploaderName ?: ch.name)
-                }
-                classifier.classifyBlocking(key, text)
+            if (cached != null) {
+                out.add(Checked(item.name, cached))
+                continue
             }
-            out.add(Checked(item.name, entry))
+            var text: VideoText? = null
+            var attempt = 0
+            while (!blocked && text == null && !stopped()) {
+                throttle(if (attempt == 0) 0 else RETRY_BACKOFF_MS[attempt - 1])
+                if (stopped()) break
+                requests++
+                if (attempt > 0) retries++
+                try {
+                    text = ZenClassifier.textOf(ExtractorHelper.getStreamInfo(item.serviceId, item.url, false).blockingGet())
+                } catch (e: Exception) {
+                    val kind = failKind(e)
+                    Log.w(
+                        TAG,
+                        "details failed (${kind.name.lowercase()}, attempt ${attempt + 1}) for ${item.url}: " +
+                            generateSequence(e as Throwable) { it.cause }.take(10)
+                                .joinToString(" <- ") { "${it.javaClass.simpleName}: ${it.message?.take(120)}" }
+                    )
+                    if (kind == FailKind.BLOCKED) blocked = true
+                    if (kind != FailKind.TRANSIENT || attempt >= RETRY_BACKOFF_MS.size) {
+                        val name = rootName(e)
+                        errors[name] = (errors[name] ?: 0) + 1
+                        break
+                    }
+                    attempt++
+                }
+            }
+            if (stopped()) break
+            // no network / blocked / not available: title + channel only (marked as such)
+            val failed = text == null
+            val entry = classifier.classifyBlocking(key, text ?: VideoText(item.name, item.uploaderName ?: ch.name))
+            out.add(Checked(item.name, entry, failed))
         }
-        Log.d(TAG, "checked ${out.size} videos, $requests detail requests, ${SystemClock.elapsedRealtime() - t0} ms")
-        return out
+        if (blocked) errors["blocked"] = (errors["blocked"] ?: 0) + 1
+        Log.d(
+            TAG,
+            "checked ${out.size} videos, $requests detail requests ($retries retries), " +
+                "${out.count { it.detailsFailed }} failed $errors, ${SystemClock.elapsedRealtime() - t0} ms"
+        )
+        return Sample(out, requests, retries, errors)
     }
 
     /** Newest videos of a channel (videos tab) or the first ones of a playlist, without shorts/live. */
@@ -139,17 +228,39 @@ object ZenPlausibilityCheck {
             .take(ZenPlausibility.SAMPLE)
     }
 
-    private fun show(activity: Activity, channel: ZenPraxisChannel, checked: List<Checked>, proceed: (String?) -> Unit) {
+    /** "n of m videos could not be loaded …" or null. */
+    @JvmStatic
+    fun failedNote(context: android.content.Context, sample: Sample): String? {
+        if (sample.failed == 0) return null
+        // members-only videos are no error (PaidContentException): say so instead of "not loadable"
+        val members = minOf(sample.errors[MEMBERS_ONLY] ?: 0, sample.failed)
+        val other = sample.failed - members
+        return listOfNotNull(
+            if (members > 0) context.getString(R.string.zen_check_members_only, members, sample.checked.size) else null,
+            if (other > 0) context.getString(R.string.zen_check_level_t, other, sample.checked.size) else null
+        ).joinToString("\n")
+    }
+
+    private const val MEMBERS_ONLY = "PaidContentException"
+
+    /** ZenLog detail of the detail requests ("requests=15 retries=1 failed=2 errors=IOException:2"). */
+    @JvmStatic
+    fun logRequests(sample: Sample): String = "requests=${sample.requests} retries=${sample.retries} failed=${sample.failed}" +
+        if (sample.errors.isEmpty()) "" else " errors=" + sample.errors.entries.joinToString(",") { "${it.key}:${it.value}" }
+
+    private fun show(activity: Activity, channel: ZenPraxisChannel, sample: Sample, proceed: (String?) -> Unit) {
+        val checked = sample.checked
         val v = ZenPlausibility.evaluate(checked.map { ZenPlausibility.Item(it.title, it.entry?.cats, it.entry?.level) })
         val log = Zen.log(activity)
-        log.add("class_check", "url=${channel.url} " + ZenPlausibility.logDetail(v, channel.playlist))
+        log.add("class_check", "url=${channel.url} " + ZenPlausibility.logDetail(v, channel.playlist) + " " + logRequests(sample))
+        val failedNote = failedNote(activity, sample)
+        fun withFailed(s: String) = if (failedNote == null) s else "$s\n$failedNote"
         when (v.result) {
-            ZenPlausibility.Result.FITS -> proceed(activity.getString(R.string.zen_check_fits, v.hit, v.n))
+            ZenPlausibility.Result.FITS -> proceed(withFailed(activity.getString(R.string.zen_check_fits, v.hit, v.n)))
 
-            ZenPlausibility.Result.UNCLEAR -> proceed(activity.getString(R.string.zen_check_unclear, v.none, v.n))
+            ZenPlausibility.Result.UNCLEAR -> proceed(withFailed(activity.getString(R.string.zen_check_unclear, v.none, v.n)))
 
             ZenPlausibility.Result.WARN, ZenPlausibility.Result.STRONG_WARN -> {
-                val titleOnly = checked.count { it.entry?.level == "T" }
                 val msg = StringBuilder()
                 if (v.result == ZenPlausibility.Result.STRONG_WARN) msg.append(activity.getString(R.string.zen_check_strong)).append("\n\n")
                 msg.append(
@@ -159,7 +270,7 @@ object ZenPlausibilityCheck {
                         activity.getString(R.string.zen_check_warn_no_example, v.hit, v.n, channel.name)
                     }
                 )
-                if (titleOnly > 0) msg.append("\n\n").append(activity.getString(R.string.zen_check_level_t, titleOnly))
+                if (failedNote != null) msg.append("\n\n").append(failedNote)
                 warn(activity, channel, checked, v, msg.toString(), proceed)
             }
         }
@@ -195,7 +306,8 @@ object ZenPlausibilityCheck {
                 "${c.title}\n${activity.getString(R.string.zen_check_list_failed)}"
             } else {
                 val top = e.top.joinToString(", ") { "${it.first} ${"%.2f".format(java.util.Locale.ROOT, it.second)}" }
-                "${c.title}\n${ZenClassWhy.summary(activity, e.cats, e.tone, e.level)}\n$top"
+                "${c.title}\n${ZenClassWhy.summary(activity, e.cats, e.tone, e.level)}" +
+                    (if (c.detailsFailed) " · " + activity.getString(R.string.zen_check_list_not_loaded) else "") + "\n$top"
             }
         }
         val tv = TextView(activity).apply {
