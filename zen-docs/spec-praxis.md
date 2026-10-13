@@ -1,4 +1,4 @@
-# Spec: Praxis-Kanäle (Yoga, Atemübungen, Meditation, Einschlafhilfen)
+# Spec: Praxis-Kanäle und -Playlists (Yoga, Atemübungen, Meditation, Einschlafhilfen)
 
 Anforderung (Nutzer, 2026-10-13): Eine Kategorie „Praxis“ für Inhalte, die meist verfügbar sein sollen. Maßgeblich ist
 `rules.md` (Abschnitt „Praxis“); diese Spec beschreibt Begründung und Umsetzung. **Status: umgesetzt (2026-10-13).**
@@ -11,11 +11,20 @@ Anforderung (Nutzer, 2026-10-13): Eine Kategorie „Praxis“ für Inhalte, die 
 - Ein Kanal kann zugleich abonniert/in Feed-Gruppen und Praxis sein. **Alle** seiner Videos gelten dann als Praxis-Videos: sie
   erscheinen im Praxis-Tab und **nicht** in der Feed-Ausgabe (sie konkurrieren nicht um die 15 Plätze und zählen nicht zum
   Tages-Deckel 30). Bereits gebaute Ausgaben werden nicht neu gewürfelt (Regel „Laufendes bleibt unberührt“).
-- **Playlists:** nicht umgesetzt (Folgeaufgabe, s. u.).
+- **Playlists** (umgesetzt 2026-10-13, nur Online-Playlists, keine lokalen): gleiche Liste und gleiche Sperre wie Kanäle
+  (`ZenPraxisChannel.playlist`, gespeichert mit Flag `p`). Praxis sind die Videos, die **aus der Playlist selbst geladen**
+  wurden (`ZenPraxisPlaylistItems`, `px_pl_items`): der Praxis-Tab lädt die erste Seite (bei YouTube bis 100) und registriert
+  sie, die Playlist-Seite registriert ihre geladenen Seiten; max. 200 je Playlist, jedes Laden ersetzt die Menge. Gezählt wird
+  nur, solange die Playlist aktiv ist (Entfernen wirkt sofort). Bewusst **nicht** über den Warteschlangen-Kontext: in eine
+  Praxis-Warteschlange eingereihte fremde Videos würden sonst Praxis. Grenze: Videos jenseits der geladenen Seiten einer sehr
+  langen Playlist zählen erst, wenn die Seite geladen wurde.
 
 ## Markieren / Entfernen (24-h-Sperre)
 - Kanalseite > Überlaufmenü: „Als Praxis-Kanal markieren“ / „Ausstehenden Praxis-Kanal abbrechen“ / „Aus Praxis-Kanälen
-  entfernen“ (`ZenPraxisUi`). Verwaltung unter Einstellungen > Zen (Liste mit Status, „Entfernen“/„Abbrechen“).
+  entfernen“ (`ZenPraxisUi`), Playlist-Seite entsprechend („Als Praxis-Playlist markieren“ …). **Langer Druck** auf einen
+  Kanal- oder Playlist-Eintrag in Listen (Suche, Kanal-Tabs, alle `BaseListFragment`-Listen) öffnet einen kleinen Dialog mit
+  derselben Aktion; in den Abos ist sie ein zusätzlicher Eintrag im Long-Press-Dialog. Verwaltung unter Einstellungen > Zen
+  (Liste mit Status und Kennzeichnung „Playlist“, „Entfernen“/„Abbrechen“).
 - **Hinzufügen = Lockerung** über `ZenSettingsLock.addPraxis`, mit denselben Regeln wie die übrigen Zen-Einstellungen:
   Bestätigungsdialog mit 3 s Wartezeit; **ausstehend**, wirksam mit dem Ende der dadurch gestarteten **24-h-Sperre**
   (Gerätelaufzeit, `ZenCountdown`, fail-closed); bis dahin abbrechbar (Abbrechen lässt die Sperre weiterlaufen);
@@ -35,7 +44,8 @@ Anforderung (Nutzer, 2026-10-13): Eine Kategorie „Praxis“ für Inhalte, die 
 | Ausgabe 15/Stunde, Tages-Deckel 30, Mindestlänge 5 min, Längenbonus/Scoring, max. 3 je Kanal | gelten **nicht** (nicht Teil der Ausgabe) |
 | Pflichtpause nach Abbruch | **keine** (wie Musik: `ZenKind.PRAXIS`, `abort_exempt kind=PRAXIS`); kein „Später fortsetzen“-Dialog nötig |
 | Pausieren | bleibt kein Abbruch (unverändert) |
-| Laufende Pflichtpause | blockiert auch Praxis-Starts (unverändert streng, siehe Offen) |
+| Laufende Pflichtpause | Praxis-Videos **dürfen starten** (Pause läuft weiter); alles andere bleibt gesperrt (Vorprüfung beim Start, verbindlich im Player nach `StreamInfo`) |
+| Weiterspielen | nur als Praxis-Kette (s. u.); jedes andere Video hält am Ende an |
 | Autoplay, Related, Kommentare, Shorts, Livestreams, Absichtsabfrage | **unverändert** |
 
 Die Einordnung als Praxis passiert zur Wiedergabe, sobald die `StreamInfo` vorliegt (`ZenPause.onStreamInfo` ->
@@ -57,15 +67,35 @@ streng „Video“.
 - Anzeige: Praxis-Tab (Kopfzeile) und Einstellungen > Zen (Info-Zeile). Eine eigene Tagesübersicht gibt es (noch) nicht.
 - **Kein Limit** (Entscheidung). Hook für ein späteres optionales weiches Limit: `ZenPraxisTime.msOn(day)`.
 
-## Sleep-Timer
-NewPipe hat **keinen** Sleep-Timer (Code und Strings durchsucht, 2026-10-13). Nicht gebaut (Offenpunkt).
+## Praxis während der Pflichtpause (2026-10-13)
+Praxis-Videos dürfen auch während einer laufenden Pflichtpause starten; alles andere bleibt gesperrt, die Pause läuft weiter.
+Nur die Zuordnung zählt (Kanal-URL des Uploaders bzw. bekanntes Playlist-Video), nie Titel/Stichworte. Startstellen prüfen mit
+Listendaten (`ZenPause.blockStart(…, praxis)`, Warteschlange: aktuelles Element; ohne `uploaderUrl` = gesperrt), der Player
+prüft verbindlich nach `StreamInfo` und schließt bei Nicht-Praxis (`pause_block_running`). Praxis-Abbruch erzeugt weiter keine Pause.
+
+## Praxis-Kette (Nutzerentscheidung 2026-10-13)
+In ZenPipe startet nie ein Video von selbst: der Player pausiert am Ende **jedes** Videos, auch in selbst gebauten Warteschlangen
+und bei „Alle abspielen“ (vorher spielte NewPipe eine vom Nutzer gebaute Warteschlange nahtlos weiter, ExoPlayer-Übergang
+`AUTO_TRANSITION`; Autoplay/Related-Einreihen war schon aus). **Einzige Ausnahme:** aneinandergehängte Praxis-Videos. Ist die
+laufende Sitzung Praxis und das nächste Element nach Listendaten Praxis, läuft es nahtlos weiter; sonst bleibt der Player am
+Ende stehen (`chain_stop`, Sitzung „zu Ende“). Stellt sich ein verkettetes Element nach `StreamInfo` als Nicht-Praxis heraus,
+pausiert der Player sofort. Wiederholen „eins“ bleibt Nutzerwahl; bei „alle“ gilt die Regel auch für den Sprung zum Anfang.
+Am Defy geprüft: Praxis-Playlist läuft 1 -> 2 -> 3 -> 4 durch, auch bei gesperrtem Bildschirm.
+
+## Sleep-Timer (2026-10-13)
+Mond-Knopf in der Player-Kopfzeile (Video- und Popup-Player, Text = Countdown) und Menüeintrag „Sleep-Timer“ in der
+Warteschlange (Hintergrund-Player). 15/30/45/60/90 min (Debug-Builds zusätzlich „1 min (debug)“ für Gerätetests), „Ausschalten“.
+Kein „Ende des Videos“: am Videoende hält der Player ohnehin an. Läuft auf `elapsedRealtime` über Videogrenzen der
+Praxis-Kette hinweg und endet mit dem Player (Entscheidung: an den Player gebunden, nicht ans Video, sonst würde eine
+Einschlaf-Kette nach dem ersten Video ohne Timer weiterlaufen). Letzte 30 s Fade auf 5 %, dann Pause, Lautstärke zurück.
+Ablauf = **kein Abbruch** (`ZenPauseEngine.endBySleepTimer`, `sleep_end`): keine Pflichtpause, kein „Später“-Verbrauch,
+Praxis-Minuten zählen; Weiterspielen am Morgen beginnt eine neue Sitzung (die Zeit zählt also wieder). Standard-Dauer unter
+Einstellungen > Zen (wird im Menü zuerst angeboten, keine Sperre, kein Auto-Start). Kopplung an Einschlaferkennung: Hook
+`ZenSleepSignal`, Analyse in `research-einschlaferkennung.md`.
 
 ## Offen / Folgeaufgaben
-- **Playlists als Praxis** (z. B. eine kuratierte Yoga-Playlist eines sonst „normalen“ Kanals): Zuordnung über Playlist-URL;
-  bräuchte die Playlist-ID in der Wiedergabe (PlayQueue), daher zurückgestellt.
-- **Praxis während einer laufenden Pflichtpause starten?** Derzeit blockiert (streng, unverändert). Empfehlung: erlauben, weil
-  Praxis die gewünschte Alternative ist; dafür müsste die Pausen-Sperre den Kanal vor dem Start kennen (Start-URL reicht nicht).
-- Markieren über das Long-Press-Menü von Kanal-Einträgen (Abo-Liste) fehlt; nur Kanalseite + Verwaltung.
+- Lokale Playlists als Praxis (bewusst nicht: beliebig befüllbar).
+- Lesezeichen-Playlists (Tab „Lesezeichen“) ohne Long-Press-Eintrag; Markieren dort über die Playlist-Seite.
 - Minuten einer noch laufenden Praxis-Sitzung erscheinen erst nach ihrem Ende.
 - Weiches Praxis-Limit (Hinweis ab N min/Tag): nur Hook, nicht gebaut.
-- Sleep-Timer (s. o.).
+- Sleep-Timer: keine Anzeige in der Benachrichtigung; Einschlaferkennung nur als Hook.

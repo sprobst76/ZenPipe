@@ -24,7 +24,7 @@ Eine Sitzung ist **abgebrochen**, wenn sie endet, ohne dass sie zu Ende geschaut
 
 **Kein Abbruch:** Pausieren im Player (auch lange und im Hintergrund), Anruf/Audio-Fokus-Verlust (der Player pausiert, die
 Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergrundplayer desselben Videos, „zu Ende geschaut“,
-„Später fortsetzen“. Nicht erfasst (Lücke): Ziehen des Mini-Players nach unten (Abbruch ohne Rückfrage), Android-Auto-Wiedergabe.
+„Später fortsetzen“, **Ablauf des Sleep-Timers** (Sitzung endet ohne Pause, `sleep_end`; Weiterspielen beginnt eine neue Sitzung). Nicht erfasst (Lücke): Ziehen des Mini-Players nach unten (Abbruch ohne Rückfrage), Android-Auto-Wiedergabe.
 
 ## Regeln
 - **Auslöser:** Abbruch einer Sitzung mit Wiedergabezeit >= 5 min, die nicht Musik ist. Kürzere Abbrüche werden nur protokolliert
@@ -33,7 +33,12 @@ Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergr
 - **Pausenlänge:** 20 % der Wiedergabezeit (10 min -> 2 min, 60 min -> 12 min), Minimum 1 min, Maximum 15 min.
   Läuft schon eine Pause, wird sie nie verkürzt (es gilt das Maximum aus Rest und neuer Länge).
 - **Während der Pause:** Der Start jeder Wiedergabe (Detailseite, Popup, Hintergrund, Playlist, geteilter Link, Einreihen bei
-  geschlossenem Player) zeigt den Pausenbildschirm mit Countdown statt zu starten, ohne Überspringen. **Browsen, Suchen und
+  geschlossenem Player) zeigt den Pausenbildschirm mit Countdown statt zu starten, ohne Überspringen. **Ausnahme Praxis**
+  (Entscheidung 2026-10-13): Videos eines aktiven Praxis-Kanals bzw. einer Praxis-Playlist (`spec-praxis.md`) dürfen starten;
+  die Pause läuft dabei unverändert weiter, ein Praxis-Abbruch erzeugt keine neue Pause. Zählt nur die Zuordnung, nie der Titel.
+  Die Startstellen prüfen mit Listendaten (`uploaderUrl` von Warteschlange/Detailseite; fehlt sie = gesperrt), der Player prüft
+  verbindlich, sobald die `StreamInfo` vorliegt, und stoppt alles, was kein Praxis-Video ist (auch das nächste Element einer
+  Warteschlange, ein in eine Praxis-Warteschlange eingereihtes Video oder die Lücke „Videowechsel in der Playlist“). **Browsen, Suchen und
   Ansehen von Listen bleiben erlaubt.** Reihenfolge bei geteilten Links: erst Absichtsabfrage, dann (falls die Pause läuft) Pausenbildschirm. Die Abfrage beim
   App-Start bleibt davon unberührt.
 - **Videowechsel-Vorprüfung:** Wer ein neues Video starten will, während ein anderes mit >= 5 min offen ist, löst den Abbruch des
