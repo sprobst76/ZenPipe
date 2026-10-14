@@ -1,0 +1,7 @@
+Fourth ZenPipe development release.
+• Share a channel link: a rough classification of the latest videos first, then Subscribe, Practice or Just view
+• Feed: videos without a category show their strongest topic; descriptions of the picked videos are fetched (Wi-Fi only) for a more precise classification
+• A new edition is classified first, then built
+• Playing time per day (picture, sound, music, practice) in the Zen settings
+• The mandatory break is shortened by the time since the last stop (rest credit)
+• Practice check: members-only videos are recognized, failed requests are retried

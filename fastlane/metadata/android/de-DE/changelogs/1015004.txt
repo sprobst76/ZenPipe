@@ -1,0 +1,7 @@
+Vierte ZenPipe-Entwicklungsversion.
+• Kanal-Link teilen: zuerst eine grobe Einordnung der letzten Videos, dann Abonnieren, Praxis oder Nur ansehen
+• Feed: bei „ohne Kategorie“ steht das stärkste Thema dabei; Beschreibung der ausgewählten Videos wird nachgeladen (nur WLAN) und genauer eingeordnet
+• Neue Ausgabe wird erst fertig eingeordnet, dann gebaut
+• Wiedergabezeit pro Tag (Bild, Ton, Musik, Praxis) in den Zen-Einstellungen
+• Pflichtpause wird um die Zeit seit dem letzten Stopp verkürzt (Ruhezeit-Gutschrift)
+• Praxis-Prüfung: Videos nur für Kanalmitglieder werden erkannt, Fehlabrufe wiederholt
