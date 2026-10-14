@@ -29,8 +29,19 @@ object ZenFeatures {
      */
     private const val MINIMIZE_ON_EXIT_ENABLED = false
 
+    /**
+     * Upstream announcement dialogs on app start ("Keep Android Open" every 30 days with links
+     * to keepandroidopen.org and github.com/woheller69, "NewPipe is dropping support for
+     * Android 5" with a newpipe.net blog link). They speak for NewPipe and point to outside
+     * sites, so ZenPipe never shows them.
+     */
+    private const val UPSTREAM_ANNOUNCEMENTS_ENABLED = false
+
     @JvmStatic
     fun downloadsEnabled(): Boolean = DOWNLOADS_ENABLED
+
+    @JvmStatic
+    fun upstreamAnnouncementsEnabled(): Boolean = UPSTREAM_ANNOUNCEMENTS_ENABLED
 
     @JvmStatic
     fun popupPlayerEnabled(): Boolean = POPUP_PLAYER_ENABLED

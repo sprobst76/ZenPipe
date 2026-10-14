@@ -196,7 +196,8 @@ public abstract class Tab {
         public String getTabName(final Context context) {
             // TODO: find a better name for the blank tab (maybe "blank_tab") or replace it with
             //       context.getString(R.string.app_name);
-            return "NewPipe"; // context.getString(R.string.blank_page_summary);
+            // ZenPipe: the app name instead of the hard-coded "NewPipe"
+            return context.getString(R.string.app_name);
         }
 
         @DrawableRes

@@ -201,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
 
         // ReleaseVersionUtil.INSTANCE.isReleaseApk() will be true only for main official build
         // We want every release build (nightly, nightly-refactor) to show the popup
-        if (!DEBUG) {
+        // ZenPipe: upstream announcements are off (zen/ZenFeatures.kt)
+        if (!DEBUG && org.schabi.newpipe.zen.ZenFeatures.upstreamAnnouncementsEnabled()) {
             showKeepAndroidDialog();
             showApi23RequirementDialog();
         }

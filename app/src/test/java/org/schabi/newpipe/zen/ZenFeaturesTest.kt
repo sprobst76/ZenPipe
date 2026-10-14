@@ -19,6 +19,7 @@ class ZenFeaturesTest {
         assertFalse(ZenFeatures.popupPlayerEnabled())
         assertFalse(ZenFeatures.minimizeOnExitEnabled())
         assertFalse(ZenFeatures.downloadsEnabled())
+        assertFalse(ZenFeatures.upstreamAnnouncementsEnabled())
     }
 
     @Test
