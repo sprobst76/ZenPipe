@@ -108,6 +108,12 @@ Neue Einträge unten anhängen, fortlaufend nummeriert.
 | D57 | 2026-10-13 | **Ton zählt halb, nur als Hook:** Zen-Minuten = Bild + Ton/2 (Musik, Praxis 0) werden gemessen (`ZenWatchTime.Day.zenMinutesMs`), wirken aber nirgends (kein Limit, kein Ton-Deckel) | Messung zuerst, Limit erst mit F2; Ton ist das Escape-Ventil (Konzept §3), ein Ton-Deckel (Empfehlung 180 min) soll Dauerberieselung verhindern; für die Pflichtpause zählt Ton voll | Ton voll; Ton gar nicht (Spec 9.1 b/c) | `b61bb1998`, rules.md „Tageslimit Minuten (F2)“, [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) 10.1/10.3; **Annahme, von Stefan zu bestätigen** |
 | D58 | 2026-10-14 | **Projektanweisungen in `AGENTS.md`**, `CLAUDE.md` enthält nur `@AGENTS.md` (Import) | Eine Quelle für alle Coding-Agenten, keine doppelt gepflegten Regeln | Inhalt in `CLAUDE.md` und Kopie in `AGENTS.md` | `4e90936a7`, [../AGENTS.md](../AGENTS.md), [README.md](README.md) |
 
+## Absichtsabfrage
+
+| # | Datum | Entscheidung | Grund | Alternativen (verworfen) | Beleg |
+|---|---|---|---|---|---|
+| D59 | 2026-10-14 | **Entwurf** (Stefan billigt die Richtung, Details offen): Absichtsabfrage lädt ruhig zum Nicht-Schauen ein. Schritt 1: eigene Tageszahlen (Bild/Ton-Minuten, Einstiege), Praxis-Alternative mit einem Tipp, wechselnde Fragen statt festem Satz, „Doch nicht“/Alternative visuell stärker, „Weiter“ dezent, aber ehrlich. Schritt 2: eigene Gegenmittel-Liste (Hinzufügen ohne Sperre), behutsamerer Ton je nach Kontext. Abschwächen/Abschalten = Lockerung (24 h). Keine Streaks, Punkte, Belohnungen, Druck-Zähler, Beschämung | Dialog verlangte eine Antwort ohne Eingabefeld und wirkte unklar; fester Satz nutzt sich ab; Alternative statt Verbot vermeidet Reaktanz | Freitextfeld (D14); längere Wartezeit; Streaks/Belohnungen | [spec-absichtsabfrage-motivation.md](spec-absichtsabfrage-motivation.md) (offene Fragen Abschnitt 11); rules.md unverändert bis zur Umsetzung |
+
 ## Bewusst nicht (noch) gebaut
 
 Entdecken verwandter Kanäle (Spec, opt-in, 3/Woche, [spec-verwandte-kanaele.md](spec-verwandte-kanaele.md)), Kategorie Bildung und

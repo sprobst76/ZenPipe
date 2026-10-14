@@ -43,6 +43,7 @@ bindend; **Archiv** = Momentaufnahme.
 | [spec-einstellungs-sperre.md](spec-einstellungs-sperre.md) | 24-h-Sperre, Ersteinrichtung, Rückgängig | Spec |
 | [spec-praxis.md](spec-praxis.md) | Praxis-Kanäle/-Playlists, Kette, Sleep-Timer | Spec |
 | [spec-design.md](spec-design.md) | Palette „Salbei“, WCAG, Umsetzung | Spec |
+| [spec-absichtsabfrage-motivation.md](spec-absichtsabfrage-motivation.md) | Absichtsabfrage neu: klare Frage ohne Eingabe, Tageszahlen, Praxis-Alternative, wechselnde Fragen, Knopfgewichtung; Schritt 2 Gegenmittel/Kontextton | Spec (Entwurf, nicht gebaut) |
 | [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) | Wiedergabezeit Bild/Ton, Ruhezeit-Anrechnung (gebaut); Bildung, Tageslimit (nur Spec) | Spec |
 | [spec-klassifikator-integration.md](spec-klassifikator-integration.md) | Lokaler Inhalts-Klassifikator: Analyse, Vorschlag, Entscheidungen E1–E8 (Abschnitte 0–9) | Spec |
 | [klassifikator-umsetzungsprotokoll.md](klassifikator-umsetzungsprotokoll.md) | Klassifikator-Umsetzung je Etappe: Bausteine, Messwerte, Abweichungen, Offenes (Abschnitte 10–14) | Status (Protokoll) |
