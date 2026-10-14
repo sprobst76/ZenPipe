@@ -1,3 +1,7 @@
+> **ARCHIV – Stand 2026-10-12 (Nachträge bis Phase 1 Teil 2), nicht mehr verbindlich; maßgeblich ist [rules.md](../rules.md).**
+> Weiter nützlich als Ideen-Backlog (Z1–Z22, Abschnitt 4) und als Bestandsaufnahme der NewPipe-Einstiege (Abschnitt 2).
+> Umgesetzte Entscheidungen stehen in [decisions.md](../decisions.md).
+
 # ZenPipe – Feature-Audit (NewPipe-Bestand + neue Zen-Features)
 
 **Stand:** 12.10.2026 · Branch `zen` (Ursprungsstand HEAD `f120f8cc5`; Werte unten bei Widerspruch durch `rules.md` ersetzt, überholte Stellen sind markiert)

@@ -1,3 +1,7 @@
+> **ARCHIV – Stand 2026-10-12, nicht mehr verbindlich; maßgeblich ist [rules.md](../rules.md).** Die Entscheidungen F1–F9
+> (Abschnitt am Ende) sind in [decisions.md](../decisions.md) übernommen. Zeilenangaben (`Datei:Zeile`) beziehen sich auf den
+> damaligen Stand; Pfade ohne `archive/` meinen `zen-docs/`.
+
 # ZenPipe – Konsistenz-Review der Regeln und Entscheidungen
 
 **Stand:** 12.10.2026 · Branch `zen`, HEAD `64ac2d489` plus **uncommittete Feed-Arbeit eines parallelen Agenten** (`ZenFeedPlanner.kt`, `ZenFeedState.kt`, `ZenFeedProvider.kt`, `ZenWatchLater.kt`, `ZenGroupRank.kt`, Diffs in `FeedViewModel.kt`, `FeedFragment.kt`, `FeedGroupDAO.kt`, `strings.xml`). Diese Arbeit ist ein Zwischenstand. Befunde dazu sind als **[WIP]** markiert und können sich schon erledigt haben.
