@@ -86,6 +86,19 @@ data class UserLabel(
     }
 }
 
+/**
+ * Detected language of a video (feed language filter). Kept separately from [ClassEntry] because
+ * it works without the classifier model. [channel] = channel key of the feed (uploader URL or name).
+ */
+data class LangEntry(
+    val key: String,
+    val channel: String,
+    val title: String,
+    val channelName: String,
+    val guess: org.schabi.newpipe.zen.ZenLangGuess,
+    val atMillis: Long
+)
+
 /** Storage of [ClassEntry]s (SQLite on the device, in memory in tests). */
 interface ClassStore {
     fun get(key: String): ClassEntry?
@@ -102,6 +115,14 @@ interface ClassStore {
 
     /** All labels, newest first. */
     fun labels(): List<UserLabel>
+
+    fun langs(keys: Collection<String>): Map<String, LangEntry>
+    fun putLangs(list: Collection<LangEntry>)
+
+    /** The newest [perChannel] language entries of each channel. */
+    fun langsByChannel(channels: Collection<String>, perChannel: Int): Map<String, List<LangEntry>>
+    fun recentLangs(limit: Int): List<LangEntry>
+    fun purgeLangsBefore(millis: Long): Int
 }
 
 class MemoryClassStore : ClassStore {
@@ -142,6 +163,26 @@ class MemoryClassStore : ClassStore {
     }
 
     @Synchronized override fun labels() = lbl.values.sortedByDescending { it.atMillis }
+
+    private val lng = LinkedHashMap<String, LangEntry>()
+
+    @Synchronized override fun langs(keys: Collection<String>) = keys.mapNotNull { k -> lng[k]?.let { k to it } }.toMap()
+
+    @Synchronized override fun putLangs(list: Collection<LangEntry>) {
+        list.forEach { lng[it.key] = it }
+    }
+
+    @Synchronized override fun langsByChannel(channels: Collection<String>, perChannel: Int) = channels.toSet().associateWith { ch ->
+        lng.values.filter { it.channel == ch }.sortedByDescending { it.atMillis }.take(perChannel)
+    }
+
+    @Synchronized override fun recentLangs(limit: Int) = lng.values.sortedByDescending { it.atMillis }.take(limit)
+
+    @Synchronized override fun purgeLangsBefore(millis: Long): Int {
+        val old = lng.values.filter { it.atMillis < millis }.map { it.key }
+        old.forEach { lng.remove(it) }
+        return old.size
+    }
 }
 
 /**
@@ -209,6 +250,11 @@ private class SqliteClassStore(context: Context) :
         }
         if ("tprev" !in cols) db.execSQL("ALTER TABLE cls ADD COLUMN tprev TEXT")
         db.execSQL("CREATE TABLE IF NOT EXISTS lbl (k TEXT PRIMARY KEY, verdict TEXT, cats TEXT, title TEXT, channel TEXT, at INTEGER)")
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS lang (k TEXT PRIMARY KEY, channel TEXT, title TEXT, chname TEXT, lang TEXT, conf REAL, " +
+                "src TEXT, scores TEXT, at INTEGER)"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS lang_channel ON lang(channel, at)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -322,7 +368,80 @@ private class SqliteClassStore(context: Context) :
         out
     }
 
+    private val langCols = "k, channel, title, chname, lang, conf, src, scores, at"
+
+    private fun langRow(c: Cursor) = LangEntry(
+        key = c.getString(0),
+        channel = c.getString(1) ?: "",
+        title = c.getString(2) ?: "",
+        channelName = c.getString(3) ?: "",
+        guess = org.schabi.newpipe.zen.ZenLangGuess(
+            c.getString(4),
+            c.getDouble(5),
+            org.schabi.newpipe.zen.ZenLangGuess.decodeScores(c.getString(7)),
+            c.getString(6) ?: "T"
+        ),
+        atMillis = c.getLong(8)
+    )
+
+    private fun langQuery(sql: String, args: Array<String>): List<LangEntry> = readableDatabase.rawQuery(sql, args).use {
+        val out = ArrayList<LangEntry>()
+        while (it.moveToNext()) out.add(langRow(it))
+        out
+    }
+
+    override fun langs(keys: Collection<String>): Map<String, LangEntry> {
+        val out = HashMap<String, LangEntry>()
+        keys.distinct().chunked(SQL_CHUNK).forEach { part ->
+            val q = part.joinToString(",") { "?" }
+            langQuery("SELECT $langCols FROM lang WHERE k IN ($q)", part.toTypedArray()).forEach { out[it.key] = it }
+        }
+        return out
+    }
+
+    override fun putLangs(list: Collection<LangEntry>) {
+        if (list.isEmpty()) return
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            list.forEach { e ->
+                val v = ContentValues().apply {
+                    put("k", e.key)
+                    put("channel", e.channel)
+                    put("title", e.title)
+                    put("chname", e.channelName)
+                    put("lang", e.guess.lang)
+                    put("conf", e.guess.confidence)
+                    put("src", e.guess.source)
+                    put("scores", org.schabi.newpipe.zen.ZenLangGuess.encodeScores(e.guess.scores))
+                    put("at", e.atMillis)
+                }
+                db.insertWithOnConflict("lang", null, v, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    override fun langsByChannel(channels: Collection<String>, perChannel: Int): Map<String, List<LangEntry>> {
+        val out = HashMap<String, MutableList<LangEntry>>()
+        channels.distinct().chunked(SQL_CHUNK).forEach { part ->
+            val q = part.joinToString(",") { "?" }
+            langQuery("SELECT $langCols FROM lang WHERE channel IN ($q) ORDER BY at DESC", part.toTypedArray()).forEach {
+                val l = out.getOrPut(it.channel) { ArrayList() }
+                if (l.size < perChannel) l.add(it)
+            }
+        }
+        return out
+    }
+
+    override fun recentLangs(limit: Int): List<LangEntry> = langQuery("SELECT $langCols FROM lang ORDER BY at DESC LIMIT $limit", emptyArray())
+
+    override fun purgeLangsBefore(millis: Long): Int = writableDatabase.delete("lang", "at < ?", arrayOf(millis.toString()))
+
     private companion object {
+        const val SQL_CHUNK = 400
         const val VERDICT_CORRECT = "correct"
         const val VERDICT_WRONG = "wrong"
     }

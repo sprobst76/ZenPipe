@@ -30,7 +30,9 @@ import org.schabi.newpipe.BuildConfig
 import org.schabi.newpipe.NewPipeDatabase
 import org.schabi.newpipe.R
 import org.schabi.newpipe.zen.Zen
+import org.schabi.newpipe.zen.ZenFeedLanguages
 import org.schabi.newpipe.zen.ZenFeedState
+import org.schabi.newpipe.zen.ZenSettings
 
 /**
  * Review list "Classified videos" (Settings > Zen): the latest classifications, the user's own
@@ -47,19 +49,38 @@ class ZenClassReview(private val activity: Activity) {
 
     fun show() {
         Thread {
-            val rows = cache.recent(REVIEW_LIMIT).map { Row(it, cache.label(it.key), languageOf(it.key)) }
+            val entries = cache.recent(REVIEW_LIMIT)
+            val langs = languages(entries.map { it.key })
+            langResults = langs
+            val rows = entries.map { Row(it, cache.label(it.key), langs[it.key]?.let { r -> exportLanguage(r) }) }
             activity.runOnUiThread { if (!activity.isFinishing) showList(rows) }
         }.start()
     }
 
-    /** Language of a video for the review/export; filled by the language filter of the feed. */
-    private fun languageOf(key: String): ZenClassExport.Language? = null
+    // language results of the rows shown (for their "why" line)
+    private var langResults: Map<String, ZenFeedLanguages.Result> = emptyMap()
+
+    /** Stored languages of [keys] with the current decision of the feed language filter. */
+    private fun languages(keys: List<String>): Map<String, ZenFeedLanguages.Result> = try {
+        ZenFeedLanguages.decide(cache, cache.langs(keys).values, ZenSettings.feedLanguages())
+    } catch (e: Exception) {
+        Log.w(ZenClassifier.TAG, "languages", e)
+        emptyMap()
+    }
+
+    private fun exportLanguage(r: ZenFeedLanguages.Result) = ZenClassExport.Language(
+        r.entry.guess.lang,
+        r.entry.guess.confidence,
+        r.entry.guess.source,
+        r.decision.hidden
+    )
 
     private fun rowText(r: Row): CharSequence {
         val e = r.entry
         val sb = SpannableStringBuilder()
         sb.append("${e.title} — ${e.channel}", StyleSpan(Typeface.BOLD), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         sb.append('\n').append(ZenClassifier.describe(activity, e))
+        langResults[e.key]?.let { sb.append('\n').append(ZenFeedLanguages.whyLine(activity, it)) }
         val l = r.label
         sb.append('\n').append(
             when {
@@ -218,6 +239,7 @@ class ZenClassReview(private val activity: Activity) {
         val labels = cache.labels()
         val labelByKey = labels.associateBy { it.key }
         val streams = NewPipeDatabase.getInstance(app).streamDAO()
+        val allLangs = ZenFeedLanguages.decide(cache, cache.recentLangs(EXPORT_LIMIT), ZenSettings.feedLanguages())
         val videos = entries.map { e ->
             val (sid, url) = ZenClassExport.splitKey(e.key) ?: (0 to e.key)
             val s = try {
@@ -231,7 +253,7 @@ class ZenClassReview(private val activity: Activity) {
                 durationSec = s?.duration?.takeIf { it > 0 },
                 why = ZenClassWhy.summary(activity, e.cats, e.tone, e.level, e.top),
                 label = labelByKey[e.key],
-                language = languageOf(e.key)
+                language = (allLangs[e.key] ?: languages(listOf(e.key))[e.key])?.let { exportLanguage(it) }
             )
         }
         val inExport = entries.map { it.key }.toHashSet()
@@ -253,9 +275,15 @@ class ZenClassReview(private val activity: Activity) {
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.ROOT).format(Date(now))
         val json = File(dir, "zenpipe-classifications-$stamp.json")
         val csv = File(dir, "zenpipe-classifications-$stamp.csv")
-        json.writeText(ZenClassExport.json(meta, videos, labels.filter { it.key !in inExport }, edition))
+        val langVideos = allLangs.values.map { r ->
+            ZenClassExport.LangVideo(r.entry.key, r.entry.title, r.entry.channelName, exportLanguage(r), r.entry.guess.scores)
+        }
+        json.writeText(ZenClassExport.json(meta, videos, labels.filter { it.key !in inExport }, edition, langVideos))
         csv.writeText(ZenClassExport.csv(videos))
-        Zen.log(app).add("class_export", "videos=${videos.size} labels=${labels.size} edition=${edition?.picks?.size ?: 0}")
+        Zen.log(app).add(
+            "class_export",
+            "videos=${videos.size} labels=${labels.size} edition=${edition?.picks?.size ?: 0} languages=${langVideos.size}"
+        )
         return listOf(json, csv)
     }
 

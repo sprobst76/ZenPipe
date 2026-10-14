@@ -13,7 +13,11 @@ data class VideoText(
     val channel: String?,
     val description: String? = null,
     val categoryId: String? = null,
-    val tags: List<String>? = null
+    val tags: List<String>? = null,
+    /** Language reported with the details (feed language filter only, not part of the text). */
+    val langHint: String? = null,
+    /** Channel URL from the details (feed language filter only, not part of the text). */
+    val channelUrl: String? = null
 ) {
     /** Input level for the cache: "T" = title + channel only, "D" = with details (description/tags/category). */
     val level: String

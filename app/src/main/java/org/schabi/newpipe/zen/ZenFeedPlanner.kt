@@ -55,7 +55,11 @@ object ZenFeedPlanner {
         /** Channel/keyword on the classifier exception list: weight 1.0 and no heavy rule. */
         val classExempt: Boolean = false,
         /** Strongest theme (key, probability) for the "why" line only; never used for the selection. */
-        val classTheme: Pair<String, Double>? = null
+        val classTheme: Pair<String, Double>? = null,
+        /** Detected language (ISO code, null = unknown), see [ZenFeedLanguages]. */
+        val lang: String? = null,
+        /** The language is not allowed in the feed ("Languages in the feed"): never offered, never deleted. */
+        val langHidden: Boolean = false
     )
 
     /**
@@ -99,6 +103,8 @@ object ZenFeedPlanner {
     fun isEligible(c: Candidate, nowMillis: Long): Boolean {
         // practice videos do not compete for (or count against) the edition budget and daily cap
         if (c.praxis) return false
+        // a language that is not allowed in the feed (only clear detections, see ZenLangFilter)
+        if (c.langHidden) return false
         if (isMusic(c)) return false
         if (c.isLive || c.durationSec < ZenSettings.minLengthSec()) return false
         val age = nowMillis - c.uploadMillis

@@ -31,7 +31,12 @@ object ZenClassExport {
     )
 
     /** Every top-level key of the JSON file. */
-    val TOP_FIELDS = setOf("format", "version", "exported_at", "app_version", "model", "note", "videos", "labels_without_video", "feed_edition")
+    val TOP_FIELDS = setOf(
+        "format", "version", "exported_at", "app_version", "model", "note", "videos", "labels_without_video", "feed_edition", "languages"
+    )
+
+    /** Keys of one entry of "languages" (every video the feed language filter has judged). */
+    val LANGUAGE_FIELDS = setOf("key", "title", "channel", "code", "confidence", "source", "hidden_in_feed", "scores")
 
     /** Language of a video (filled once the language filter knows it; null = unknown). */
     data class Language(val code: String?, val confidence: Double, val source: String, val hiddenInFeed: Boolean?)
@@ -53,6 +58,9 @@ object ZenClassExport {
     data class Edition(val createdAtMillis: Long, val day: String, val leftover: Int, val picks: List<Pick>)
 
     data class Meta(val exportedAtMillis: Long, val appVersion: String, val model: String)
+
+    /** One judged video of the feed language filter (also videos that were never classified). */
+    data class LangVideo(val key: String, val title: String, val channel: String, val language: Language, val scores: Map<String, Double>)
 
     /** "serviceId:url" -> (serviceId, url); null for a malformed key. */
     @JvmStatic
@@ -142,7 +150,8 @@ object ZenClassExport {
      * kept with the title/channel stored with the label.
      */
     @JvmStatic
-    fun json(meta: Meta, videos: List<Video>, orphanLabels: List<UserLabel>, edition: Edition?): String {
+    @JvmOverloads
+    fun json(meta: Meta, videos: List<Video>, orphanLabels: List<UserLabel>, edition: Edition?, languages: List<LangVideo> = emptyList()): String {
         val root = linkedMapOf<String, Any?>(
             "format" to FORMAT,
             "version" to FORMAT_VERSION,
@@ -161,6 +170,10 @@ object ZenClassExport {
                     "leftover" to ed.leftover,
                     "picks" to ed.picks.map { pickMap(it) }
                 )
+            },
+            "languages" to languages.map { l ->
+                linkedMapOf<String, Any?>("key" to l.key, "title" to l.title, "channel" to l.channel) + languageMap(l.language) +
+                    ("scores" to catsMap(l.scores))
             }
         )
         return JsonWriter.indent("  ").string().value(root).done()

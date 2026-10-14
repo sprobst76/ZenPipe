@@ -214,7 +214,14 @@ class ZenSettingsLock(
         val pendOld = readPending()
         // in the first-time setup a looser value is not pending but applied at once
         val loosen = if (setup) emptySet() else kinds.filterValues { it == Kind.LOOSER }.keys
-        val now = changes.filterKeys { it in kinds && it !in loosen }
+        // a mask change that adds AND removes options: the removal (the common part) is stricter
+        // and applies at once, the whole new value waits like any loosening
+        val maskNow = loosen.mapNotNull { k ->
+            val d = ZenSettingDefs.get(k)!!
+            val inter = eff.getValue(k) and changes.getValue(k)
+            if (d.isMask && inter != eff.getValue(k) && d.inRange(inter)) k to inter else null
+        }.toMap()
+        val now = changes.filterKeys { it in kinds && it !in loosen } + maskNow
         val effAfter = eff + now
         val pendAfter = if (setup) emptyMap() else pendOld.filterKeys { it !in changes } + changes.filterKeys { it in loosen }
         if (loosen.isNotEmpty() && lockCd.remainingMs() > 0) {

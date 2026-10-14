@@ -80,7 +80,13 @@ class ZenSettingsFragment : Fragment() {
     private fun fmtTime(remainingMs: Long): String = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT)
         .format(Date(System.currentTimeMillis() + remainingMs))
 
+    private fun langNames(mask: Int): String {
+        val locale = androidx.core.os.ConfigurationCompat.getLocales(resources.configuration)[0] ?: java.util.Locale.getDefault()
+        return ZenLangOptions.codes(mask).joinToString(", ") { ZenLangOptions.name(it, locale) }
+    }
+
     private fun fmtValue(def: ZenSettingDef, v: Int): String = when {
+        def.isMask -> langNames(v)
         def.isBool -> getString(if (v == 1) R.string.zen_on else R.string.zen_off)
         else -> getString(unitRes(def.key), v)
     }
@@ -105,6 +111,7 @@ class ZenSettingsFragment : Fragment() {
         ZenSettingKeys.REDUCED_DETAILS -> R.string.zen_set_reduced_details
         ZenSettingKeys.CLASS_FEED -> R.string.zen_set_class_feed
         ZenSettingKeys.CLASS_HEAVY -> R.string.zen_set_class_heavy
+        ZenSettingKeys.FEED_LANGS -> R.string.zen_set_feed_langs
         else -> R.string.zen_set_intent_bg
     }
 
@@ -193,6 +200,7 @@ class ZenSettingsFragment : Fragment() {
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
                 .apply { topMargin = dp(16) }
         )
+        renderLanguages()
         renderPraxis(snap)
         renderSleep()
         renderWatchTime()
@@ -353,6 +361,12 @@ class ZenSettingsFragment : Fragment() {
         snap.praxisPending.forEach { channelRow(it, true) }
     }
 
+    private companion object {
+        /** Language entries scanned for the "hidden" list, and its time window (feed: 7 days). */
+        const val HIDDEN_SCAN = 2000
+        const val HIDDEN_WINDOW_MS = 7L * 24 * 60 * 60 * 1000
+    }
+
     private fun updateUndoLabel(snap: ZenSettingsLock.Snapshot) {
         val s = (snap.undoRemainingMs + 999) / 1000
         undoButton?.text = getString(R.string.zen_undo, String.format("%d:%02d", s / 60, s % 60))
@@ -393,7 +407,14 @@ class ZenSettingsFragment : Fragment() {
                 render()
             }
         }
-        if (def.isBool) {
+        if (def.isMask) {
+            box.addView(
+                Button(requireContext()).apply {
+                    setText(R.string.zen_lang_change)
+                    setOnClickListener { chooseLanguages(def, current, shown, locked) }
+                }
+            )
+        } else if (def.isBool) {
             val other = 1 - shown
             box.addView(
                 Button(requireContext()).apply {
@@ -412,6 +433,88 @@ class ZenSettingsFragment : Fragment() {
         return box
     }
 
+    /**
+     * "Languages in the feed": choose the allowed languages. Removing one is stricter (at once);
+     * adding one is a loosening and not possible while the lock runs. At least one stays.
+     */
+    private fun chooseLanguages(def: ZenSettingDef, current: Int, shown: Int, locked: Boolean) {
+        val locale = androidx.core.os.ConfigurationCompat.getLocales(resources.configuration)[0] ?: java.util.Locale.getDefault()
+        val codes = ZenLangOptions.CODES
+        val names = codes.map { ZenLangOptions.name(it, locale) }.toTypedArray()
+        val checked = BooleanArray(codes.size) { shown and (1 shl it) != 0 }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.zen_set_feed_langs)
+            .setMultiChoiceItems(names, checked) { d, which, isChecked ->
+                if (isChecked && locked && current and (1 shl which) == 0) {
+                    // adding a language is a loosening: not while the lock runs
+                    checked[which] = false
+                    (d as AlertDialog).listView.setItemChecked(which, false)
+                    Toast.makeText(requireContext(), getString(R.string.zen_lang_locked, fmtTime(lock.snapshot().lockRemainingMs)), Toast.LENGTH_LONG).show()
+                } else {
+                    checked[which] = isChecked
+                }
+            }
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val mask = checked.withIndex().filter { it.value }.fold(0) { m, i -> m or (1 shl i.index) }
+                if (!def.inRange(mask)) {
+                    Toast.makeText(requireContext(), R.string.zen_lang_none, Toast.LENGTH_LONG).show()
+                } else {
+                    draft[def.key] = mask
+                    render()
+                }
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    /** Feed languages: hint and the videos the filter keeps out of the feed right now. */
+    private fun renderLanguages() {
+        content.addView(
+            text(getString(R.string.zen_lang_title), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        content.addView(text(getString(R.string.zen_lang_hint), 12f))
+        content.addView(
+            Button(requireContext()).apply {
+                setText(R.string.zen_lang_hidden_show)
+                setOnClickListener { showHiddenLanguages() }
+            }
+        )
+    }
+
+    private fun showHiddenLanguages() {
+        val app = requireContext().applicationContext
+        Thread {
+            val now = System.currentTimeMillis()
+            val store = org.schabi.newpipe.zen.classify.ZenClassCache.get(app)
+            val recent = store.recentLangs(HIDDEN_SCAN).filter { it.atMillis >= now - HIDDEN_WINDOW_MS }
+            val results = ZenFeedLanguages.decide(store, recent, ZenSettings.feedLanguages()).values
+                .filter { it.decision.verdict == ZenLangFilter.Verdict.HIDDEN || it.decision.verdict == ZenLangFilter.Verdict.UNCERTAIN }
+                .sortedWith(compareBy<ZenFeedLanguages.Result> { !it.decision.hidden }.thenByDescending { it.entry.atMillis })
+            val ctx = activity ?: return@Thread
+            val body = if (results.isEmpty()) {
+                ctx.getString(R.string.zen_lang_hidden_none)
+            } else {
+                ctx.getString(R.string.zen_lang_hidden_hint) + "\n\n" +
+                    results.joinToString("\n\n") { "${it.entry.title} — ${it.entry.channelName}\n${ZenFeedLanguages.whyLine(ctx, it)}" }
+            }
+            ctx.runOnUiThread {
+                if (!ctx.isFinishing) {
+                    val tv = text(body, 12f).apply {
+                        setTextIsSelectable(true)
+                        setPadding(dp(20), dp(8), dp(20), 0)
+                    }
+                    AlertDialog.Builder(ctx)
+                        .setTitle(R.string.zen_lang_hidden_show)
+                        .setView(ScrollView(ctx).apply { addView(tv) })
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show()
+                }
+            }
+        }.start()
+    }
+
     private fun confirm(changed: Map<String, Int>, eff: Map<String, Int>, snap: ZenSettingsLock.Snapshot) {
         val setup = snap.setupMode
         val now = StringBuilder()
@@ -420,7 +523,13 @@ class ZenSettingsFragment : Fragment() {
         changed.forEach { (k, v) ->
             val d = ZenSettingDefs.get(k)!!
             val line = "• ${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, v)}\n"
-            if (!setup && lock.classify(k, v) == ZenSettingsLock.Kind.LOOSER) {
+            val inter = eff.getValue(k) and v
+            if (!setup && d.isMask && lock.classify(k, v) == ZenSettingsLock.Kind.LOOSER && inter != eff.getValue(k) && d.inRange(inter)) {
+                // languages added and removed: the removal applies now, the addition later
+                anyLooser = true
+                now.append("• ${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, inter)}\n")
+                later.append("• ${getString(labelRes(k))}: ${fmtValue(d, inter)} → ${fmtValue(d, v)}\n")
+            } else if (!setup && lock.classify(k, v) == ZenSettingsLock.Kind.LOOSER) {
                 anyLooser = true
                 later.append(line)
             } else {

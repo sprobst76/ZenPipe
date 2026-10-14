@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: feed language filter (zen/ZenLanguage.kt, ZenFeedLanguages.kt). -->
+<resources>
+    <string name="zen_set_feed_langs">Languages in the feed</string>
+    <string name="zen_lang_change">Change</string>
+    <string name="zen_lang_locked">Zen settings are locked until %1$s. Allowing another language is a loosening and possible again afterwards.</string>
+    <string name="zen_lang_none">At least one language must stay.</string>
+    <string name="zen_lang_title">Languages in the feed</string>
+    <string name="zen_lang_hint">Videos whose title is clearly in a language not chosen above are not offered in the feed. Subscriptions, search and channel pages still show everything, and nothing is deleted. The recognition runs on this device from title and channel name (for opened videos also from the audio track or automatic captions); unclear titles always stay. Removing a language applies at once, allowing another one is a loosening (24 hours).</string>
+    <string name="zen_lang_hidden_show">Videos kept out by language</string>
+    <string name="zen_lang_hidden_hint">Last 7 days: first the videos kept out of the feed, then those that stay because the recognition is unsure.</string>
+    <string name="zen_lang_hidden_none">No video of the last 7 days is kept out by language.</string>
+    <string name="zen_lang_src_title">title</string>
+    <string name="zen_lang_src_details">audio/captions</string>
+    <string name="zen_lang_why_unknown">Language: not recognised</string>
+    <string name="zen_lang_why_allowed">Language: %1$s (%2$s)</string>
+    <string name="zen_lang_why_uncertain">Language: %1$s? %2$s (%3$s) · unsure, stays in the feed</string>
+    <string name="zen_lang_why_hidden">Language: %1$s %2$s (%3$s) · hidden in the feed</string>
+</resources>

@@ -15,12 +15,18 @@ data class ZenSettingDef(
     /** true: a HIGHER value is stricter (longer pause, longer minimum length); false: a lower one. */
     val strictHigher: Boolean,
     val step: Int = 1,
-    val isBool: Boolean = false
+    val isBool: Boolean = false,
+    /** A set of options as a bit mask (languages): fewer bits = stricter, any new bit = looser. */
+    val isMask: Boolean = false
 ) {
     fun inRange(v: Int) = v in min..max && (v - min) % step == 0
 
-    /** [new] is stricter than [old]. */
-    fun isStricter(old: Int, new: Int) = if (strictHigher) new > old else new < old
+    /** [new] is stricter than [old] (for a mask: a real subset). */
+    fun isStricter(old: Int, new: Int) = when {
+        isMask -> new != old && (new and old.inv()) == 0
+        strictHigher -> new > old
+        else -> new < old
+    }
 }
 
 object ZenSettingKeys {
@@ -41,6 +47,12 @@ object ZenSettingKeys {
 
     /** Content recognition: at most 1 heavy video in 10 places, never two in a row, not on places 1-9. */
     const val CLASS_HEAVY = "class_heavy"
+
+    /**
+     * Languages of the feed (bit mask over [ZenLangOptions.CODES], default German + English): videos
+     * recognised as another language are not offered in the feed. Fewer languages = stricter.
+     */
+    const val FEED_LANGS = "feed_langs"
 
     /** Settings that only matter with the content recognition (shown only where it is supported). */
     @JvmField
@@ -65,7 +77,16 @@ object ZenSettingDefs {
         ZenSettingDef(ZenSettingKeys.REDUCED_DETAILS, default = 1, min = 0, max = 1, strictHigher = true, isBool = true),
         // content recognition (spec 4.7): on = stricter, off = loosening; effective only with a model
         ZenSettingDef(ZenSettingKeys.CLASS_FEED, default = 1, min = 0, max = 1, strictHigher = true, isBool = true),
-        ZenSettingDef(ZenSettingKeys.CLASS_HEAVY, default = 1, min = 0, max = 1, strictHigher = true, isBool = true)
+        ZenSettingDef(ZenSettingKeys.CLASS_HEAVY, default = 1, min = 0, max = 1, strictHigher = true, isBool = true),
+        // feed languages (no model needed): removing a language = stricter, adding one = loosening
+        ZenSettingDef(
+            ZenSettingKeys.FEED_LANGS,
+            default = ZenLangOptions.DEFAULT_MASK,
+            min = 1,
+            max = ZenLangOptions.ALL_MASK,
+            strictHigher = false,
+            isMask = true
+        )
     )
 
     private val byKey = all.associateBy { it.key }
@@ -152,4 +173,8 @@ object ZenSettings {
 
     @JvmStatic
     fun classHeavyLimit() = get(ZenSettingKeys.CLASS_HEAVY) == 1
+
+    /** ISO codes of the languages the feed may offer. */
+    @JvmStatic
+    fun feedLanguages(): Set<String> = ZenLangOptions.codes(get(ZenSettingKeys.FEED_LANGS))
 }

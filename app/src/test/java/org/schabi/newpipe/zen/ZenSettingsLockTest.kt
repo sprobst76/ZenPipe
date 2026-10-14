@@ -463,4 +463,33 @@ class ZenSettingsLockTest {
         assertFalse(ZenClassExempt.validKeyword(" ab "))
         assertTrue(ZenClassExempt.validKeyword("abc"))
     }
+
+    @Test
+    fun `feed languages - removing is immediate, adding waits, mixed splits`() {
+        val (e, l) = ready()
+        val key = ZenSettingKeys.FEED_LANGS
+        val de = ZenLangOptions.mask(listOf("de"))
+        val deCa = ZenLangOptions.mask(listOf("de", "ca"))
+        // stricter: immediate, no lock
+        assertTrue((l.apply(mapOf(key to de)) as ZenSettingsLock.Result.Applied).pending.isEmpty())
+        assertEquals(de, l.effective(key))
+        assertFalse(l.isLocked())
+        // looser: pending, starts the lock
+        l.apply(mapOf(key to ZenLangOptions.DEFAULT_MASK))
+        assertEquals(de, l.effective(key))
+        assertTrue(l.isLocked())
+        assertEquals(ZenLangOptions.DEFAULT_MASK, l.pending()[key])
+        // while locked: adding another language is rejected, removing still works
+        e.mono += 6 * min
+        assertTrue(l.apply(mapOf(key to deCa)) is ZenSettingsLock.Result.Rejected)
+        e.mono += 25 * h
+        assertEquals(ZenLangOptions.DEFAULT_MASK, l.effective(key))
+        // mixed (remove en, add ca): German alone at once, German + Catalan after the lock
+        val r = l.apply(mapOf(key to deCa)) as ZenSettingsLock.Result.Applied
+        assertEquals(listOf(key), r.pending)
+        assertEquals(de, l.effective(key))
+        assertEquals(deCa, l.pending()[key])
+        e.mono += 25 * h
+        assertEquals(deCa, l.effective(key))
+    }
 }

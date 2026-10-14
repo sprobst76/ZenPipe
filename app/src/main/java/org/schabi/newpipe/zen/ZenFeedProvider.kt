@@ -58,9 +58,10 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
         var pool: List<ZenFeedPlanner.Candidate> = emptyList()
         val view = state.view(now, allowCreate, rules, createdAt) {
             ZenWatchLater.purgeExpired(appContext, now)
-            (if (rules.active) classified(candidates(), now) else candidates()).also { pool = it }
+            (if (rules.active) classified(candidates(now), now) else candidates(now)).also { pool = it }
         }
         if (view.created && rules.active && view.edition != null) refineDetails(view.edition, pool, rules)
+        if (view.created) logLanguages(pool)
 
         // not finished streams (partially watched ones stay visible with their progress)
         val available = db.getStreams(FeedGroupEntity.GROUP_ALL_ID, false, true, false)
@@ -81,11 +82,21 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
 
     private val prep get() = ZenEditionPrep.shared
 
+    /** New edition: how many videos the language filter kept out (`feed_lang`). */
+    private fun logLanguages(pool: List<ZenFeedPlanner.Candidate>) {
+        val hidden = pool.filter { it.langHidden }
+        Zen.log(appContext).add(
+            "feed_lang",
+            "hidden=${hidden.size} langs=${hidden.groupingBy { it.lang ?: "?" }.eachCount().entries.joinToString(",") { "${it.key}:${it.value}" }} " +
+                "allowed=${ZenSettings.feedLanguages().sorted().joinToString(",")}"
+        )
+    }
+
     /** Eligible candidates without a classification of the current model, as preparation jobs. */
     private fun missingJobs(now: Long): List<ZenEditionPrep.Job> {
         val cache = ZenClassCache.get(appContext)
         val classifier = ZenClassifier.get(appContext)
-        return candidateRows().filter { (serviceId, c) ->
+        return candidateRows(now).filter { (serviceId, c) ->
             ZenFeedPlanner.isEligible(c, now) &&
                 cache.get(ZenClassCache.keyOf(serviceId, c.url))?.model != ZenClassifierModel.VERSION
         }.map { (serviceId, c) ->
@@ -144,7 +155,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
      * Feed candidates for the content classifier (same eligibility as an edition), newest first,
      * as (cache key, title + channel). Only data the feed already has; no network.
      */
-    fun classifyCandidates(nowMillis: Long): List<Pair<String, VideoText>> = candidateRows()
+    fun classifyCandidates(nowMillis: Long): List<Pair<String, VideoText>> = candidateRows(nowMillis)
         .filter { ZenFeedPlanner.isEligible(it.second, nowMillis) }
         .sortedByDescending { it.second.uploadMillis }
         .map { (serviceId, c) -> ZenClassCache.keyOf(serviceId, c.url) to VideoText(c.title, c.channelName) }
@@ -152,12 +163,37 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
     // service id per video URL of the last candidate query (cache keys need it)
     private val serviceIds = HashMap<String, Int>()
 
-    private fun candidates(): List<ZenFeedPlanner.Candidate> = candidateRows().map {
+    private fun candidates(now: Long): List<ZenFeedPlanner.Candidate> = candidateRows(now).map {
         serviceIds[it.second.url] = it.first
         it.second
     }
 
-    private fun candidateRows(): List<Pair<Int, ZenFeedPlanner.Candidate>> {
+    /**
+     * Adds the language (and whether it is hidden) to the candidates that could enter an edition
+     * otherwise; the others are left alone (no detection work for old or short videos).
+     */
+    private fun withLanguages(rows: List<Pair<Int, ZenFeedPlanner.Candidate>>, now: Long): List<Pair<Int, ZenFeedPlanner.Candidate>> {
+        val base = rows.filter { ZenFeedPlanner.isEligible(it.second, now) }
+        if (base.isEmpty()) return rows
+        val langs = try {
+            ZenFeedLanguages.forFeed(
+                appContext,
+                base.map { (sid, c) -> ZenFeedLanguages.Item(ZenClassCache.keyOf(sid, c.url), c.channel, c.title, c.channelName) },
+                now
+            )
+        } catch (e: Exception) {
+            android.util.Log.w("ZenLanguage", "feed languages", e)
+            return rows
+        }
+        return rows.map { (sid, c) ->
+            val r = langs[ZenClassCache.keyOf(sid, c.url)] ?: return@map sid to c
+            sid to c.copy(lang = r.decision.lang, langHidden = r.decision.hidden)
+        }
+    }
+
+    private fun candidateRows(now: Long): List<Pair<Int, ZenFeedPlanner.Candidate>> = withLanguages(rawCandidateRows(), now)
+
+    private fun rawCandidateRows(): List<Pair<Int, ZenFeedPlanner.Candidate>> {
         val ranks = db.database().feedGroupDAO().getZenGroupRanks().associateBy { it.streamId }
         val praxis = ZenPraxis.activeKeys()
         val praxisStreams = ZenPraxis.activePlaylistStreamKeys()
