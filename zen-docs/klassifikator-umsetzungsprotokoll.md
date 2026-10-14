@@ -342,6 +342,21 @@ subscribe or practice in one channel import sheet`. Regeln: `rules.md` „Funkti
   automatische Untertitelspur als **Hindi** ausgeblendet (ASR-Spur `hi` per Abruf der Watch-Seite bestätigt; ob wirklich
   durchgehend Hindi gesprochen wird, ist nicht geprüft). Spanisch/Türkisch ebenso über Stufe D.
 
+#### Korrektur nach Gerätetest (2026-10-14, Commit `866a87d43`)
+- **Befund:** Die einzige automatische Untertitelspur (ASR) trägt die Sprache, die der Kanal angibt, nicht die gesprochene. Die vier
+  englischen TEDxBocconiUMumbai-Videos wurden dadurch als Hindi ausgeblendet (siehe oben). Neue Hierarchie (`ZenLangDetect.combine`,
+  Regeln in `rules.md` „Sprachen im Feed“, Entscheidung D60): Sprachfeld/Originaltonspur hart (außer ein klarer Titel ab 0,45 nennt
+  eine andere Sprache), Titel-Heuristik unverändert, ASR bestätigt nur den Titel (`TS`), verliert gegen eine andere Titelsprache und
+  blendet allein (`S`) nie aus; `S` zählt nicht für die Kanal-Mehrheit.
+- **Speicher:** Rohsignale in `lang.sig`, Neubewertung ohne Anfrage; beim Anlegen der Spalte werden alte Detail-Einträge (`src='D'`)
+  einmalig gelöscht.
+- **Ergebnis am Gerät (TEDx-Test, Debug):** vorher `feed_lang hidden=9` inkl. `hi:4`, nachher `hidden=4` mit `ca:2,tr:1,es:1`; die vier
+  englischen Bocconi-Videos bleiben im Feed.
+- **Fehlerraten der Erkennung** (unverändert, Titel-Heuristik, siehe Tabelle in 14.3): Satz A 0/75 fälschlich ausgeblendet, 70/82
+  Fremdsprachen ausgeblendet; Satz B 0/50, 38/62 (61 %), lateinische Schrift 24/48, andere Schriften 14/14, mit Kanal-Kontext 41/62.
+- **Nicht am Gerät geprüft:** der Fall „Titel ca + ASR ca“ (= `TS`, hart) nur im Unit-Test (`ZenLanguageTest`); ebenso die Regel, dass
+  ein klarer Titel gegen Sprachfeld/Originaltonspur gewinnt.
+
 ### 14.4 Praxis im Kanal-Blatt (Teil D, Wunsch Stefan)
 - Statt Blatt → Prüf-/Bestätigungsdialog nun ein Blatt: Abschnitt „Praxis-Kanal?“ mit Prüfergebnis bzw. Warnung, Wirkungstext
   und Wartezeit auf den Knöpfen; Knöpfe „Als Praxis-Kanal markieren“ / „Trotzdem …“ und „Abonnieren und als Praxis markieren“.

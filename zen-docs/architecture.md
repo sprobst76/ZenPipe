@@ -70,7 +70,7 @@ FeedFragment ──► StreamItem (Zeile „N min · Gruppe“ + Warum-Zeile) ·
 | `zen/ZenEditionPrep.kt` | Vorbereitung einer fälligen Ausgabe (Einordnung bis `LIMIT_MS` 20 s, Startzeit = Erstellzeit) |
 | `zen/ZenWatchLater.kt` | Später-Liste (lokale Playlist, max. 10, Ablauf 30 Tage) |
 | `zen/ZenGroupRank.kt` | Datensatz Feed-Gruppen-Rang (Priorität = Sortierreihenfolge der Feed-Gruppen) |
-| `zen/ZenFeedLanguages.kt`, `zen/ZenLanguage.kt` | Feed-Sprachfilter (Einstellung `feed_langs`): lokale Spracherkennung `ZenLangDetect`, Kanal-Mehrheit `ZenLangFilter` (neu, `3bdcfd2a6`; noch keine Zeile in rules.md) |
+| `zen/ZenFeedLanguages.kt`, `zen/ZenLanguage.kt` | Feed-Sprachfilter (Einstellung `feed_langs`): lokale Spracherkennung `ZenLangDetect`, Signal-Hierarchie `ZenLangDetect.combine` (Feld/Originalton hart, ASR nur bestätigend, `866a87d43`), Kanal-Mehrheit `ZenLangFilter` (`3bdcfd2a6`); Regeln: rules.md „Sprachen im Feed“ |
 | `local/feed/item/ZenEndCardItem.kt` | Abschlusskarte „Du bist durch …“ |
 
 **Invarianten:** Pull-to-refresh füllt nur den Vorrat, die laufende Ausgabe wächst nie; eine laufende Ausgabe wird durch
@@ -129,7 +129,7 @@ Kette: `Player.initPlayer` setzt `setPauseAtEndOfMediaItems(true)`; am Ende ruft
 Modell-Download (Tipp) ─► ZenModelInstaller (Zip, SHA-256, noBackupFilesDir) ─► ZenClassifierModel (Status, URL e5s-1)
 VideoText (TextBuilder) ─► UnigramTokenizer ─► OrtEncoder (ONNX, Embedding) ─► Heads (Thema/Format/Ton) ─► ZenRules (Kategorien, Gewicht)
                                    └──────────── ZenPipeline ──────────────┘          ▼
-ZenClassifier (Session, Threads 4/2, Leerlauf 60 s) ─► ZenClassCache (zen_class_cache.db: Einträge T/D, Labels, Sprache)
+ZenClassifier (Session, Threads 4/2, Leerlauf 60 s) ─► ZenClassCache (zen_class_cache.db: Einträge T/D, Labels, Sprache inkl. Rohsignale `lang.sig`)
 Auslöser: ZenClassifyWorker (nach Feed-Aktualisierung/App-Start, T) · VideoDetailFragment/Player (D) · ZenEditionPrep · ZenFeedDetails
 ```
 
