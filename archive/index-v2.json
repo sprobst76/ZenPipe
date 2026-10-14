@@ -1,0 +1,136 @@
+{
+  "repo": {
+    "name": {
+      "en-US": "ZenPipe archive"
+    },
+    "description": {
+      "en-US": "Older ZenPipe releases."
+    },
+    "icon": {
+      "en-US": {
+        "name": "/icons/zenpipe-icon.png",
+        "sha256": "4cf117cb377ae2093c7749774d0ace6b60f6b238f2aa8a8bf5a52017fe45fc75",
+        "size": 22163
+      }
+    },
+    "address": "https://sprobst76.github.io/ZenPipe/archive",
+    "timestamp": 1791957234000,
+    "antiFeatures": {
+      "NonFreeNet": {
+        "name": {
+          "en-US": "Non-Free Network Services"
+        },
+        "description": {
+          "en-US": "This app promotes or depends entirely on a non-free network service."
+        }
+      }
+    },
+    "categories": {
+      "Internet": {
+        "name": {
+          "en-US": "Internet"
+        }
+      },
+      "Multimedia": {
+        "name": {
+          "en-US": "Multimedia"
+        }
+      }
+    }
+  },
+  "packages": {
+    "io.github.sprobst76.zenpipe": {
+      "metadata": {
+        "added": 1791872282000,
+        "categories": [
+          "Multimedia",
+          "Internet"
+        ],
+        "changelog": "https://github.com/sprobst76/ZenPipe/releases",
+        "issueTracker": "https://github.com/sprobst76/ZenPipe/issues",
+        "lastUpdated": 1791957193000,
+        "license": "GPL-3.0-or-later",
+        "sourceCode": "https://github.com/sprobst76/ZenPipe/tree/zen",
+        "webSite": "https://github.com/sprobst76/ZenPipe#readme",
+        "authorName": "Stefan Probst-Schendzielorz",
+        "name": {
+          "en-US": "ZenPipe"
+        },
+        "preferredSigner": "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518"
+      },
+      "versions": {
+        "79747d1aed809a08ded50e0335c70a7a27aa70445d004cae0debea57066c8ddb": {
+          "added": 1791872282000,
+          "file": {
+            "name": "/ZenPipe_v0.1.0-zen.1.apk",
+            "sha256": "79747d1aed809a08ded50e0335c70a7a27aa70445d004cae0debea57066c8ddb",
+            "size": 6933631
+          },
+          "manifest": {
+            "nativecode": [
+              "arm64-v8a",
+              "armeabi-v7a",
+              "x86",
+              "x86_64"
+            ],
+            "versionName": "0.1.0-zen.1",
+            "versionCode": 1015001,
+            "usesSdk": {
+              "minSdkVersion": 23,
+              "targetSdkVersion": 35
+            },
+            "signer": {
+              "sha256": [
+                "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518"
+              ]
+            },
+            "usesPermission": [
+              {
+                "name": "android.permission.INTERNET"
+              },
+              {
+                "name": "android.permission.WAKE_LOCK"
+              },
+              {
+                "name": "android.permission.ACCESS_NETWORK_STATE"
+              },
+              {
+                "name": "android.permission.WRITE_EXTERNAL_STORAGE"
+              },
+              {
+                "name": "android.permission.SYSTEM_ALERT_WINDOW"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
+              },
+              {
+                "name": "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+              },
+              {
+                "name": "android.permission.POST_NOTIFICATIONS"
+              },
+              {
+                "name": "android.permission.RECEIVE_BOOT_COMPLETED"
+              },
+              {
+                "name": "io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+              },
+              {
+                "name": "android.permission.READ_EXTERNAL_STORAGE"
+              }
+            ]
+          },
+          "antiFeatures": {
+            "NonFreeNet": {
+              "de-DE": "Benötigt YouTube für die Videos.",
+              "en-US": "Depends on YouTube for videos."
+            }
+          }
+        }
+      }
+    }
+  }
+}

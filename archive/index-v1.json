@@ -1,0 +1,117 @@
+{
+  "repo": {
+    "timestamp": 1791957234000,
+    "version": 20002,
+    "name": "ZenPipe archive",
+    "icon": "zenpipe-icon.png",
+    "description": "Older ZenPipe releases.",
+    "address": "https://sprobst76.github.io/ZenPipe/archive"
+  },
+  "requests": {
+    "install": [],
+    "uninstall": []
+  },
+  "apps": [
+    {
+      "allowedAPKSigningKeys": [
+        "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518"
+      ],
+      "antiFeatures": [
+        "NonFreeNet"
+      ],
+      "authorName": "Stefan Probst-Schendzielorz",
+      "categories": [
+        "Multimedia",
+        "Internet"
+      ],
+      "changelog": "https://github.com/sprobst76/ZenPipe/releases",
+      "suggestedVersionCode": "1015001",
+      "issueTracker": "https://github.com/sprobst76/ZenPipe/issues",
+      "license": "GPL-3.0-or-later",
+      "sourceCode": "https://github.com/sprobst76/ZenPipe/tree/zen",
+      "webSite": "https://github.com/sprobst76/ZenPipe#readme",
+      "added": 1791872282000,
+      "packageName": "io.github.sprobst76.zenpipe",
+      "lastUpdated": 1791957193000,
+      "localized": {
+        "en-US": {
+          "name": "ZenPipe"
+        }
+      }
+    }
+  ],
+  "packages": {
+    "io.github.sprobst76.zenpipe": [
+      {
+        "added": 1791872282000,
+        "apkName": "ZenPipe_v0.1.0-zen.1.apk",
+        "hash": "79747d1aed809a08ded50e0335c70a7a27aa70445d004cae0debea57066c8ddb",
+        "hashType": "sha256",
+        "minSdkVersion": 23,
+        "nativecode": [
+          "arm64-v8a",
+          "armeabi-v7a",
+          "x86",
+          "x86_64"
+        ],
+        "packageName": "io.github.sprobst76.zenpipe",
+        "sig": "1d853d17c454285de5ed2ff7e23ad60c",
+        "signer": "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518",
+        "size": 6933631,
+        "targetSdkVersion": 35,
+        "uses-permission": [
+          [
+            "android.permission.INTERNET",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            null
+          ]
+        ],
+        "versionCode": 1015001,
+        "versionName": "0.1.0-zen.1"
+      }
+    ]
+  }
+}

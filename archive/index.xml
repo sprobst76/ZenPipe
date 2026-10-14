@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<fdroid>
+	<repo icon="zenpipe-icon.png" name="ZenPipe archive" pubkey="3082050b308202f3a003020102020847bf7ca97f2992be300d06092a864886f70d01010b0500303331123010060355040a13097370726f6273743736311d301b060355040313145a656e5069706520462d44726f6964207265706f3020170d3236313031333036333830345a180f32303534303232383036333830345a303331123010060355040a13097370726f6273743736311d301b060355040313145a656e5069706520462d44726f6964207265706f30820222300d06092a864886f70d01010105000382020f003082020a0282020100d82a236e88272a6f93df585eedb7c18f367391393452f172f1b24226a51a73728fc3823f66d5ed1bd6433bf505a2f3ec15fef91c7d184a76ee03e6bcd30d7b156e30aeff12534164eecfdfacf1fbcd67c036778e08cb1fa542867c1389de64ac7c47fae789739a331d52df0fca594db7e3070dfd6a51ce4200bc076ee6d6538394ea0083e0abaca41e04a801bfdc4a3a7fa7f9ba406d4fb91214773ac4a7da4cb8e8c8af109ddb72acaf509f7c3a67286b4730ec459969067cdd98ff6f08765358c04747e39736ab6f317167ceed101cb53c5fc6a8e15e5e767f015ffd6dbac944c53d1f50c458c026745ceb4d533a578f52d760df4fbd79cfc9938cd61192e95cd2ab9b8d3f08c8b5439bfe38035382433c5338b5929b0ac91674542eaaf33410ff5c4cb31cc439015258eb3d960af9f90183f64ad7f8739aa2ba6ff86d21f5f80655f5ddcd786ab86d3c3dd11a9898d264fdf2a0a996693db4ca3b57fa64a7758d24b8da0aa9e140ddb5f731b1349e4a2857166517660ab5ee3b3abe0f4bf54580a79c44685ceb08ab2194cfef931e1c504cab0ff61cb2a6e4086b9ea8af693e695db76de92848c5793cd5c7c968b833cf5a8b8a855f5a42b7a3dc01a6790606d85ef8ea2797eaba6b71284e54f26f8fcc669dd1c8773b3949867ca8f6f18900e93d39d6a4d7b659a8532936060adc530446b46b78523dc158f2673d7e50790203010001a321301f301d0603551d0e041604149b2f157c7a7fe0fcee33392eac16a708007dee9e300d06092a864886f70d01010b0500038202010025c5be39bdfbc4231b88dae9b196534956bfe498fa1243052e5954720eb8e94fdce6808ff20f4c8de34b6298cd752a7e2b67bcc63583094bd0f51722cf5ed79fcc12972c2052fa0b0eeece38c5f84c0ff1bbcef7abe74e691bdc69d7fae040d77d912595d6b0478ebe15e4e5d1bcc805a5658da1d14dcde0879b1a78497ee53ad59d47cc70e6dd8bc6b55389baabe853edb05e673fcf8f108baf036b0c61819944891144907b2e143e50835c87e95ebd017c85f13fd2f709094a5679d6952fbbdfe1a522f2a8d4d776425bc45db6761f083e27396da4e3d75b6da9ceb24b3ab2af3494aa4d5f566353788aed1bd84538fc00695dd93b161ca42e20f2f8ad38d3fa32240cfb37bdc281c46072b2b55371068daa56df98c21c9372ed8b5096778e92cbc3eec688a360e621dcf155a418a40e82f1bbd2ceaa04d88b3ed1a4f46c1f8431e3a5db603d5be7fe2fd49e2e4358d7cb0d01fd04228a82c2074fa155aead69002a4c020de1f9983a78d5a51e81f2cbf087c6a6facdb35eb37b640613ad77a41cbb56305ddf38bba3b87b8feb1688d0a801df43804dc6f204e3f950b4e67dd8e4aaac35485aca5291f3d89f8ee95b6bc0649a73524a67e78b61b844903e67c3bf24d5ff71113e42dc9a165021dc918e57ef2d0639883445eeef7f180d0dafa376348c66211cd93b365dcb265131b41e3f6aa59844719ab4fd9662bb1e548e" timestamp="1791957234" url="https://sprobst76.github.io/ZenPipe/archive" version="20002">
+		<description>Older ZenPipe releases.</description>
+	</repo>
+	<application id="io.github.sprobst76.zenpipe">
+		<id>io.github.sprobst76.zenpipe</id>
+		<added>2026-10-13</added>
+		<lastupdated>2026-10-14</lastupdated>
+		<name>ZenPipe</name>
+		<summary></summary>
+		<desc>No description available</desc>
+		<license>GPL-3.0-or-later</license>
+		<categories>Multimedia,Internet</categories>
+		<category>Multimedia</category>
+		<web>https://github.com/sprobst76/ZenPipe#readme</web>
+		<source>https://github.com/sprobst76/ZenPipe/tree/zen</source>
+		<tracker>https://github.com/sprobst76/ZenPipe/issues</tracker>
+		<changelog>https://github.com/sprobst76/ZenPipe/releases</changelog>
+		<author>Stefan Probst-Schendzielorz</author>
+		<marketversion></marketversion>
+		<marketvercode>1015001</marketvercode>
+		<antifeatures>NonFreeNet</antifeatures>
+		<package>
+			<version>0.1.0-zen.1</version>
+			<versioncode>1015001</versioncode>
+			<apkname>ZenPipe_v0.1.0-zen.1.apk</apkname>
+			<hash type="sha256">79747d1aed809a08ded50e0335c70a7a27aa70445d004cae0debea57066c8ddb</hash>
+			<size>6933631</size>
+			<sdkver>23</sdkver>
+			<targetSdkVersion>35</targetSdkVersion>
+			<added>2026-10-13</added>
+			<sig>1d853d17c454285de5ed2ff7e23ad60c</sig>
+			<permissions>ACCESS_NETWORK_STATE,FOREGROUND_SERVICE,FOREGROUND_SERVICE_DATA_SYNC,FOREGROUND_SERVICE_MEDIA_PLAYBACK,INTERNET,POST_NOTIFICATIONS,READ_EXTERNAL_STORAGE,RECEIVE_BOOT_COMPLETED,SYSTEM_ALERT_WINDOW,WAKE_LOCK,WRITE_EXTERNAL_STORAGE,io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION</permissions>
+			<nativecode>arm64-v8a,armeabi-v7a,x86,x86_64</nativecode>
+		</package>
+	</application>
+</fdroid>
