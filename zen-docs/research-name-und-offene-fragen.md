@@ -1,6 +1,6 @@
 # Recherche: Name „ZenPipe“, Lizenz/Recht, Signing, offene Punkte vor dem ersten Release
 
-**Stand:** 13.10.2026 · **Bezug:** `research-fdroid-deployment.md`, `release.md`, `CLAUDE.md`
+**Stand:** 13.10.2026 · **Bezug:** `research-fdroid-deployment.md`, `release.md`, `AGENTS.md`
 Legende: **[Belegt]** = Primärquelle bzw. selbst abgefragte Datenbank · **[Schwach belegt]** = Sekundärquelle · **[Einschätzung]** = eigene Schlussfolgerung, **keine Rechtsberatung**
 
 ---

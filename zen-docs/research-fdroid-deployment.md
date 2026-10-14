@@ -2,7 +2,7 @@
 
 **Projekt:** ZenPipe (NewPipe-Fork)
 **Stand:** 12.10.2026
-**Bezug:** `ZenPipe-Konzept_v0.1.md`, `CLAUDE.md`
+**Bezug:** `ZenPipe-Konzept_v0.1.md`, `AGENTS.md`
 
 Legende: **[Belegt]** = Primärquelle verlinkt · **[Schwach belegt]** = Sekundärquelle oder Forum · **[Einschätzung]** = eigene Schlussfolgerung
 

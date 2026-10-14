@@ -18,8 +18,8 @@ Ausführlich: [ZenPipe-Konzept_v0.1.md](ZenPipe-Konzept_v0.1.md) (historisch), B
 
 | Leitplanke | Bedeutung | Quelle |
 |---|---|---|
-| Fork als kleiner Patch-Satz | Eigener Code im Paket `org.schabi.newpipe.zen`, in Upstream-Klassen nur kurze Hooks (Kommentar `ZenPipe:`/`zen:`); Upstream regelmäßig einspielen (`dev` folgt Upstream, `zen` trägt die Patches) | [../CLAUDE.md](../CLAUDE.md), [architecture.md](architecture.md) |
-| NewPipeExtractor unverändert | Keine Änderungen am Extractor; Datenlücken (z. B. fehlende Kategorie im Feed) werden in der App gelöst | [../CLAUDE.md](../CLAUDE.md), Konzept §4 |
+| Fork als kleiner Patch-Satz | Eigener Code im Paket `org.schabi.newpipe.zen`, in Upstream-Klassen nur kurze Hooks (Kommentar `ZenPipe:`/`zen:`); Upstream regelmäßig einspielen (`dev` folgt Upstream, `zen` trägt die Patches) | [../AGENTS.md](../AGENTS.md), [architecture.md](architecture.md) |
+| NewPipeExtractor unverändert | Keine Änderungen am Extractor; Datenlücken (z. B. fehlende Kategorie im Feed) werden in der App gelöst | [../AGENTS.md](../AGENTS.md), Konzept §4 |
 | GPLv3 | Fork bleibt Open Source, §5a-Vermerk (README, Über/Lizenz), §6 Quell-Link je Release | [release.md](release.md) „GPL notices“ |
 | Keine Anfragen an Dritte | Gegenstellen sind nur YouTube (über den Extractor, wie beim Öffnen eines Videos) und GitHub (Crash-Report-Ziel, Releases, opt-in Modell-Download auf Tipp). Kein Update-Check, keine NewPipe-Server, ONNX-Telemetrie entfernt | [rules.md](rules.md) „Externe Anfrage“, [release.md](release.md) „No NewPipe backend contact“ |
 | Verteilung | GitHub-Releases, eigenes F-Droid-Repo, Obtainium; nicht Play Store | [release.md](release.md) |
@@ -59,7 +59,7 @@ bindend; **Archiv** = Momentaufnahme.
 | [../.planning/STATE.md](../.planning/STATE.md) | Umsetzungsprotokoll je Etappe, Gerätebefunde, Gerätetest-Tricks, Offenes | Status |
 | [../.planning/PROJECT.md](../.planning/PROJECT.md) | Kurzbild des Projekts | Status (veraltet, siehe unten) |
 | `../.planning/HANDOFF.json` | GSD-Übergabe vom 2026-10-12 | veraltet |
-| [../CLAUDE.md](../CLAUDE.md) | Arbeitsregeln für Agenten, Operations, Gerätetest-Regeln, Git-Workflow | verbindlich (Arbeitsweise) |
+| [../AGENTS.md](../AGENTS.md) | Arbeitsregeln für Agenten, Operations, Gerätetest-Regeln, Git-Workflow (`CLAUDE.md` importiert nur `@AGENTS.md`) | verbindlich (Arbeitsweise) |
 | [../README.md](../README.md) | Öffentliche Projektseite (Englisch), Installation, Fingerprint | öffentlich |
 
 ## Lesepfade
@@ -69,12 +69,12 @@ bindend; **Archiv** = Momentaufnahme.
 | eine Regel/einen Wert ändern | [rules.md](rules.md) (Zeile + Code-Spalte) → [decisions.md](decisions.md) (warum so) → passende Spec → Code laut [architecture.md](architecture.md); Lockerung oder Verschärfung? → Abschnitt „Zen-Einstellungen“ in rules.md |
 | ein neues Feature bauen | [decisions.md](decisions.md) (nichts Entschiedenes umwerfen) → [architecture.md](architecture.md) (Hook-Stellen, `ZenFeatures`) → Spec schreiben/ergänzen → rules.md-Zeilen im selben Commit |
 | eine Upstream-Funktion abschalten | rules.md „Funktionen“ + `zen/ZenFeatures.kt` (alle Einstiege dort prüfen lassen) |
-| einen Release bauen | [release.md](release.md) „Release checklist“ → Skill `/android-release` + `android-release-preflight.sh` → [../CLAUDE.md](../CLAUDE.md) „Operations“ |
-| auf dem Gerät testen | [../CLAUDE.md](../CLAUDE.md) „Operations“ (Defy, PIN-Sperre, `run-as`-Tricks) → Abschnitte „Gerätetest-Tricks“ in [../.planning/STATE.md](../.planning/STATE.md) → Zen-Zustand danach zurücksetzen |
+| einen Release bauen | [release.md](release.md) „Release checklist“ → Skill `/android-release` + `android-release-preflight.sh` → [../AGENTS.md](../AGENTS.md) „Operations“ |
+| auf dem Gerät testen | [../AGENTS.md](../AGENTS.md) „Operations“ (Defy, PIN-Sperre, `run-as`-Tricks) → Abschnitte „Gerätetest-Tricks“ in [../.planning/STATE.md](../.planning/STATE.md) → Zen-Zustand danach zurücksetzen |
 | den Klassifikator verstehen | [glossary.md](glossary.md) (Stufe T/D, Warum-Zeile) → rules.md „Inhalts-Erkennung“ → [architecture.md](architecture.md) „Klassifikator“ → [spec-klassifikator-integration.md](spec-klassifikator-integration.md) Abschnitte 0, 4, 9, dann 10–13 |
 | Pause/Zeitmessung verstehen | rules.md „Pflichtpause“ + „Wiedergabezeit“ → [spec-pause-nach-abbruch.md](spec-pause-nach-abbruch.md) → [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) Abschnitte 2 und 10 |
 | den aktuellen Stand wissen | [../.planning/STATE.md](../.planning/STATE.md) (unterster Abschnitt zuerst) + `git log --oneline zen` |
-| Upstream einspielen | [../CLAUDE.md](../CLAUDE.md) „Git-Workflow“, [release.md](release.md) (modify/delete-Konflikte bei fastlane/.github) |
+| Upstream einspielen | [../AGENTS.md](../AGENTS.md) „Git-Workflow“, [release.md](release.md) (modify/delete-Konflikte bei fastlane/.github) |
 
 ## Konventionen
 
