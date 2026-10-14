@@ -1,1 +1,21 @@
-{"updated":"2026-10-12T18:04:10+02:00","project":"ZenPipe","stack":"kotlin-android","next":"Clone NewPipe upstream, build, locate drawer/autoplay/related-videos code"}
+{
+  "timestamp": "2026-10-14T07:23:48+02:00",
+  "updated": "2026-10-14T07:23:48+02:00",
+  "project": "ZenPipe",
+  "stack": "kotlin-android",
+  "status": "active",
+  "next_action": "Stefan: approve tag v0.1.0-zen.4 on the zen head (version bump c1e5fd70e, changelogs 65bb53d60) via /android-release + preflight",
+  "human_actions_pending": [
+    {
+      "action": "Approve and tag release v0.1.0-zen.4",
+      "context": "versionCode 1015004 prepared, not tagged; releases are public",
+      "blocking": false
+    },
+    {
+      "action": "Confirm assumptions in zen-docs/spec-bildung-und-hintergrundzeit.md 10.3",
+      "context": "rest-time credit acts at once; sound counts half (hook only); defaults 90/180/60",
+      "blocking": false
+    }
+  ],
+  "context_notes": "Rewritten 2026-10-14: the previous content (2026-10-12, next step 'clone NewPipe upstream') was the initial MVP handoff and is obsolete. Progress log: .planning/STATE.md (newest section last); docs entry: zen-docs/README.md."
+}

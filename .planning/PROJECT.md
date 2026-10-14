@@ -2,29 +2,31 @@
 
 **Stack:** kotlin-android (Fork von NewPipe, GPLv3)
 
+Kurzbild des Projekts (Stand 2026-10-14). Alle Werte und Regeln stehen in `zen-docs/rules.md` (Single Source of Truth),
+Begründungen in `zen-docs/decisions.md`, der Einstieg in die Doku in `zen-docs/README.md`, der Fortschritt in `.planning/STATE.md`.
+Diese Datei wiederholt bewusst keine Zahlen.
+
 ## Zweck
 Achtsamerer YouTube-Konsum: NewPipe-Fork ohne Feed-Sog. Ein Werkzeug zum bewussten Schauen.
 
 ## Kernwert
 Man schaut, was man vorhatte — und ist dann fertig. Kein Autoplay, keine Empfehlungen, kein endloses Scrollen.
 
-## Kernregeln (Details und Werte: `zen-docs/rules.md`, Single Source of Truth)
-- Autoplay dauerhaft aus; Auto-Queue, Related und Kommentare aus; Shorts nirgends; keine Livestreams im Feed/Kanal-Tab; YouTube-Links bleiben in der App (Link kopieren statt Browser).
-- Drawer nur Abos, Feed, Playlists, Suche. Startseite = Feed.
-- Feed mit Ende: Ausgabe mit 15 Videos (frühestens 60 min nach der letzten), Tages-Deckel 30 verschiedene Videos pro Zen-Tag (Wechsel 04:00), lokales erklärbares Scoring (Feed-Gruppen-Reihenfolge = Priorität, Längenfokus), keine Musik im Feed, Später-Liste max. 10 (30 Tage). Kanalseiten 15 Einträge, Suche 2 Seiten.
-- Absichtsabfrage (5 s Wartezeit) bei App-Start (auch nach „Doch nicht“), geteilten Links inkl. Hintergrund-/Popup-Wiedergabe über den Router und Rückkehr nach >= 5 min; nur die eigene laufende Wiedergabe unterdrückt sie.
-- Pflichtpause: Abbruch eines Videos (Schließen, Videowechsel, Prozess-Kill; Pausieren ist kein Abbruch) nach >= 5 min Wiedergabezeit -> Pause 20 % der Wiedergabezeit (min 1, max 15 min); Musik ausgenommen, Podcasts inklusive; „Später fortsetzen“ ohne Pause 2x pro Zen-Tag. Pause zählt nur Gerätelaufzeit (Uhr-/Neustart-fest).
-- Einstellungs-Sperre (Phase 2, Spec): nach jeder Änderung 24 h keine weitere; strenger sofort, lockern erst nach 24 h und abbrechbar; 5 min Rückgängig; Feed-Gruppen nicht gesperrt.
-- Entdecken verwandter Kanäle (Phase 2, opt-in, Spec). Minuten-Tageslimit erst nach der Einstellungs-Sperre.
+## Bausteine (umgesetzt)
+- Kein Sog: Autoplay/Weiterspielen, Related, Kommentare, Shorts aus; Pop-up-Player, Downloads, Minimieren beim App-Wechsel und
+  Upstream-Ankündigungen über `ZenFeatures` aus; Bild läuft nie nebenbei.
+- Feed als endliche Ausgabe mit Tages-Deckel, lokalem erklärbarem Scoring und Sprachfilter; Absichtsabfrage.
+- Pflichtpause nach Abbruch (mit Ruhezeit-Anrechnung), Wiedergabezeit pro Zen-Tag (Bild/Ton/Musik/Praxis, ohne Limit).
+- Zen-Einstellungen mit Asymmetrie: strenger sofort, Lockern erst nach 24-h-Sperre, 5-min-Rückgängig, Ersteinrichtung frei.
+- Praxis-Kanäle/-Playlists (Ausnahmen von Ausgabe und Pause, Praxis-Kette, Sleep-Timer).
+- Lokale Inhalts-Erkennung (Opt-in-Modell): Feed-Gewichtung, Prüfung beim Markieren, Ausnahmen, „Kanal übernehmen“,
+  Prüfansicht mit Korrekturen und Debug-Export.
+- Eigene Identität und Verteilung: applicationId `io.github.sprobst76.zenpipe`, eigener Signierschlüssel, GitHub-Releases,
+  eigenes F-Droid-Repo, Obtainium.
 
-## Stand
-MVP, Phase 0 (Lücken schließen), Phase 1 (Zen-Paket, Feed mit Ende, Absichtsabfrage-Lücken, Pflichtpause) umgesetzt. Siehe `.planning/STATE.md`.
-
-## Später
-Zen-Einstellungen mit 24-h-Sperre, Entdecken, Minuten-Tageslimit, Nachtruhe, Graustufen/ruhiges Design, Branding/applicationId/Signierung.
+## Offen
+Bildung ohne Politik (AP 7), Minuten-Tageslimit (F2, Wert offen), Entdecken verwandter Kanäle, Nachtruhe, Abo-Hygiene.
 
 ## Risiken
-Wartung gegen Upstream/Extractor bei YouTube-Änderungen; ToS-Hinweis (siehe Konzept §4).
-
-## Offene Punkte
-Name/Branding, applicationId, Upstream-Strategie.
+Wartung gegen Upstream/Extractor bei YouTube-Änderungen; ToS-Hinweis (Konzept §4); Rate-Limits bei Detailabrufen
+(gedrosselt, siehe rules.md „Details nachladen“).
