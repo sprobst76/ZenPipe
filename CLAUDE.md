@@ -29,6 +29,10 @@ Kommunikation Deutsch; Code, Commits, technische Doku Englisch.
 ## Status
 Siehe `.planning/STATE.md`.
 
+## Doku
+Einstieg und Index aller Doku: `zen-docs/README.md` (Regeln: `zen-docs/rules.md`, Entscheidungen: `zen-docs/decisions.md`, Code-Karte: `zen-docs/architecture.md`, Begriffe: `zen-docs/glossary.md`).
+Neue Nutzerentscheidungen als Eintrag in `zen-docs/decisions.md`; überholte Spec-Stellen mit „[überholt: …]“ markieren, Momentaufnahmen nach `zen-docs/archive/`.
+
 ## Git-Workflow
 - Fork von `TeamNewPipe/NewPipe`; Remote `upstream`. Branch `dev` folgt Upstream unverändert, `zen` trägt unsere Patches (ein klarer Commit pro Änderung, Präfix `zen:`).
 - Upstream einspielen: `git fetch upstream && git checkout dev && git merge --ff-only upstream/dev`, dann `git checkout zen && git rebase dev`.
