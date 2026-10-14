@@ -56,9 +56,19 @@ jobs:
           distribution: "temurin"
           cache: 'gradle'
 
-      - name: Build debug APK and run jvm tests
-        # ZenPipe: 4 GB Gradle heap (ONNX Runtime native libs made packageContinuous hang with the 2 GB default)
-        run: ./gradlew assembleContinuous lintContinuous testDebugUnitTest --stacktrace -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+      # ZenPipe: split into steps with their own timeouts; one combined Gradle run hung after
+      # ":app:packageContinuous FAILED" and never printed the reason
+      - name: Assemble continuous APK
+        timeout-minutes: 15
+        run: ./gradlew assembleContinuous --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+
+      - name: Lint continuous
+        timeout-minutes: 15
+        run: ./gradlew lintContinuous --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+
+      - name: JVM unit tests
+        timeout-minutes: 15
+        run: ./gradlew testDebugUnitTest --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
 
       - name: Upload APK
         uses: actions/upload-artifact@v7
