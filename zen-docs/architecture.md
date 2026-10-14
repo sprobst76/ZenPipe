@@ -148,7 +148,7 @@ Auslöser: ZenClassifyWorker (nach Feed-Aktualisierung/App-Start, T) · VideoDet
 **Invarianten:** Ohne Modell läuft alles wie vorher (Gewicht 1,0); der Klassifikator wirkt automatisch nur strenger, entscheidet
 nie über Praxis-Zugehörigkeit; `select` liest nur den Cache; einzige neue Gegenstelle ist der GitHub-Download auf Tipp; Labels
 der Prüfansicht ändern nichts an Feed/Gewicht/Sperre. Regeln: rules.md „Inhalts-Erkennung (lokal)“. Spec:
-[spec-klassifikator-integration.md](spec-klassifikator-integration.md).
+[spec-klassifikator-integration.md](spec-klassifikator-integration.md), Umsetzung: [klassifikator-umsetzungsprotokoll.md](klassifikator-umsetzungsprotokoll.md).
 
 ## Abgeschaltete Upstream-Funktionen und Design
 
