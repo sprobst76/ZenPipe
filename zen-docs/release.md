@@ -97,7 +97,9 @@ the store icon (open ring on calm green `#2E4A45`, ring `#F2EFE6`).
 
 ## F-Droid repository (own repo on GitHub Pages)
 
-URL: `https://sprobst76.github.io/ZenPipe/repo` (plus `?fingerprint=<repo key SHA-256>`).
+URL: `https://sprobst76.github.io/ZenPipe/repo` (plus `?fingerprint=<repo key SHA-256>`). Live; repo key
+SHA-256 `8458B982F715D2B19BCB8C271C3E58BA8E8656401D4453C5BCCABDD83C0ECE0D` (checked 2026-10-14 against
+the signer of `repo/entry.jar` with `keytool -printcert -jarfile` and the repo's `index.html`; also in README.md).
 A plain binary repo: the APKs are the signed release APKs from the GitHub releases, nothing is
 rebuilt or re-signed. Only the index is signed, with a **separate repo key** (not the app key).
 
@@ -132,7 +134,7 @@ rebuilt or re-signed. Only the index is signed, with a **separate repo key** (no
    the default branch, see above) or re-run the release; then enable Pages from branch
    `gh-pages`, folder `/`:
    `gh api -X POST repos/sprobst76/ZenPipe/pages -f 'source[branch]=gh-pages' -f 'source[path]=/'`
-5. Put the repo fingerprint into README.md ("Own F-Droid repository").
+5. Put the repo fingerprint into README.md ("Own F-Droid repository"). Done 2026-10-14.
 
 ### Per release
 

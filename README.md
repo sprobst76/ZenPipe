@@ -19,9 +19,10 @@ between these channels without reinstalling:
   on the phone. Obtainium does not check the signer: verify the first install against the
   fingerprint below; Android then rejects updates signed with any other key.
 - **Own F-Droid repository** (F-Droid, Droid-ify, Neo Store): add the repository
-  `https://sprobst76.github.io/ZenPipe/repo` (being set up; the repository fingerprint will be
-  listed here, add it as `?fingerprint=…` to the URL). The repository only distributes the
-  signed APKs from the GitHub releases.
+  `https://sprobst76.github.io/ZenPipe/repo?fingerprint=8458B982F715D2B19BCB8C271C3E58BA8E8656401D4453C5BCCABDD83C0ECE0D`
+  (repository key SHA-256 `84:58:B9:82:F7:15:D2:B1:9B:CB:8C:27:1C:3E:58:BA:8E:86:56:40:1D:44:53:C5:BC:CA:BD:D8:3C:0E:CE:0D`;
+  this is the key of the repository index, not the app signing key below). The repository only
+  distributes the signed APKs from the GitHub releases.
 
 ZenPipe needs a 64-bit ARM device (`arm64-v8a`, practically every phone since about 2017); the
 APK contains no 32-bit or x86 code (the optional content recognition brings a native library).
