@@ -5,3 +5,7 @@ Vierte ZenPipe-Entwicklungsversion.
 • Wiedergabezeit pro Tag (Bild, Ton, Musik, Praxis) in den Zen-Einstellungen
 • Pflichtpause wird um die Zeit seit dem letzten Stopp verkürzt (Ruhezeit-Gutschrift)
 • Praxis-Prüfung: Videos nur für Kanalmitglieder werden erkannt, Fehlabrufe wiederholt
+• Sprachen im Feed: standardmäßig nur Deutsch und Englisch, andere Sprachen werden im Feed nicht angeboten (Erkennung auf dem Gerät, im Zweifel bleibt das Video)
+• Kanal teilen: Abonnieren oder Praxis markieren direkt im selben Fenster
+• Eingeordnete Videos: Korrektur „stimmt / stimmt nicht“ und Export (JSON/CSV) über das Teilen-Menü; Themen und Formate mit lesbaren Namen
+• Kein „Keep Android Open“-Dialog mehr; Praxis-Leerseite und Lizenztexte lesbarer

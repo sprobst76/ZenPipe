@@ -1,6 +1,6 @@
 # Spec: Lokaler Inhalts-Klassifikator (Praxis/Bildung/Aktuelles/Ton) in ZenPipe
 
-Stand: 2026-10-13. **Status: AP 0 geliefert (Messung 2.3), AP 1–3 umgesetzt (Abschnitt 10), AP 4–6 umgesetzt (Abschnitt 11), „Kanal übernehmen“ und vorbereitete Ausgabe (Abschnitt 12), AP 7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
+Stand: 2026-10-14. **Status: AP 0 geliefert (Messung 2.3), AP 1–3 umgesetzt (Abschnitt 10), AP 4–6 umgesetzt (Abschnitt 11), „Kanal übernehmen“ und vorbereitete Ausgabe (Abschnitt 12), stärkstes Thema/Details nachladen (Abschnitt 13), Korrekturen + Export, Sprachfilter, Praxis-Wahl im Kanal-Blatt (Abschnitt 14), AP 7 offen.** Entscheidungen E1–E8: Empfehlungen bestätigt. Maßgeblich bleibt `rules.md`; diese Spec schlägt Regeln vor,
 Abschnitt 8 listet die nötigen Änderungen an `rules.md`. Quelle des Klassifikators: Projekt YoutubeManager, übergeben als
 `resources/zen-android.zip`, `zen-handoff.zip`, `zen-rules.zip` (**ungetrackt, wird nicht committet**).
 
@@ -727,3 +727,95 @@ Cache, Prüfansicht).
 - Ton „belastend“ am Titel (Stefans Fall) bleibt ein Modellthema; Stufe D hilft nur für Videos der Ausgabe.
 - Kurznamen nur für 18 Themen; Format-Namen werden in der Prüfansicht roh gezeigt.
 - Nachladen im Mobilfunknetz bewusst nie; ob Stefan es dort will, ist offen.
+
+## 14. Umsetzung Release-Test zen.3: Korrekturen, Export, Sprachfilter, Praxis im Kanal-Blatt (2026-10-14)
+
+Anlass: Release-Test von 0.1.0-zen.3 auf dem Defy und Wünsche Stefans (Trainingsdaten für YoutubeManager, Sprachen außerhalb
+Deutsch/Englisch ausblenden, ein Dialog statt zwei beim Teilen eines Kanals). Commits auf `zen`: `zen: turn off the upstream
+announcement dialogs`, `zen: margins and text size of the empty practice page`, `zen: short names for all classifier topics,
+formats and tones`, `zen: reflow the license notices for the phone screen`, `zen: show what the content switches do around the
+model download`, `zen: corrections and debug export in the classification review`, `zen: feed language filter`, `zen: choose
+subscribe or practice in one channel import sheet`. Regeln: `rules.md` „Funktionen“, „Feed“ (Sprachen im Feed),
+„Zen-Einstellungen“ (`feed_langs`), „Inhalts-Erkennung“ (Schalter, Prüfansicht, Korrektur, Export, Cache, Kanal übernehmen),
+„Absichtsabfrage“ (Kanal-Link).
+
+### 14.1 Fehler aus dem Release-Test
+- **„Keep Android Open“** (Upstream, alle 30 Tage in Release-Builds, nennt NewPipe, Links keepandroidopen.org/woheller69) und
+  der Android-5-Hinweis (newpipe.net) laufen über `ZenFeatures.upstreamAnnouncementsEnabled()` = aus. Der leere Tab hieß fest
+  „NewPipe“, jetzt App-Name. Weitere Fundstellen mit „NewPipe“/externen Links, bewusst **nicht** geändert: Über/Lizenz und
+  „Support NewPipe“/„NewPipe website“ (Herkunft), `import_settings_vulnerable_format` (nennt NewPipe 0.27.0 als Formatversion),
+  Fehlerhinweis „IP-Sperre“ mit Link auf newpipe.net/FAQ (`ErrorInfo.YOUTUBE_IP_BAN_FAQ_URL`, hilfreicher Inhalt), Dateiname des
+  Daten-Exports `NewPipeData-*.zip`, Update-Prüfung (ohnehin aus).
+- Praxis-Leerseite: Text 16 sp mit 24 dp Seitenrand statt 24 sp ohne Rand (Kiosk-Layout, nur im Praxis-Fragment angepasst).
+- Kurznamen für alle 37 Themen, 10 Formate und Töne (eigene Ressourcen `zen_taxonomy_strings.xml`, DE/EN), Rohschlüssel nur Rückfall.
+- Lizenztexte: Anzeige umbrochen (`ZenNoticeText.reflow`: harte Umbrüche in Absätzen verbunden, Trennlinien kurz), Dateien unverändert.
+- **Schalter beim Modell-Download (Frage a):** Der Code schaltet nichts ein. `class_feed`/`class_heavy` haben ab Werk den Wert
+  „an“ (4.7) und wirken erst, sobald ein funktionierendes Modell da ist – für den Nutzer sah das wie ein stilles Einschalten aus.
+  Entscheidung (konservativ im Sinne von 4.1/4.7, kein neuer Zustand): Standard bleibt an, wird aber sichtbar: Download-Dialog
+  nennt den Stand beider Schalter und dass Ausschalten eine Lockerung ist, Hinweis nach der Installation, ohne Modell steht unter
+  beiden Zeilen „Noch ohne Wirkung“. Nicht gewählt: Schalter ab Werk aus (wäre eine Lockerung des Standards, und das Einschalten
+  danach wäre zwar strenger, aber ein zusätzlicher Schritt, den die Spec nicht vorsieht).
+- **Absichtsabfrage nach ~6 min beim Kanal-Link (Frage b):** gewollt. Das Blatt fragt nicht; „Nur ansehen“ ist ein externer Link
+  in `MainActivity` (Abfrage nach Ablauf des 5-min-Cooldowns), und die Rückkehr aus der YouTube-App nach ≥ 5 min Hintergrund fragt
+  ebenfalls (`rules.md` „Absichtsabfrage“).
+
+### 14.2 Korrekturen und Export (Teil B)
+- `UserLabel` in Tabelle `lbl`, T-Ergebnis vor einer D-Neuberechnung in Spalte `tprev`; beides wird in `SqliteClassStore.onOpen`
+  angelegt (kein Versionssprung, alte Einträge gültig, ältere App-Versionen lesen weiter; Downgrade-Absturz vermieden).
+- Prüfansicht als Liste (`ZenClassReview`): Tipp → Stimmt / Stimmt nicht (7 Kategorien oder keine) / entfernen.
+- `ZenClassExport` (rein, JSON über nanojson, CSV): Feldlisten `TOP_FIELDS`, `VIDEO_FIELDS`, `LANGUAGE_FIELDS`; Unit-Test prüft
+  Struktur und verbietet Schlüssel mit history/subscri/setting/lock/pause/log/watch/zs_/zp_/cd_/state.
+- Ausgabe-Export: Picks der aktuellen Ausgabe mit `title_only` (T, ggf. aus `tprev`) und `with_details` (D) nebeneinander.
+
+### 14.3 Sprachfilter (Teil C)
+- Extraktor (Jar `3313901108…`, `javap`): `StreamInfo.getLanguageInfo()` gibt es, **YouTube liefert immer null**
+  (Bytecode `aconst_null`); `AudioStream.getAudioLocale()/getAudioTrackType()` (ORIGINAL) nur bei mehrsprachigen Videos;
+  `SubtitlesStream.isAutoGenerated()/getLanguageTag()` = Sprache der automatischen Untertitel (YouTube erzeugt sie in der
+  vom Kanal angegebenen Videosprache). `StreamInfoItem` (Feed/Listen) hat keine Sprachangabe. Reihenfolge der Stufe D:
+  Sprachfeld → Originaltonspur → einzige ASR-Spur; sie ersetzt die Titel-Heuristik. Am Feed wirkt Stufe D nur für Videos,
+  deren Details schon geladen wurden (Kanal-Blatt, Prüfung, geöffnet, „Details nachladen“) – die Auswahl selbst lädt nichts.
+- Heuristik `ZenLangDetect` (Wortlisten ~100–200 häufige Wörter je Sprache für de, en, es, fr, it, pt, ca, nl, tr, pl,
+  seltene Buchstaben, Endungen, Buchstabengruppen; Schrift für ru/uk, ar/fa/ur, hi, ja, ko, zh, el, he, th).
+  Entscheidung `ZenLangFilter` siehe `rules.md`. Kanalebene über die letzten 20 Einträge des Kanals im Cache.
+- **Fehlerraten (Unit-Test `ZenLanguageTest`, erfundene Titel, ohne Kanal-Kontext):**
+
+| Satz | Deutsch/Englisch/Gemischt fälschlich ausgeblendet | fremd ausgeblendet | Sprache richtig benannt |
+|---|---|---|---|
+| A (Wortlisten daran abgestimmt, 30 de, 30 en, 15 gemischt, 82 fremd) | 0 / 75 | 70 / 82 (85 %) | 81 / 82; de 29/30, en 29/30 |
+| B (erst nach der Abstimmung geschrieben, nicht abgestimmt; 20 de, 20 en, 10 gemischt, 62 fremd) | **0 / 50** | **38 / 62 (61 %)**; lateinische Schrift 24 / 48 (50 %), andere Schriften 14 / 14 | 47 / 62; de 18/20, en 16/20; Ukrainisch 0/2 als „uk“ (als Russisch erkannt, trotzdem ausgeblendet) |
+| B mit Kanal-Kontext (die übrigen Titel derselben Sprache als Kanalverlauf) | – | 41 / 62 (66 %) | – |
+
+  Ehrlich: Satz A ist überangepasst; Satz B ist die realistischere Schätzung. Kurze lateinische Titel („Cinco libros que debes
+  leer“, „Hem anat al desert“) bleiben oft unerkannt und damit im Feed – gewollt („unsicher = bleibt“), die Kanal-Mehrheit
+  fängt einen Teil davon. Beide katalanischen TEDx-Titel werden erkannt und ohne Kanalverlauf ausgeblendet.
+- Am Gerät (TEDx Talks vorübergehend abonniert, Feed aktualisiert): Ausgabe `feed_lang hidden=9 langs=ca:2,es:2,hi:4,tr:1`;
+  beide Katalanisch-Titel per Titel ausgeblendet (1,00), „Sobre assassins silenciosos i àngels de la guarda“ nur 0,60
+  (unsicher, blieb in der Ausgabe auf Platz 1). Vier Videos von TEDxBocconiUMumbai mit **englischem Titel** wurden über die
+  automatische Untertitelspur als **Hindi** ausgeblendet (ASR-Spur `hi` per Abruf der Watch-Seite bestätigt; ob wirklich
+  durchgehend Hindi gesprochen wird, ist nicht geprüft). Spanisch/Türkisch ebenso über Stufe D.
+
+### 14.4 Praxis im Kanal-Blatt (Teil D, Wunsch Stefan)
+- Statt Blatt → Prüf-/Bestätigungsdialog nun ein Blatt: Abschnitt „Praxis-Kanal?“ mit Prüfergebnis bzw. Warnung, Wirkungstext
+  und Wartezeit auf den Knöpfen; Knöpfe „Als Praxis-Kanal markieren“ / „Trotzdem …“ und „Abonnieren und als Praxis markieren“.
+  Dialogfreie Teile ausgelagert: `ZenPraxisUi.addPlan/addText/commitAdd`, `ZenPlausibilityCheck.assess/logOverride`; Kanalseite
+  und Long-Press behalten ihre Dialoge. Texte der Prüfung werden mit dem Kontext des Blatts erzeugt (der ViewModel-Kontext
+  war in Systemsprache: englische Prüfzeile im deutschen Blatt, beim Test gefunden und behoben).
+- Abweichung: `class_check` wird jetzt beim Ende der Einordnung im Blatt protokolliert (vorher erst beim Tipp auf Praxis).
+
+### 14.5 Messwerte (Defy, Debug)
+| Messung | Wert |
+|---|---|
+| Unit-Tests | 381 grün, 3 übersprungen (lokale Modelldaten); neu `ZenClassWhyTest` (2), `ZenNoticeTextTest` (2), `ZenClassExportTest` (5), `ZenLanguageTest` (7), `ZenSettingsLockTest` +1 (Sprachmaske), `ZenPraxisTest` +1 (`addPlan`), `ZenFeaturesTest` erweitert |
+| Migration Cache v1 → neue Spalte/Tabellen | alte Yoga-Einträge nach Update sichtbar, Labels gespeichert |
+| Export | 43 Videos, 30 Spracheinträge, 3 Korrekturen, Ausgabe mit T/D nebeneinander; Kanal-URL/Dauer bei 29 von 43 (die übrigen stammen aus Kanal-Stichproben und stehen nicht in der NewPipe-DB) |
+| Sprachfilter | s. 14.3; Sprache entfernen während Sperre sofort, Zulassen während Sperre abgelehnt (Hinweis „gesperrt bis“) |
+| Kanal-Blatt | gesperrt: Knopf aus + „gesperrt bis“; frei: „(3)“-Wartezeit, „Abonnieren und als Praxis markieren“ → abonniert + ausstehend in einem Schritt; tagesschau: deutliche Warnung inline, „Trotzdem“ → ausstehend + `class_check_override`; Ersteinrichtung: ohne Wartezeit sofort aktiv; Entfernen sofort |
+
+### 14.6 Offen
+- „Keep Android Open“ ist am Gerät nicht sichtbar prüfbar (Debug-Builds zeigen ihn upstream nie; das Release-Paket wurde bewusst
+  nicht angefasst) – nur Code + Unit-Test.
+- Download-Dialog mit Schalter-Stand nicht am Gerät gesehen (Modell war installiert, Löschen braucht beide Schalter aus = Lockerung).
+- Spracherkennung: kurze lateinische Titel (Recall ≈ 50 % im nicht abgestimmten Satz); ASR-Sprache kann von der Titelsprache
+  abweichen (Hindi-Fall); Persisch/Urdu werden erkannt, sind aber nicht in der Auswahl der Einstellung (bleiben damit ausgeblendet).
+- Export: Kanal-URL/Dauer fehlen für Videos, die nur aus Kanal-Stichproben stammen.
+

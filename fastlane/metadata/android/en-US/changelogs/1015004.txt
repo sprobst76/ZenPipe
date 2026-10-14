@@ -5,3 +5,7 @@ Fourth ZenPipe development release.
 • Playing time per day (picture, sound, music, practice) in the Zen settings
 • The mandatory break is shortened by the time since the last stop (rest credit)
 • Practice check: members-only videos are recognized, failed requests are retried
+• Feed languages: German and English by default, other languages are not offered in the feed (detected on the device, unclear videos stay)
+• Share a channel: subscribe or mark as practice in the same window
+• Classified videos: "correct / not correct" corrections and export (JSON/CSV) via the share menu; readable topic and format names
+• No more "Keep Android Open" dialog; empty practice page and license texts easier to read
