@@ -69,9 +69,9 @@ class ZenClassReview(private val activity: Activity) {
     }
 
     private fun exportLanguage(r: ZenFeedLanguages.Result) = ZenClassExport.Language(
-        r.entry.guess.lang,
-        r.entry.guess.confidence,
-        r.entry.guess.source,
+        r.guess.lang,
+        r.guess.confidence,
+        r.guess.source,
         r.decision.hidden
     )
 
@@ -276,7 +276,7 @@ class ZenClassReview(private val activity: Activity) {
         val json = File(dir, "zenpipe-classifications-$stamp.json")
         val csv = File(dir, "zenpipe-classifications-$stamp.csv")
         val langVideos = allLangs.values.map { r ->
-            ZenClassExport.LangVideo(r.entry.key, r.entry.title, r.entry.channelName, exportLanguage(r), r.entry.guess.scores)
+            ZenClassExport.LangVideo(r.entry.key, r.entry.title, r.entry.channelName, exportLanguage(r), r.guess.scores)
         }
         json.writeText(ZenClassExport.json(meta, videos, labels.filter { it.key !in inExport }, edition, langVideos))
         csv.writeText(ZenClassExport.csv(videos))

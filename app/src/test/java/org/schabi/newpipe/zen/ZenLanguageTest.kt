@@ -199,7 +199,7 @@ class ZenLanguageTest {
         val germanChannel = List(6) { ZenLangGuess("de", 0.9, mapOf("de" to 4.0), "T") }
         assertFalse("a German channel protects against one wrong judgement", ZenLangFilter.decide(strong, germanChannel, allowed).hidden)
         val details = ZenLangDetect.fromDetails("ca-ES")!!
-        assertTrue("audio/captions language beats the channel", ZenLangFilter.decide(details, germanChannel, allowed).hidden)
+        assertTrue("a hard detail language beats the channel", ZenLangFilter.decide(details, germanChannel, allowed).hidden)
         assertFalse(ZenLangFilter.decide(ZenLangDetect.fromDetails("de-DE")!!, emptyList(), allowed).hidden)
         assertFalse(ZenLangFilter.decide(ZenLangGuess.UNKNOWN, spanishChannel, allowed).hidden)
         // allowing the language shows it again
@@ -366,5 +366,84 @@ class ZenLanguageTest {
         }
         println("lang-testB foreign hidden with channel history $withChannel/$total")
         assertTrue("never hide German/English: $falseHidden", falseHidden.isEmpty())
+    }
+
+    /** Decision for a title with detail signals (no channel history). */
+    private fun withDetails(title: String, field: String? = null, audio: String? = null, asr: String? = null): ZenLangFilter.Decision = ZenLangFilter.decide(ZenLangDetect.combine(ZenLangDetect.detect(title, "TEDxBocconiUMumbai"), ZenLangSignals.of(field, audio, asr)), emptyList(), allowed)
+
+    /**
+     * Hierarchy of the detail signals (ZenLangDetect.combine): field/original audio are hard but
+     * lose against a clearly different title language; the automatic caption track (ASR) only
+     * confirms the title and never hides on its own (device test: English TEDx talks with ASR "hi").
+     */
+    @Test
+    fun `automatic captions alone never hide, they only confirm the title`() {
+        val english = "How I learned to listen to my body | Priya Mehta | TEDxBocconiUMumbai"
+        assertEquals("en", ZenLangDetect.detect(english, "TEDxBocconiUMumbai").lang)
+        // English title + ASR hi -> the title wins, stays
+        val en = withDetails(english, asr = "hi")
+        assertFalse(en.hidden)
+        assertEquals(ZenLangFilter.Verdict.ALLOWED, en.verdict)
+        assertEquals("S:hi", ZenLangDetect.combine(ZenLangDetect.detect(english, null), ZenLangSignals.of(null, null, "hi")).note)
+        // Catalan title + ASR ca -> confirmed, hidden (even where the title alone is unsure)
+        val catalan = "Sobre assassins silenciosos i àngels de la guarda"
+        val ca = withDetails(catalan, asr = "ca")
+        assertTrue(ca.hidden)
+        assertEquals("ca", ca.lang)
+        assertEquals("TS", ZenLangDetect.combine(ZenLangDetect.detect(catalan, null), ZenLangSignals.of(null, null, "ca-ES")).source)
+        // unsure title + ASR hi -> "captions only", stays
+        val unsure = "Ganesh Chaturthi 2026"
+        assertNull(ZenLangDetect.detect(unsure, "TEDxBocconiUMumbai").lang)
+        val hiOnly = withDetails(unsure, asr = "hi")
+        assertFalse(hiOnly.hidden)
+        assertEquals(ZenLangFilter.Verdict.UNCERTAIN, hiOnly.verdict)
+        assertEquals("hi", hiOnly.lang)
+        // Devanagari title -> hidden by the script, with or without contradicting captions
+        val devanagari = "मन की शांति के लिए ध्यान"
+        assertTrue(withDetails(devanagari).hidden)
+        assertTrue(withDetails(devanagari, asr = "en").hidden)
+        assertTrue(withDetails(devanagari, asr = "hi").hidden)
+    }
+
+    @Test
+    fun `original audio track is hard unless the title clearly says otherwise`() {
+        val english = "How I learned to listen to my body | Priya Mehta | TEDxBocconiUMumbai"
+        // contradiction (multi-language video with a clearly English title, often dubbed): stays
+        val contra = withDetails(english, audio = "hi")
+        assertFalse(contra.hidden)
+        assertEquals("A:hi", ZenLangDetect.combine(ZenLangDetect.detect(english, null), ZenLangSignals.of(null, "hi-IN", null)).note)
+        // unsure title: the original audio track decides
+        assertTrue(withDetails("Ganesh Chaturthi 2026", audio = "hi").hidden)
+        // agreeing title: hidden; the language field counts like the audio track
+        assertTrue(withDetails("Sobre assassins silenciosos i àngels de la guarda", audio = "ca").hidden)
+        assertTrue(withDetails("Ganesh Chaturthi 2026", field = "es").hidden)
+        assertFalse(withDetails("Ganesh Chaturthi 2026", audio = "de").hidden)
+    }
+
+    @Test
+    fun `captions-only languages are no channel evidence`() {
+        val captionsOnly = List(6) { ZenLangDetect.combine(ZenLangGuess.UNKNOWN, ZenLangSignals.of(null, null, "hi")) }
+        assertNull(ZenLangFilter.channelMajority(captionsOnly, ZenLangFilter.CHANNEL_MIN, ZenLangFilter.CHANNEL_SHARE))
+        val g = ZenLangGuess("hi", 0.5, mapOf("hi" to 1.5), "T") // medium title evidence
+        assertFalse(ZenLangFilter.decide(g, captionsOnly, allowed).hidden)
+        val hardHindi = List(4) { ZenLangDetect.fromDetails("hi", "A")!! }
+        assertTrue(ZenLangFilter.decide(g, hardHindi, allowed).hidden)
+    }
+
+    @Test
+    fun `stored signals are re-evaluated without a new request`() {
+        val store = ZenClassCache(MemoryClassStore())
+        val title = "How I learned to listen to my body | Priya Mehta | TEDxBocconiUMumbai"
+        val signals = ZenLangSignals.of(null, null, "hi")!!
+        assertEquals(signals, ZenLangSignals.decode(signals.encode()))
+        assertNull(ZenLangSignals.decode("f=;a=;s="))
+        // an entry stored with an older (stricter) result: the rule re-evaluates the raw signals
+        val stale = LangEntry("0:t1", "ch", title, "TEDxBocconiUMumbai", ZenLangDetect.fromDetails("hi")!!, 1, signals)
+        store.putLangs(listOf(stale))
+        val r = ZenFeedLanguages.decide(store, store.langs(listOf("0:t1")).values, allowed).getValue("0:t1")
+        assertFalse(r.decision.hidden)
+        assertEquals("en", r.guess.lang)
+        val fresh = ZenFeedLanguages.detailsEntry("0:t2", "ch", "No soc adoptada, vaig ser adoptada. I això em condiciona", "TEDx Talks", ZenLangSignals.of(null, null, "ca")!!, 2)
+        assertEquals("TS", fresh.guess.source)
     }
 }

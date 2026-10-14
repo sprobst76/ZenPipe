@@ -9,3 +9,4 @@ Vierte ZenPipe-Entwicklungsversion.
 • Kanal teilen: Abonnieren oder Praxis markieren direkt im selben Fenster
 • Eingeordnete Videos: Korrektur „stimmt / stimmt nicht“ und Export (JSON/CSV) über das Teilen-Menü; Themen und Formate mit lesbaren Namen
 • Kein „Keep Android Open“-Dialog mehr; Praxis-Leerseite und Lizenztexte lesbarer
+• Sprachfilter blendet Videos nicht mehr allein wegen der automatischen Untertitelspur aus

@@ -27,7 +27,8 @@ object ZenFeedLanguages {
 
     data class Item(val key: String, val channel: String, val title: String, val channelName: String)
 
-    data class Result(val entry: LangEntry, val decision: ZenLangFilter.Decision)
+    /** [guess] = the language under the current rule (re-evaluated from the stored signals). */
+    data class Result(val entry: LangEntry, val decision: ZenLangFilter.Decision, val guess: ZenLangGuess = entry.guess)
 
     @Volatile
     private var lastPurge = 0L
@@ -48,13 +49,21 @@ object ZenFeedLanguages {
         return decide(store, all.values, allowed)
     }
 
+    /**
+     * The language of a stored entry under the current rule: entries with detail signals are
+     * re-evaluated from title and signals ([ZenLangDetect.combine]), without a new request.
+     */
+    @JvmStatic
+    fun guessOf(e: LangEntry): ZenLangGuess = e.signals?.let { ZenLangDetect.combine(ZenLangDetect.detect(e.title, e.channelName), it) } ?: e.guess
+
     /** Decisions for stored entries (with the history of their channels). */
     @JvmStatic
     fun decide(store: ClassStore, entries: Collection<LangEntry>, allowed: Set<String>): Map<String, Result> {
         val history = store.langsByChannel(entries.map { it.channel }.filter { it.isNotEmpty() }, CHANNEL_HISTORY)
         return entries.associate { e ->
-            val others = history[e.channel].orEmpty().filter { it.key != e.key }.map { it.guess }
-            e.key to Result(e, ZenLangFilter.decide(e.guess, others, allowed))
+            val others = history[e.channel].orEmpty().filter { it.key != e.key }.map { guessOf(it) }
+            val g = guessOf(e)
+            e.key to Result(e, ZenLangFilter.decide(g, others, allowed), g)
         }
     }
 
@@ -69,17 +78,22 @@ object ZenFeedLanguages {
         return annotate(store, items, ZenSettings.feedLanguages(), nowMillis)
     }
 
+    /** Stored entry of a video whose details ([signals]) are known: title heuristic combined with them. */
+    @JvmStatic
+    fun detailsEntry(key: String, channel: String?, title: String?, channelName: String?, signals: ZenLangSignals, nowMillis: Long): LangEntry {
+        val g = ZenLangDetect.combine(ZenLangDetect.detect(title, channelName), signals)
+        return LangEntry(key, channel.orEmpty(), title.orEmpty(), channelName.orEmpty(), g, nowMillis, signals)
+    }
+
     /**
-     * The language reported with the video details ([code], e.g. original audio track or automatic
-     * captions) replaces the title heuristic for this video.
+     * The language signals of the video details (language field, original audio track, automatic
+     * captions) are stored with the video and combined with the title ([ZenLangDetect.combine]).
      */
     @JvmStatic
-    fun recordDetails(context: Context, key: String, channel: String?, title: String?, channelName: String?, code: String?) {
-        val g = ZenLangDetect.fromDetails(code) ?: return
+    fun recordDetails(context: Context, key: String, channel: String?, title: String?, channelName: String?, signals: ZenLangSignals?) {
+        if (signals == null) return
         try {
-            ZenClassCache.get(context).putLangs(
-                listOf(LangEntry(key, channel.orEmpty(), title.orEmpty(), channelName.orEmpty(), g, System.currentTimeMillis()))
-            )
+            ZenClassCache.get(context).putLangs(listOf(detailsEntry(key, channel, title, channelName, signals, System.currentTimeMillis())))
         } catch (e: Exception) {
             Log.w("ZenLanguage", "recordDetails", e)
         }
@@ -90,19 +104,35 @@ object ZenFeedLanguages {
         maximumFractionDigits = 2
     }.format(v)
 
-    /** "Language: Catalan 0.95 (title) · hidden in the feed" and the like. */
+    private fun sourceName(context: Context, source: String) = context.getString(
+        when (source) {
+            "D" -> R.string.zen_lang_src_field
+            "A" -> R.string.zen_lang_src_audio
+            "TS" -> R.string.zen_lang_src_title_captions
+            "S" -> R.string.zen_lang_src_captions
+            else -> R.string.zen_lang_src_title
+        }
+    )
+
+    /**
+     * "Language: Catalan 0.95 (title) · hidden in the feed", "Language: Hindi (captions track only),
+     * not hidden", "Language: English (title) · captions track: Hindi, the title wins" and the like.
+     */
     @JvmStatic
     fun whyLine(context: Context, r: Result): String {
         val locale = androidx.core.os.ConfigurationCompat.getLocales(context.resources.configuration)[0] ?: java.util.Locale.getDefault()
-        val g = r.entry.guess
+        val g = r.guess
         val d = r.decision
         val name = g.lang?.let { ZenLangOptions.name(it, locale) }
-        val src = context.getString(if (g.source == "D") R.string.zen_lang_src_details else R.string.zen_lang_src_title)
-        return when (d.verdict) {
-            ZenLangFilter.Verdict.UNKNOWN -> context.getString(R.string.zen_lang_why_unknown)
-            ZenLangFilter.Verdict.ALLOWED -> context.getString(R.string.zen_lang_why_allowed, name, src)
-            ZenLangFilter.Verdict.UNCERTAIN -> context.getString(R.string.zen_lang_why_uncertain, name, num(d.score), src)
-            ZenLangFilter.Verdict.HIDDEN -> context.getString(R.string.zen_lang_why_hidden, name, num(d.score), src)
+        val src = sourceName(context, g.source)
+        val line = when {
+            d.verdict == ZenLangFilter.Verdict.UNKNOWN -> context.getString(R.string.zen_lang_why_unknown)
+            d.verdict == ZenLangFilter.Verdict.ALLOWED -> context.getString(R.string.zen_lang_why_allowed, name, src)
+            g.source == "S" -> context.getString(R.string.zen_lang_why_captions_only, name)
+            d.verdict == ZenLangFilter.Verdict.UNCERTAIN -> context.getString(R.string.zen_lang_why_uncertain, name, num(d.score), src)
+            else -> context.getString(R.string.zen_lang_why_hidden, name, num(d.score), src)
         }
+        val note = g.note?.split(':')?.takeIf { it.size == 2 } ?: return line
+        return line + context.getString(R.string.zen_lang_why_overruled, sourceName(context, note[0]), ZenLangOptions.name(note[1], locale))
     }
 }

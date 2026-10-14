@@ -10,14 +10,27 @@ import java.util.Locale
 /**
  * Result of a language detection. [lang] = ISO 639-1 code or null (unknown); [confidence] = how
  * clearly [lang] beats the second best language (0..1, for display); [scores] = the evidence per
- * language (the filter compares it with the allowed languages); [source] = "T" (title + channel
- * heuristic) or "D" (language reported with the video details: original audio track, automatic
- * captions or the service's own language field).
+ * language (the filter compares it with the allowed languages); [source] = where [lang] comes from
+ * (see [ZenLangDetect.combine]): "T" title + channel heuristic, "D" the service's language field,
+ * "A" original audio track, "TS" title confirmed by the automatic captions, "S" automatic captions
+ * only (weak, never hides). [note] = a detail signal the title overruled ("A:hi", "S:hi"; display).
  */
-data class ZenLangGuess(val lang: String?, val confidence: Double, val scores: Map<String, Double>, val source: String) {
+data class ZenLangGuess(
+    val lang: String?,
+    val confidence: Double,
+    val scores: Map<String, Double>,
+    val source: String,
+    val note: String? = null
+) {
+    /** A source that may hide a video on its own (besides the title heuristic). */
+    val isHardDetails get() = source in HARD_DETAILS
+
     companion object {
         @JvmField
         val UNKNOWN = ZenLangGuess(null, 0.0, emptyMap(), "T")
+
+        /** Detail sources with full strength ("D" also covers entries of older versions). */
+        val HARD_DETAILS = setOf("D", "A", "TS")
 
         fun encodeScores(m: Map<String, Double>) = m.entries.sortedByDescending { it.value }.take(4)
             .joinToString(",") { "${it.key}=${String.format(Locale.ROOT, "%.2f", it.value)}" }
@@ -27,6 +40,32 @@ data class ZenLangGuess(val lang: String?, val confidence: Double, val scores: M
                 val i = it.indexOf('=')
                 if (i > 0) it.substring(i + 1).toDoubleOrNull()?.let { v -> put(it.substring(0, i), v) }
             }
+        }
+    }
+}
+
+/**
+ * The raw language signals of the video details (normalized ISO codes): the service's own language
+ * [field] (YouTube never fills it), the [audio] locale of the ORIGINAL track of a multi-language
+ * video and the language of the single automatic speech-recognition caption track ([asr]). Stored
+ * with the language entry, so a changed rule re-evaluates them without a new request.
+ */
+data class ZenLangSignals(val field: String?, val audio: String?, val asr: String?) {
+    fun encode() = "f=${field.orEmpty()};a=${audio.orEmpty()};s=${asr.orEmpty()}"
+
+    companion object {
+        /** Signals from raw tags, or null when none of them names a language. */
+        @JvmStatic
+        fun of(field: String?, audio: String?, asr: String?): ZenLangSignals? {
+            val s = ZenLangSignals(ZenLangDetect.normalize(field), ZenLangDetect.normalize(audio), ZenLangDetect.normalize(asr))
+            return if (s.field == null && s.audio == null && s.asr == null) null else s
+        }
+
+        @JvmStatic
+        fun decode(s: String?): ZenLangSignals? {
+            if (s.isNullOrEmpty()) return null
+            val m = s.split(';').mapNotNull { p -> p.indexOf('=').takeIf { it > 0 }?.let { p.substring(0, it) to p.substring(it + 1) } }.toMap()
+            return of(m["f"], m["a"], m["s"])
         }
     }
 }
@@ -242,20 +281,59 @@ object ZenLangDetect {
         return ZenLangGuess(best.key, conf, scores, "T")
     }
 
-    /**
-     * The language the service reports with the video details ([code] = BCP 47 tag or ISO code,
-     * e.g. of the original audio track or the automatic captions); null if none.
-     */
+    /** ISO 639-1/2 code of a BCP 47 tag or ISO code ("pt-BR" -> "pt"), or null. */
     @JvmStatic
-    fun fromDetails(code: String?): ZenLangGuess? {
+    fun normalize(code: String?): String? {
         val lang = code?.trim()?.takeIf { it.isNotEmpty() }?.let { Locale.forLanguageTag(it.replace('_', '-')).language }
             ?.takeIf { it.length in 2..3 && it != "und" } ?: return null
-        val norm = when (lang) {
+        return when (lang) {
             "iw" -> "he"
             "in" -> "id"
             else -> lang
         }
-        return ZenLangGuess(norm, DETAILS_CONFIDENCE, mapOf(norm to FULL_EVIDENCE * 2), "D")
+    }
+
+    /** A hard detail language ([source] "D" field, "A" original audio, "TS" title + captions); null if none. */
+    @JvmStatic
+    @JvmOverloads
+    fun fromDetails(code: String?, source: String = "D"): ZenLangGuess? {
+        val norm = normalize(code) ?: return null
+        return ZenLangGuess(norm, DETAILS_CONFIDENCE, mapOf(norm to FULL_EVIDENCE * 2), source)
+    }
+
+    /** From this confidence on the title clearly names its language (it then wins against a detail signal). */
+    const val CLEAR_TITLE = 0.45
+
+    /**
+     * The language of a video from its [title] heuristic ([detect]) and the detail [signals].
+     * Hierarchy (a video is hidden only for a foreign language from a hard signal, never for an
+     * unclear or contradicted one):
+     * 1. Hard signals: the language field, else the original audio track. They decide, unless the
+     *    title clearly ([CLEAR_TITLE]) names another language: then the title wins and the signal
+     *    is only noted. A multi-language video whose title is clearly English is usually offered to
+     *    an English audience (often with a dubbed track), so "unsure = keep" applies.
+     * 2. The title heuristic itself (a clear foreign script, foreign words) – unchanged.
+     * 3. The automatic caption track (ASR) is weak: YouTube labels it with the language the uploader
+     *    set for the channel, not the one spoken (four English TEDxBocconiUMumbai talks carried "hi").
+     *    It only confirms the title: same language -> hard ("TS"); another language -> the title
+     *    wins; no title language -> "S" (shown as "captions only", never hidden, not counted for the
+     *    channel majority).
+     */
+    @JvmStatic
+    fun combine(title: ZenLangGuess, signals: ZenLangSignals?): ZenLangGuess {
+        if (signals == null) return title
+        val titleClear = title.lang != null && title.confidence >= CLEAR_TITLE
+        val hard = signals.field?.let { it to "D" } ?: signals.audio?.let { it to "A" }
+        if (hard != null) {
+            val (code, src) = hard
+            return if (titleClear && title.lang != code) title.copy(note = "$src:$code") else fromDetails(code, src)!!
+        }
+        val asr = signals.asr ?: return title
+        return when (title.lang) {
+            asr -> fromDetails(asr, "TS")!!
+            null -> ZenLangGuess(asr, 0.0, emptyMap(), "S")
+            else -> title.copy(note = "S:$asr")
+        }
     }
 
     const val DETAILS_CONFIDENCE = 0.95
@@ -300,17 +378,21 @@ object ZenLangFilter {
     fun exclusionScore(g: ZenLangGuess, allowed: Set<String>): Double {
         val lang = g.lang ?: return 0.0
         if (lang in allowed) return 0.0
-        if (g.source == "D") return g.confidence
+        if (g.isHardDetails) return g.confidence
+        if (g.source == "S") return 0.0 // captions only: never hides
         val foreign = g.scores.filterKeys { it !in allowed }.values.maxOrNull() ?: return 0.0
         val ok = g.scores.filterKeys { it in allowed }.values.maxOrNull() ?: 0.0
         if (foreign <= 0) return 0.0
         return (1 - ok / foreign).coerceAtLeast(0.0) * minOf(1.0, foreign / ZenLangDetect.FULL_EVIDENCE)
     }
 
-    /** Majority language of a channel from its judged videos ([MEDIUM] or more), or null. */
+    /**
+     * Majority language of a channel from its judged videos (hard details or title [MEDIUM] or
+     * more; a caption track alone is no evidence), or null.
+     */
     @JvmStatic
     fun channelMajority(history: List<ZenLangGuess>, minCount: Int, minShare: Double): String? {
-        val judged = history.filter { it.lang != null && (it.source == "D" || it.confidence >= MEDIUM) }
+        val judged = history.filter { it.lang != null && it.source != "S" && (it.isHardDetails || it.confidence >= MEDIUM) }
         if (judged.size < minCount) return null
         val top = judged.groupingBy { it.lang!! }.eachCount().maxByOrNull { it.value } ?: return null
         return if (top.value.toDouble() / judged.size >= minShare) top.key else null

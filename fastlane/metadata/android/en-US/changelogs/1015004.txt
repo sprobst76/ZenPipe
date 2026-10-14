@@ -9,3 +9,4 @@ Fourth ZenPipe development release.
 • Share a channel: subscribe or mark as practice in the same window
 • Classified videos: "correct / not correct" corrections and export (JSON/CSV) via the share menu; readable topic and format names
 • No more "Keep Android Open" dialog; empty practice page and license texts easier to read
+• Language filter no longer hides videos only because of the automatic captions track

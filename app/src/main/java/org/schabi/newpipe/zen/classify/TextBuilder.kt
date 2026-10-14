@@ -14,8 +14,8 @@ data class VideoText(
     val description: String? = null,
     val categoryId: String? = null,
     val tags: List<String>? = null,
-    /** Language reported with the details (feed language filter only, not part of the text). */
-    val langHint: String? = null,
+    /** Language signals of the details (feed language filter only, not part of the text). */
+    val langSignals: org.schabi.newpipe.zen.ZenLangSignals? = null,
     /** Channel URL from the details (feed language filter only, not part of the text). */
     val channelUrl: String? = null
 ) {

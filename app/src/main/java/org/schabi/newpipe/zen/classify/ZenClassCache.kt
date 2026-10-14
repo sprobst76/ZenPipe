@@ -89,6 +89,8 @@ data class UserLabel(
 /**
  * Detected language of a video (feed language filter). Kept separately from [ClassEntry] because
  * it works without the classifier model. [channel] = channel key of the feed (uploader URL or name).
+ * [guess] = the stored result; [signals] = raw detail signals (if the details were loaded), from
+ * which the current rule re-evaluates the language without a new request.
  */
 data class LangEntry(
     val key: String,
@@ -96,7 +98,8 @@ data class LangEntry(
     val title: String,
     val channelName: String,
     val guess: org.schabi.newpipe.zen.ZenLangGuess,
-    val atMillis: Long
+    val atMillis: Long,
+    val signals: org.schabi.newpipe.zen.ZenLangSignals? = null
 )
 
 /** Storage of [ClassEntry]s (SQLite on the device, in memory in tests). */
@@ -238,7 +241,10 @@ private class SqliteClassStore(context: Context) :
     /**
      * Additions after schema version 1 are made here instead of a version bump, so the file stays
      * readable for older ZenPipe versions (they ignore the extra column/table) and every existing
-     * entry stays valid: column `tprev` (earlier title-only result) and table `lbl` (user labels).
+     * entry stays valid: column `tprev` (earlier title-only result), table `lbl` (user labels), table
+     * `lang` (feed languages) and its column `sig` (raw detail signals). When `sig` is added, the older
+     * detail languages (`src` "D") are dropped: they did not record whether they came from the audio
+     * track or only from the automatic captions; the feed re-detects them from the title.
      */
     override fun onOpen(db: SQLiteDatabase) {
         super.onOpen(db)
@@ -255,6 +261,21 @@ private class SqliteClassStore(context: Context) :
                 "src TEXT, scores TEXT, at INTEGER)"
         )
         db.execSQL("CREATE INDEX IF NOT EXISTS lang_channel ON lang(channel, at)")
+        val langTable = db.rawQuery("PRAGMA table_info(lang)", null).use { c ->
+            val out = HashSet<String>()
+            while (c.moveToNext()) out.add(c.getString(1))
+            out
+        }
+        if ("sig" !in langTable) {
+            db.beginTransaction()
+            try {
+                db.execSQL("ALTER TABLE lang ADD COLUMN sig TEXT")
+                db.execSQL("DELETE FROM lang WHERE src = 'D'")
+                db.setTransactionSuccessful()
+            } finally {
+                db.endTransaction()
+            }
+        }
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -368,7 +389,7 @@ private class SqliteClassStore(context: Context) :
         out
     }
 
-    private val langCols = "k, channel, title, chname, lang, conf, src, scores, at"
+    private val langCols = "k, channel, title, chname, lang, conf, src, scores, at, sig"
 
     private fun langRow(c: Cursor) = LangEntry(
         key = c.getString(0),
@@ -381,7 +402,8 @@ private class SqliteClassStore(context: Context) :
             org.schabi.newpipe.zen.ZenLangGuess.decodeScores(c.getString(7)),
             c.getString(6) ?: "T"
         ),
-        atMillis = c.getLong(8)
+        atMillis = c.getLong(8),
+        signals = org.schabi.newpipe.zen.ZenLangSignals.decode(c.getString(9))
     )
 
     private fun langQuery(sql: String, args: Array<String>): List<LangEntry> = readableDatabase.rawQuery(sql, args).use {
@@ -415,6 +437,7 @@ private class SqliteClassStore(context: Context) :
                     put("src", e.guess.source)
                     put("scores", org.schabi.newpipe.zen.ZenLangGuess.encodeScores(e.guess.scores))
                     put("at", e.atMillis)
+                    put("sig", e.signals?.encode())
                 }
                 db.insertWithOnConflict("lang", null, v, SQLiteDatabase.CONFLICT_REPLACE)
             }
