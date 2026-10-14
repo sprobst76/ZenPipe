@@ -32,7 +32,7 @@ on:
 jobs:
   build-and-test-jvm:
     runs-on: ubuntu-latest
-    # ZenPipe: a hung packaging step once ran for hours; fail instead
+    # ZenPipe: a hung lint task once ran for hours; fail instead
     timeout-minutes: 40
 
     permissions:
@@ -56,19 +56,20 @@ jobs:
           distribution: "temurin"
           cache: 'gradle'
 
-      # ZenPipe: split into steps with their own timeouts; one combined Gradle run hung after
-      # ":app:packageContinuous FAILED" and never printed the reason
+      # ZenPipe: separate steps with their own timeouts, so a hanging task is named instead of
+      # blocking the whole job (lintAnalyzeContinuous hung in androidx.fragment's
+      # UnsafeFragmentLifecycleObserverDetector; those checks are disabled in app/build.gradle.kts)
       - name: Assemble continuous APK
         timeout-minutes: 15
-        run: ./gradlew assembleContinuous --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+        run: ./gradlew assembleContinuous --stacktrace --console=plain -DskipFormatKtlint
 
       - name: Lint continuous
         timeout-minutes: 15
-        run: ./gradlew lintContinuous --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+        run: ./gradlew lintContinuous --stacktrace --console=plain -DskipFormatKtlint
 
       - name: JVM unit tests
         timeout-minutes: 15
-        run: ./gradlew testDebugUnitTest --stacktrace --console=plain -DskipFormatKtlint "-Dorg.gradle.jvmargs=-Xmx4g --add-opens jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED"
+        run: ./gradlew testDebugUnitTest --stacktrace --console=plain -DskipFormatKtlint
 
       - name: Upload APK
         uses: actions/upload-artifact@v7

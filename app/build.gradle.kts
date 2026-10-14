@@ -130,6 +130,9 @@ configure<ApplicationExtension> {
         lintConfig = file("lint.xml")
         // Continue the debug build even when errors are found
         abortOnError = false
+        // ZenPipe: androidx.fragment's UnsafeFragmentLifecycleObserverDetector never finished on the
+        // call chains of the zen fragments (lintAnalyze ran for hours); both checks are off
+        disable += setOf("FragmentLiveDataObserve", "FragmentAddMenuProvider", "FragmentBackPressedCallback")
     }
 
     compileOptions {
