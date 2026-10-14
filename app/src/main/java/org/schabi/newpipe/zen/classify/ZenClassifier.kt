@@ -229,9 +229,8 @@ class ZenClassifier private constructor(private val app: Context) {
          * tone; level) with the feed weight, then the raw top themes/formats.
          */
         fun describe(context: Context, e: ClassEntry): String {
-            val top = e.top.joinToString(", ") { "${it.first} ${"%.2f".format(java.util.Locale.ROOT, it.second)}" }
             val w = "w ${"%.1f".format(java.util.Locale.ROOT, if (e.cats.isEmpty()) 1.0 else e.weight)}"
-            return "${ZenClassWhy.summary(context, e.cats, e.tone, e.level, e.top)} · $w\n$top"
+            return "${ZenClassWhy.summary(context, e.cats, e.tone, e.level, e.top)} · $w\n${ZenClassWhy.topLine(context, e.top)}"
         }
 
         internal fun log(context: Context, type: String, detail: String) = Zen.log(context).add(type, detail)

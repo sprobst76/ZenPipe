@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: short names of the classifier taxonomy v5 (themes without a name in zen_classify_strings.xml, formats, tone). -->
+<resources>
+    <string name="zen_theme_yoga">Yoga</string>
+    <string name="zen_theme_mobilitaet_kraft_training">Mobilität &amp; Kraft</string>
+    <string name="zen_theme_atmen_breathwork">Atmen</string>
+    <string name="zen_theme_meditation_hypnose">Meditation &amp; Hypnose</string>
+    <string name="zen_theme_schlaf_klang">Schlaf &amp; Klang</string>
+    <string name="zen_theme_ernaehrung_abnehmen">Ernährung</string>
+    <string name="zen_theme_selbstentwicklung_produktivitaet">Selbstentwicklung</string>
+    <string name="zen_theme_beziehungen_dating">Beziehungen</string>
+    <string name="zen_theme_sexualitaet_aufklaerung">Sexualität</string>
+    <string name="zen_theme_tantra_erotik">Tantra &amp; Erotik</string>
+    <string name="zen_theme_spiritualitaet_esoterik">Spiritualität</string>
+    <string name="zen_theme_office_pkm_software">Office &amp; Notiz-Apps</string>
+    <string name="zen_theme_xr_vr">XR &amp; VR</string>
+    <string name="zen_theme_foto_video_design">Foto, Video &amp; Design</string>
+    <string name="zen_theme_rad_mtb">Rad &amp; MTB</string>
+    <string name="zen_theme_familie_kinder">Familie &amp; Alltag</string>
+    <string name="zen_theme_haushalt_diy_vorsorge">Haushalt &amp; DIY</string>
+    <string name="zen_theme_hobby_sammeln_spiele">Hobby &amp; Spiele</string>
+    <string name="zen_theme_mystery_internetkultur">Mystery &amp; Internetkultur</string>
+    <string name="zen_format_mitmach_praxis">zum Mitmachen</string>
+    <string name="zen_format_tutorial_anleitung">Anleitung</string>
+    <string name="zen_format_erklaerung_analyse">Erklärung</string>
+    <string name="zen_format_vortrag_interview">Vortrag &amp; Interview</string>
+    <string name="zen_format_doku_lang">Doku</string>
+    <string name="zen_format_news_aktuell">Nachrichtenformat</string>
+    <string name="zen_format_review_test">Test</string>
+    <string name="zen_format_reaktion_kommentar">Reaktion &amp; Kommentar</string>
+    <string name="zen_format_unterhaltung_vlog">Unterhaltung &amp; Vlog</string>
+    <string name="zen_format_audio_musik">Musik &amp; Klang</string>
+    <string name="zen_tone_neutral">neutral</string>
+</resources>
