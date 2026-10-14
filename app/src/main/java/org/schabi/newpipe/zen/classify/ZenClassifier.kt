@@ -112,7 +112,8 @@ class ZenClassifier private constructor(private val app: Context) {
     private fun classifyNow(key: String, v: VideoText): ClassEntry? {
         idle?.cancel(false)
         try {
-            if (!cache.needsWork(cache.get(key), v.level, ZenClassifierModel.VERSION)) return cache.get(key)
+            val old = cache.get(key)
+            if (!cache.needsWork(old, v.level, ZenClassifierModel.VERSION)) return old
             val pipe = pipeline() ?: return null
             val t0 = System.nanoTime()
             val a = pipe.analyze(v)
@@ -131,7 +132,8 @@ class ZenClassifier private constructor(private val app: Context) {
                 tokens = a.tokens,
                 ms = ms,
                 createdMillis = now,
-                accessedMillis = now
+                accessedMillis = now,
+                previousT = ZenClassCache.previousTFor(old, v.level, ZenClassifierModel.VERSION)
             )
             cache.put(e)
             return e

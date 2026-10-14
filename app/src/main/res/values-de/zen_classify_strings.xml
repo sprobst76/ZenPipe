@@ -26,6 +26,22 @@
     <string name="zen_class_download_switches">Der Download ändert keinen Schalter. Sobald das Modell installiert ist, wirken die beiden Inhalts-Schalter oben in der Liste so, wie sie jetzt stehen: Feed nach Inhalt gewichten: %1$s, belastende Videos begrenzen: %2$s. Ausschalten ist eine Lockerung (24 Stunden), auch jetzt vor dem Download.</string>
     <string name="zen_class_installed_switches">Inhalts-Erkennung aktiv. Nach Inhalt gewichten: %1$s, belastende Videos begrenzen: %2$s (Einstellungen > Zen).</string>
     <string name="zen_class_switch_no_model">Noch ohne Wirkung: wirkt erst mit dem Modell der Inhalts-Erkennung.</string>
+    <!-- review: corrections and export -->
+    <string name="zen_review_export">Exportieren</string>
+    <string name="zen_review_export_title">Einordnungen exportieren</string>
+    <string name="zen_review_export_message">Schreibt alle Einordnungen im Cache (bis 5000), deine Korrekturen und die aktuelle Feed-Ausgabe als JSON- und CSV-Datei und öffnet das Teilen-Menü. ZenPipe selbst sendet nichts.\n\nDie Dateien enthalten echte Videotitel und Kanalnamen: privat halten, nicht öffentlich ins Repo legen. Sie enthalten keinen Verlauf, keine Abos, keine Zen-Einstellungen und keine Sperrzustände.</string>
+    <string name="zen_review_export_share">Teilen</string>
+    <string name="zen_review_export_failed">Export fehlgeschlagen.</string>
+    <string name="zen_review_label_hint">Tippe auf einen Eintrag, um ihn zu korrigieren („Stimmt“ / „Stimmt nicht“ mit den richtigen Kategorien). Korrekturen werden nur auf diesem Gerät gespeichert und exportiert; sie ändern nie den Feed, ein Gewicht oder eine Sperre.</string>
+    <string name="zen_review_label_none">Deine Korrektur: – (tippen)</string>
+    <string name="zen_review_label_correct">Deine Korrektur: stimmt</string>
+    <string name="zen_review_label_wrong">Deine Korrektur: stimmt nicht → %1$s</string>
+    <string name="zen_review_correct">Stimmt</string>
+    <string name="zen_review_wrong">Stimmt nicht …</string>
+    <string name="zen_review_remove">Korrektur entfernen</string>
+    <string name="zen_review_wrong_title">Richtige Kategorien</string>
+    <string name="zen_review_cat_none">keine</string>
+    <string name="zen_review_save">Speichern</string>
     <!-- AP 4: Feed-Gewichtung -->
     <string name="zen_set_class_feed">Inhalts-Erkennung: Feed nach Inhalt gewichten (Aktuelles und Unterhaltung weiter hinten)</string>
     <string name="zen_set_class_heavy">Inhalts-Erkennung: belastende Videos begrenzen (höchstens 1 von 10, nie hintereinander, nicht ganz oben)</string>

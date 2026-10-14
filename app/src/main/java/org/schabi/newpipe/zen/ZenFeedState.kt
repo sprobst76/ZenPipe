@@ -147,6 +147,10 @@ class ZenFeedState(
         log?.add(reason, url)
     }
 
+    /** The stored current edition (read only; for the debug export of the classifications). */
+    @Synchronized
+    fun current(): Edition? = load()
+
     private fun lines(key: String) = (store.getString(key, "") ?: "").split('\n').filter { it.isNotEmpty() }
 
     private fun handledList(): List<String> = lines(KEY_HANDLED)

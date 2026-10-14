@@ -112,18 +112,7 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
     }
 
     /** Review list (spec 6.3): the latest classifications with categories, tone, weight, level and "why". */
-    private fun showReview() {
-        Thread {
-            val entries = ZenClassCache.get(activity).recent(REVIEW_LIMIT)
-            val body = if (entries.isEmpty()) {
-                activity.getString(R.string.zen_class_review_empty)
-            } else {
-                activity.getString(R.string.zen_class_review_hint) + "\n\n" +
-                    entries.joinToString("\n\n") { "${it.title} — ${it.channel}\n${ZenClassifier.describe(activity, it)}" }
-            }
-            activity.runOnUiThread { if (!activity.isFinishing) showText(activity.getString(R.string.zen_class_review), body) }
-        }.start()
-    }
+    private fun showReview() = ZenClassReview(activity).show()
 
     private fun runSelfTest() {
         val wait = AlertDialog.Builder(activity).setMessage(R.string.zen_class_selftest_running).setCancelable(false).show()
@@ -157,10 +146,6 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
             .setView(ScrollView(activity).apply { addView(tv) })
             .setPositiveButton(android.R.string.ok, null)
             .show()
-    }
-
-    companion object {
-        private const val REVIEW_LIMIT = 100
     }
 
     /** Called every second by the settings screen: live progress, re-render on status change. */
