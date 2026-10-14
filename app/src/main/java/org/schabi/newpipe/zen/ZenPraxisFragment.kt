@@ -48,6 +48,22 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = inflater.inflate(R.layout.fragment_kiosk, container, false)
 
+    override fun initViews(rootView: View, savedInstanceState: Bundle?) {
+        super.initViews(rootView, savedInstanceState)
+        // The kiosk layout's empty state is made for one short line (24 sp, no side margin); the
+        // practice hint is a sentence, so it gets the size and margins of the other empty pages.
+        val d = resources.displayMetrics.density
+        rootView.findViewById<View>(R.id.empty_state_view)?.let { box ->
+            box.layoutParams = box.layoutParams.apply { width = ViewGroup.LayoutParams.MATCH_PARENT }
+        }
+        rootView.findViewById<TextView>(R.id.empty_state_message)?.apply {
+            textSize = EMPTY_TEXT_SP
+            gravity = android.view.Gravity.CENTER
+            val side = (EMPTY_SIDE_DP * d).toInt()
+            setPadding(side, paddingTop, side, paddingBottom)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         activity.supportActionBar?.setDisplayShowTitleEnabled(true)
@@ -189,4 +205,10 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
     }
 
     override fun hasMoreItems(): Boolean = false
+
+    private companion object {
+        /** Empty-state text like the other empty pages (`list_empty_view`: default size, 16 dp sides). */
+        const val EMPTY_TEXT_SP = 16f
+        const val EMPTY_SIDE_DP = 24
+    }
 }
