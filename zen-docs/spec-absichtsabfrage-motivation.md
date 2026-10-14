@@ -480,3 +480,13 @@ Keine Upstream-Datei außer den bestehenden Hook-Stellen (`MainActivity`, `Route
    (strengere) Einstellung, falls gewünscht.
 8. **Spät-Fenster 22:00–04:00 fest** in Schritt 2, später an eine Nachtruhe gekoppelt. *Empfehlung: ja, fest, ohne eigene
    Einstellung.*
+
+## 12. Entscheidung von Stefan (2026-10-14)
+
+Stefan übernimmt **alle acht Empfehlungen aus Abschnitt 11** („Merke Dir alle“) und ergänzt: Der Dialog soll **nicht stur würfeln**, sondern aus allen Bausteinen (wechselnde Frage, Zahlenzeile, Praxis-Alternative, später Gegenmittel und Kontextton) **eines oder eine Kombination weise auswählen** (Wortlaut: „wähle eines oder eine Kombination weise aus“).
+
+Umsetzungsvorgabe (Entwurf, vor dem Bau mit Stefan am Gerät abzustimmen):
+- Pro Abfrage wird **eine Hauptaussage** gewählt (nie alles gleichzeitig): Frage, Zahlenzeile oder Gegenmittel; die Praxis-Alternative erscheint zusätzlich, wenn eine Quelle markiert ist.
+- Die Auswahl richtet sich nach Kontext (Tageszeit, Dauer der letzten Sitzung, Anteil „Doch nicht“ in letzter Zeit, Zahlen vorhanden/nicht null) und nach **Wiederholungsschutz** über alle Bausteine, damit sich nichts abnutzt.
+- Sie bleibt **durchschaubar**: kein verstecktes Anreizsystem, die Auswahlregeln stehen in der Spec und in den Einstellungen (Entwurf), nichts wird nach außen gemeldet.
+
