@@ -44,9 +44,10 @@ import org.schabi.newpipe.zen.classify.ZenRules
  * instead of the full channel page: name/avatar, subscription and practice status, and a rough
  * local classification of the newest videos (the same sample, throttling and cache as the
  * practice plausibility check). Actions: subscribe (at once, no lock: its videos are classified
- * and weighted in the feed anyway), mark as practice (the unchanged [ZenPraxisUi] flow with lock
- * and confirmation), just view (the normal channel page). The classification is only a
- * suggestion; nothing happens automatically.
+ * and weighted in the feed anyway), mark as practice and "subscribe and mark as practice" (one
+ * sheet: the check result or warning, the lock text and the short confirmation wait are shown
+ * inline; the lock rules are those of [ZenPraxisUi.commitAdd]), just view (the normal channel
+ * page). The classification is only a suggestion; nothing happens automatically.
  */
 object ZenChannelImport {
     const val TAG = "ZenChannelImport"
@@ -94,7 +95,11 @@ data class ZenChannelImportState(
     val sample: ZenPlausibilityCheck.Sample? = null,
     val profile: ZenChannelProfile.Profile? = null,
     val checkFailed: Boolean = false,
-    val stopped: Boolean = false
+    val stopped: Boolean = false,
+    /** The evaluated check for marking as practice (null while loading/checking). */
+    val assessment: ZenPlausibilityCheck.Assessment? = null,
+    /** elapsedRealtime when the practice confirmation became available (start of its short wait). */
+    val confirmFrom: Long = 0
 ) {
     val checking get() = progress != null
 }
@@ -149,11 +154,12 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
         val ready = ZenClassifierModel.isReady(app)
         if (stop.get()) return
         update { it.copy(info = info, subscribed = subscribed, modelReady = ready, progress = if (ready) 0 to 0 else null) }
+        val channel = ZenPraxisChannel(info.serviceId, info.url, info.name)
         if (!ready) {
             ZenChannelImport.log(app, "channel_import_check", "url=${info.url} result=no_model")
+            update { it.copy(assessment = ZenPlausibilityCheck.assess(app, channel, null)) }
             return
         }
-        val channel = ZenPraxisChannel(info.serviceId, info.url, info.name)
         val sample = try {
             ZenPlausibilityCheck.sample(app, channel, { stop.get() }) { done, total -> update { it.copy(progress = done to total) } }
         } catch (e: Exception) {
@@ -163,7 +169,8 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
         if (stop.get()) return
         if (sample == null || sample.checked.isEmpty()) {
             ZenChannelImport.log(app, "channel_import_check", "url=${info.url} result=failed")
-            update { it.copy(progress = null, checkFailed = sample == null, sample = sample, profile = sample?.let { s -> profileOf(s, info) }) }
+            val a = ZenPlausibilityCheck.assess(app, channel, sample)
+            update { it.copy(progress = null, checkFailed = sample == null, sample = sample, profile = sample?.let { s -> profileOf(s, info) }, assessment = a) }
             return
         }
         val profile = profileOf(sample, info)
@@ -172,7 +179,8 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
             "channel_import_check",
             "url=${info.url} ${ZenChannelProfile.logDetail(profile)} ${ZenPlausibilityCheck.logRequests(sample)}"
         )
-        update { it.copy(progress = null, sample = sample, profile = profile) }
+        val a = ZenPlausibilityCheck.assess(app, channel, sample)
+        update { it.copy(progress = null, sample = sample, profile = profile, assessment = a) }
     }
 
     private fun profileOf(sample: ZenPlausibilityCheck.Sample, info: ChannelInfo): ZenChannelProfile.Profile {
@@ -184,12 +192,23 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    /** Stops a running classification (the practice flow then runs its own check, reusing the cache). */
+    /** Stops a running classification ("skip"): the practice choice then shows "check skipped". */
     fun stopCheck() {
-        if (current().checking) {
+        val s = current()
+        if (s.checking) {
             stop.set(true)
-            update { it.copy(progress = null, stopped = true) }
+            val info = s.info
+            val a = info?.let {
+                ZenPlausibilityCheck.assess(getApplication(), ZenPraxisChannel(it.serviceId, it.url, it.name), null, skipped = true)
+            }
+            update { it.copy(progress = null, stopped = true, assessment = a) }
         }
+    }
+
+    /** The practice confirmation is visible now: its short wait starts once (survives rotation). */
+    fun confirmShown(nowElapsed: Long): Long = synchronized(this) {
+        if (latest.confirmFrom == 0L) update { it.copy(confirmFrom = nowElapsed) }
+        latest.confirmFrom
     }
 
     fun subscribe(done: (Boolean) -> Unit) {
@@ -204,7 +223,7 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
                 false
             }
             if (ok) {
-                action = "subscribe"
+                if (action != "subscribe_praxis") action = "subscribe"
                 ZenChannelImport.log(app, "channel_import", "action=subscribe url=${info.url}")
                 update { it.copy(subscribed = true) }
             }
@@ -236,6 +255,12 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
         model.start(serviceId, url)
         b.zenImportSubscribe.setOnClickListener { onSubscribe() }
         b.zenImportPraxis.setOnClickListener { onPraxis() }
+        b.zenImportBoth.setOnClickListener { confirmPraxis(true) }
+        b.zenImportVideos.setOnClickListener {
+            val checked = model.live.value?.sample?.checked
+            val a = activity
+            if (!checked.isNullOrEmpty() && a != null) ZenPlausibilityCheck.showList(a, checked) {}
+        }
         b.zenImportView.setOnClickListener { onView() }
         model.live.observe(this) { render(it) }
         return AlertDialog.Builder(ctx)
@@ -246,8 +271,16 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        handler.removeCallbacksAndMessages(null)
         binding = null
     }
+
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+    }
+
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
 
     private fun channelUrl() = model.live.value?.info?.url ?: url
 
@@ -328,8 +361,70 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
 
         // actions: subscribing only when not subscribed yet (and the channel is known)
         b.zenImportSubscribe.visibility = if (info != null && s.subscribed == false) View.VISIBLE else View.GONE
-        b.zenImportPraxis.visibility = if (info != null) View.VISIBLE else View.GONE
-        if (info != null) b.zenImportPraxis.text = ZenPraxisUi.menuTitle(ctx, info.serviceId, info.url)
+        renderPraxis(ctx, b, s)
+    }
+
+    /**
+     * The practice choice inline (no second dialog): the check note or warning, what adding means
+     * now (pending 24 h with lock and undo / at once in the setup / locked until) and the buttons
+     * with the short confirmation wait ([ZenSettingsRules.CONFIRM_WAIT_S]).
+     */
+    private fun renderPraxis(ctx: Context, b: ZenChannelImportBinding, s: ZenChannelImportState) {
+        val info = s.info
+        b.zenImportPraxisTitle.visibility = View.GONE
+        b.zenImportPraxisInfo.visibility = View.GONE
+        b.zenImportBoth.visibility = View.GONE
+        b.zenImportVideos.visibility = View.GONE
+        b.zenImportPraxis.isEnabled = true
+        if (info == null) {
+            b.zenImportPraxis.visibility = View.GONE
+            return
+        }
+        b.zenImportPraxis.visibility = View.VISIBLE
+        val plan = ZenPraxisUi.addPlan(ctx, info.serviceId, info.url)
+        when {
+            // remove / cancel pending: immediate as before
+            plan == ZenPraxisUi.AddPlan.ALREADY -> b.zenImportPraxis.text = ZenPraxisUi.menuTitle(ctx, info.serviceId, info.url)
+
+            s.checking -> b.zenImportPraxis.setText(R.string.zen_import_skip_check)
+
+            s.assessment == null -> b.zenImportPraxis.visibility = View.GONE
+
+            else -> {
+                val channel = ZenPraxisChannel(info.serviceId, info.url, info.name)
+                // texts again with the sheet's context: the model only has the application context,
+                // which may still be in the system language (the result itself is the same)
+                val a = ZenPlausibilityCheck.assess(ctx, channel, s.sample, skipped = s.stopped && s.sample == null, log = false)
+                b.zenImportPraxisTitle.visibility = View.VISIBLE
+                b.zenImportPraxisInfo.visibility = View.VISIBLE
+                // the "not loadable / members only" note already stands above the buttons' section
+                val failed = s.sample?.let { ZenPlausibilityCheck.failedNote(ctx, it) }
+                val check = (a.warning ?: a.note).let { t -> failed?.let { t.replace("\n\n$it", "").replace("\n$it", "") } ?: t }
+                b.zenImportPraxisInfo.text = listOf(check, ZenPraxisUi.addText(ctx, channel, plan)).joinToString("\n\n")
+                if (!s.sample?.checked.isNullOrEmpty()) b.zenImportVideos.visibility = View.VISIBLE
+                val warned = a.warning != null
+                val markLabel = if (warned) ctx.getString(R.string.zen_import_praxis_anyway) else ctx.getString(R.string.zen_praxis_mark)
+                val bothLabel = ctx.getString(if (warned) R.string.zen_import_both_anyway else R.string.zen_import_both)
+                val showBoth = s.subscribed == false && plan != ZenPraxisUi.AddPlan.LOCKED
+                if (showBoth) b.zenImportBoth.visibility = View.VISIBLE
+                val left = if (plan == ZenPraxisUi.AddPlan.PENDING) {
+                    val now = android.os.SystemClock.elapsedRealtime()
+                    val from = model.confirmShown(now)
+                    ((ZenSettingsRules.CONFIRM_WAIT_S * 1000L - (now - from)) + 999) / 1000
+                } else {
+                    0
+                }
+                val ready = plan != ZenPraxisUi.AddPlan.LOCKED && left <= 0
+                b.zenImportPraxis.isEnabled = ready
+                b.zenImportBoth.isEnabled = ready
+                b.zenImportPraxis.text = if (left > 0) ctx.getString(R.string.zen_import_praxis_wait, markLabel, left) else markLabel
+                b.zenImportBoth.text = if (left > 0) ctx.getString(R.string.zen_import_praxis_wait, bothLabel, left) else bothLabel
+                if (left > 0 && plan != ZenPraxisUi.AddPlan.LOCKED) {
+                    handler.removeCallbacksAndMessages(null)
+                    handler.postDelayed({ model.live.value?.let { render(it) } }, WAIT_TICK_MS)
+                }
+            }
+        }
     }
 
     private fun groupName(ctx: Context, g: ZenChannelProfile.Group): String = ZenClassWhy.catName(
@@ -384,17 +479,41 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
         val activity = activity ?: return
         val s = model.live.value ?: return
         val info = s.info ?: return
-        // a finished sample is reused (no second check); a running one is stopped, the practice
-        // flow then checks itself and reuses what is already in the cache
-        val sample = s.sample?.takeIf { !s.checking && it.checked.isNotEmpty() }
-        // only when the practice flow will check itself (not when it just rejects because of the lock)
-        val snap = Zen.settingsLock(activity).snapshot()
-        val willCheck = ZenPraxis.state(activity, info.serviceId, info.url) == ZenPraxis.State.NONE &&
-            (snap.setupMode || snap.lockRemainingMs <= 0)
-        if (sample == null && willCheck) model.stopCheck()
-        model.action = "praxis"
-        ZenChannelImport.log(activity, "channel_import", "action=praxis url=${info.url} presampled=${sample != null}")
-        ZenPraxisUi.onMenu(activity, info.serviceId, info.url, info.name, false, { binding?.let { render(model.live.value ?: s) } }, sample)
+        when {
+            // remove / cancel pending: the unchanged immediate action
+            ZenPraxisUi.addPlan(activity, info.serviceId, info.url) == ZenPraxisUi.AddPlan.ALREADY -> {
+                model.action = "praxis_remove"
+                ZenPraxisUi.onMenu(activity, info.serviceId, info.url, info.name, false, { rerender() })
+            }
+
+            // "skip classification": the choice appears with "check skipped"
+            s.checking -> model.stopCheck()
+
+            else -> confirmPraxis(false)
+        }
+    }
+
+    private fun rerender() {
+        binding ?: return
+        model.live.value?.let { render(it) }
+    }
+
+    /** Marks the channel as practice from the sheet (and subscribes first with [subscribe]). */
+    private fun confirmPraxis(subscribe: Boolean) {
+        val ctx = context ?: return
+        val s = model.live.value ?: return
+        val info = s.info ?: return
+        if (s.assessment == null) return
+        val channel = ZenPraxisChannel(info.serviceId, info.url, info.name)
+        val a = ZenPlausibilityCheck.assess(ctx, channel, s.sample, skipped = s.stopped && s.sample == null, log = false)
+        if (a.warning != null && a.verdict != null) ZenPlausibilityCheck.logOverride(ctx, channel, a.verdict)
+        if (subscribe) onSubscribe()
+        model.action = if (subscribe) "subscribe_praxis" else "praxis"
+        ZenChannelImport.log(ctx, "channel_import", "action=${model.action} url=${info.url} inline=true")
+        ZenPraxisUi.commitAdd(ctx, channel)?.let {
+            Toast.makeText(ctx.applicationContext, it + "\n" + a.note, Toast.LENGTH_LONG).show()
+        }
+        rerender()
     }
 
     private fun onView() {
@@ -418,5 +537,6 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
 
     companion object {
         const val FRAGMENT_TAG = "zen_channel_import"
+        private const val WAIT_TICK_MS = 250L
     }
 }

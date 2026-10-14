@@ -25,4 +25,11 @@
     <string name="zen_import_close">Close</string>
     <string name="zen_import_subscribed_toast">Subscribed: %1$s</string>
     <string name="zen_import_subscribe_failed">Subscribing failed</string>
+    <string name="zen_praxis_add_setup_info">First-time setup: \"%1$s\" becomes a practice channel at once, without the 24-hour wait.</string>
+    <string name="zen_import_praxis_title">Practice channel?</string>
+    <string name="zen_import_praxis_wait">%1$s (%2$d)</string>
+    <string name="zen_import_praxis_anyway">Mark as practice anyway</string>
+    <string name="zen_import_both">Subscribe and mark as practice</string>
+    <string name="zen_import_skip_check">Skip classification</string>
+    <string name="zen_import_both_anyway">Subscribe and mark as practice anyway</string>
 </resources>

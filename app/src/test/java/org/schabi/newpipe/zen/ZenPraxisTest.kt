@@ -450,4 +450,16 @@ class ZenPraxisTest {
         t.add("2026-10-01", 0)
         assertEquals(min, t.msOn("2026-10-01"))
     }
+
+    @Test
+    fun `channel import sheet - what adding a practice channel does now`() {
+        val none = ZenPraxis.State.NONE
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.NOW_SETUP, ZenPraxisUi.addPlan(none, true, 0))
+        // the setup wins over a running lock countdown (as in ZenSettingsLock.addPraxis)
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.NOW_SETUP, ZenPraxisUi.addPlan(none, true, 1000))
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.LOCKED, ZenPraxisUi.addPlan(none, false, 1000))
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.PENDING, ZenPraxisUi.addPlan(none, false, 0))
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.ALREADY, ZenPraxisUi.addPlan(ZenPraxis.State.PENDING, false, 0))
+        org.junit.Assert.assertEquals(ZenPraxisUi.AddPlan.ALREADY, ZenPraxisUi.addPlan(ZenPraxis.State.ACTIVE, true, 0))
+    }
 }

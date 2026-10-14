@@ -25,4 +25,11 @@
     <string name="zen_import_close">Schließen</string>
     <string name="zen_import_subscribed_toast">Abonniert: %1$s</string>
     <string name="zen_import_subscribe_failed">Abonnieren fehlgeschlagen</string>
+    <string name="zen_praxis_add_setup_info">Ersteinrichtung: „%1$s“ wird sofort zum Praxis-Kanal, ohne 24 Stunden Wartezeit.</string>
+    <string name="zen_import_praxis_title">Praxis-Kanal?</string>
+    <string name="zen_import_praxis_wait">%1$s (%2$d)</string>
+    <string name="zen_import_praxis_anyway">Trotzdem als Praxis markieren</string>
+    <string name="zen_import_both">Abonnieren und als Praxis markieren</string>
+    <string name="zen_import_skip_check">Einordnung überspringen</string>
+    <string name="zen_import_both_anyway">Abonnieren und trotzdem als Praxis markieren</string>
 </resources>

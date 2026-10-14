@@ -103,39 +103,85 @@ object ZenPraxisUi {
             .show()
     }
 
+    /** What adding a practice entry would do right now (the lock decides, see [ZenSettingsLock.addPraxis]). */
+    enum class AddPlan {
+        /** First-time setup: active at once, no confirmation wait. */
+        NOW_SETUP,
+
+        /** Normal case: pending for 24 h, starts the lock, needs the confirmation wait. */
+        PENDING,
+
+        /** A lock runs: adding (a loosening) is not possible now. */
+        LOCKED,
+
+        /** Already active or pending. */
+        ALREADY
+    }
+
+    @JvmStatic
+    fun addPlan(state: ZenPraxis.State, setupMode: Boolean, lockRemainingMs: Long): AddPlan = when {
+        state != ZenPraxis.State.NONE -> AddPlan.ALREADY
+        setupMode -> AddPlan.NOW_SETUP
+        lockRemainingMs > 0 -> AddPlan.LOCKED
+        else -> AddPlan.PENDING
+    }
+
+    @JvmStatic
+    fun addPlan(context: Context, serviceId: Int, url: String): AddPlan {
+        val snap = Zen.settingsLock(context).snapshot()
+        return addPlan(ZenPraxis.state(context, serviceId, url), snap.setupMode, snap.lockRemainingMs)
+    }
+
+    /**
+     * The text that explains [plan] for [channel] (the same text as the confirmation dialog):
+     * pending 24 h + lock + undo, active at once in the setup, or locked until.
+     */
+    @JvmStatic
+    fun addText(context: Context, channel: ZenPraxisChannel, plan: AddPlan): String = when (plan) {
+        AddPlan.NOW_SETUP -> context.getString(R.string.zen_praxis_add_setup_info, channel.name)
+
+        AddPlan.LOCKED -> context.getString(R.string.zen_praxis_locked, fmtTime(Zen.settingsLock(context).snapshot().lockRemainingMs))
+
+        AddPlan.ALREADY -> ""
+
+        AddPlan.PENDING -> context.getString(
+            if (channel.playlist) R.string.zen_praxis_pl_confirm_message else R.string.zen_praxis_confirm_message,
+            channel.name,
+            fmtTime(ZenSettingsRules.LOCK_MS)
+        ) + "\n\n" + context.getString(R.string.zen_confirm_footer_lock) + " " + context.getString(R.string.zen_confirm_footer_undo)
+    }
+
+    /**
+     * Adds [channel] through the lock (unchanged rules) and returns the message to show, null if
+     * nothing changed. Used by the confirmation dialog and by the channel import sheet.
+     */
+    @JvmStatic
+    fun commitAdd(context: Context, channel: ZenPraxisChannel): String? {
+        val lock = Zen.settingsLock(context)
+        return when (val r = lock.addPraxis(channel)) {
+            is ZenSettingsLock.Result.Applied -> if (r.setupMode) {
+                context.getString(R.string.zen_praxis_added_setup, channel.name)
+            } else {
+                context.getString(
+                    if (channel.playlist) R.string.zen_praxis_pl_added_pending else R.string.zen_praxis_added_pending,
+                    channel.name,
+                    fmtTime(lock.snapshot().lockRemainingMs)
+                )
+            }
+
+            is ZenSettingsLock.Result.Rejected -> context.getString(R.string.zen_praxis_locked, fmtTime(lock.snapshot().lockRemainingMs))
+
+            ZenSettingsLock.Result.NoChange -> null
+        }
+    }
+
     private fun confirmAdd(activity: Activity, channel: ZenPraxisChannel, changed: Runnable, note: String? = null) {
         if (activity.isFinishing) return
-        val lock = Zen.settingsLock(activity)
         val dialog = AlertDialog.Builder(activity)
             .setTitle(if (channel.playlist) R.string.zen_praxis_pl_confirm_title else R.string.zen_praxis_confirm_title)
-            .setMessage(
-                (note?.let { "$it\n\n" } ?: "") +
-                    activity.getString(
-                        if (channel.playlist) R.string.zen_praxis_pl_confirm_message else R.string.zen_praxis_confirm_message,
-                        channel.name,
-                        fmtTime(ZenSettingsRules.LOCK_MS)
-                    ) +
-                    "\n\n" + activity.getString(R.string.zen_confirm_footer_lock) + " " +
-                    activity.getString(R.string.zen_confirm_footer_undo)
-            )
+            .setMessage((note?.let { "$it\n\n" } ?: "") + addText(activity, channel, AddPlan.PENDING))
             .setPositiveButton(R.string.zen_confirm_ok) { _, _ ->
-                when (val r = lock.addPraxis(channel)) {
-                    is ZenSettingsLock.Result.Applied -> toast(
-                        activity,
-                        activity.getString(
-                            if (channel.playlist) R.string.zen_praxis_pl_added_pending else R.string.zen_praxis_added_pending,
-                            channel.name,
-                            fmtTime(lock.snapshot().lockRemainingMs)
-                        )
-                    )
-
-                    is ZenSettingsLock.Result.Rejected -> toast(
-                        activity,
-                        activity.getString(R.string.zen_praxis_locked, fmtTime(lock.snapshot().lockRemainingMs))
-                    )
-
-                    ZenSettingsLock.Result.NoChange -> {}
-                }
+                commitAdd(activity, channel)?.let { toast(activity, it) }
                 changed.run()
             }
             .setNegativeButton(R.string.cancel, null)

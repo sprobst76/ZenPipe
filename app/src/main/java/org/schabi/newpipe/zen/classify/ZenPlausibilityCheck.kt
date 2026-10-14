@@ -217,32 +217,56 @@ object ZenPlausibilityCheck {
     fun logRequests(sample: Sample): String = "requests=${sample.requests} retries=${sample.retries} failed=${sample.failed}" +
         if (sample.errors.isEmpty()) "" else " errors=" + sample.errors.entries.joinToString(",") { "${it.key}:${it.value}" }
 
-    private fun show(activity: Activity, channel: ZenPraxisChannel, sample: Sample, proceed: (String?) -> Unit) {
-        val checked = sample.checked
-        val v = ZenPlausibility.evaluate(checked.map { ZenPlausibility.Item(it.title, it.entry?.cats, it.entry?.level) })
-        val log = Zen.log(activity)
-        log.add("class_check", "url=${channel.url} " + ZenPlausibility.logDetail(v, channel.playlist) + " " + logRequests(sample))
-        val failedNote = failedNote(activity, sample)
-        fun withFailed(s: String) = if (failedNote == null) s else "$s\n$failedNote"
-        when (v.result) {
-            ZenPlausibility.Result.FITS -> proceed(withFailed(activity.getString(R.string.zen_check_fits, v.hit, v.n)))
+    /**
+     * The evaluated check without any dialog: [note] = the line for the confirmation (also after
+     * "mark anyway"), [warning] = the warning text for WARN/STRONG_WARN (null otherwise),
+     * [verdict] = null when there was nothing to evaluate (no model, failed, skipped).
+     */
+    data class Assessment(val verdict: ZenPlausibility.Verdict?, val note: String, val warning: String?)
 
-            ZenPlausibility.Result.UNCLEAR -> proceed(withFailed(activity.getString(R.string.zen_check_unclear, v.none, v.n)))
+    /**
+     * Evaluates [sample] for [channel] ([skipped] = the user skipped the check); logs `class_check`
+     * unless [log] is false (the texts are in the language of [context]).
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun assess(context: android.content.Context, channel: ZenPraxisChannel, sample: Sample?, skipped: Boolean = false, log: Boolean = true): Assessment {
+        if (!ZenClassifierModel.isReady(context)) return Assessment(null, context.getString(R.string.zen_check_unavailable), null)
+        if (skipped) return Assessment(null, context.getString(R.string.zen_check_skipped), null)
+        if (sample == null || sample.checked.isEmpty()) return Assessment(null, context.getString(R.string.zen_check_failed), null)
+        val v = ZenPlausibility.evaluate(sample.checked.map { ZenPlausibility.Item(it.title, it.entry?.cats, it.entry?.level) })
+        if (log) Zen.log(context).add("class_check", "url=${channel.url} " + ZenPlausibility.logDetail(v, channel.playlist) + " " + logRequests(sample))
+        val failedNote = failedNote(context, sample)
+        fun withFailed(s: String) = if (failedNote == null) s else "$s\n$failedNote"
+        return when (v.result) {
+            ZenPlausibility.Result.FITS -> Assessment(v, withFailed(context.getString(R.string.zen_check_fits, v.hit, v.n)), null)
+
+            ZenPlausibility.Result.UNCLEAR -> Assessment(v, withFailed(context.getString(R.string.zen_check_unclear, v.none, v.n)), null)
 
             ZenPlausibility.Result.WARN, ZenPlausibility.Result.STRONG_WARN -> {
                 val msg = StringBuilder()
-                if (v.result == ZenPlausibility.Result.STRONG_WARN) msg.append(activity.getString(R.string.zen_check_strong)).append("\n\n")
+                if (v.result == ZenPlausibility.Result.STRONG_WARN) msg.append(context.getString(R.string.zen_check_strong)).append("\n\n")
                 msg.append(
                     if (v.example != null && v.distraction > 0) {
-                        activity.getString(R.string.zen_check_warn, v.hit, v.n, channel.name, v.distraction, v.example)
+                        context.getString(R.string.zen_check_warn, v.hit, v.n, channel.name, v.distraction, v.example)
                     } else {
-                        activity.getString(R.string.zen_check_warn_no_example, v.hit, v.n, channel.name)
+                        context.getString(R.string.zen_check_warn_no_example, v.hit, v.n, channel.name)
                     }
                 )
                 if (failedNote != null) msg.append("\n\n").append(failedNote)
-                warn(activity, channel, checked, v, msg.toString(), proceed)
+                Assessment(v, context.getString(R.string.zen_check_warned, v.hit, v.n), msg.toString())
             }
         }
+    }
+
+    /** "Mark anyway" after a warning (dialog or channel import sheet). */
+    @JvmStatic
+    fun logOverride(context: android.content.Context, channel: ZenPraxisChannel, v: ZenPlausibility.Verdict) = Zen.log(context).add("class_check_override", "url=${channel.url} hit=${v.hit} n=${v.n} result=${v.result.name.lowercase()}")
+
+    private fun show(activity: Activity, channel: ZenPraxisChannel, sample: Sample, proceed: (String?) -> Unit) {
+        val a = assess(activity, channel, sample)
+        val v = a.verdict
+        if (a.warning == null || v == null) proceed(a.note) else warn(activity, channel, sample.checked, v, a.warning, proceed)
     }
 
     private fun warn(
@@ -257,7 +281,7 @@ object ZenPlausibilityCheck {
             .setTitle(R.string.zen_check_title)
             .setMessage(message)
             .setPositiveButton(R.string.zen_check_override) { _, _ ->
-                Zen.log(activity).add("class_check_override", "url=${channel.url} hit=${v.hit} n=${v.n} result=${v.result.name.lowercase()}")
+                logOverride(activity, channel, v)
                 proceed(activity.getString(R.string.zen_check_warned, v.hit, v.n))
             }
             .setNegativeButton(R.string.cancel, null)
@@ -268,7 +292,8 @@ object ZenPlausibilityCheck {
     }
 
     /** List of the checked videos with their classification ("why"); back to the warning afterwards. */
-    private fun showList(activity: Activity, checked: List<Checked>, back: () -> Unit) {
+    @JvmStatic
+    fun showList(activity: Activity, checked: List<Checked>, back: () -> Unit) {
         val body = checked.joinToString("\n\n") { c ->
             val e = c.entry
             if (e == null) {
