@@ -23,7 +23,7 @@ Eine Sitzung ist **abgebrochen**, wenn sie endet, ohne dass sie zu Ende geschaut
   Folge: Auch ein Absturz oder `adb install -r` während der Wiedergabe löst die Pause aus (bewusst streng).
 
 **Kein Abbruch:** Pausieren im Player (auch lange und im Hintergrund), Anruf/Audio-Fokus-Verlust (der Player pausiert, die
-Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergrundplayer desselben Videos, „zu Ende geschaut“,
+Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergrundplayer desselben Videos [überholt: Pop-up-Player entfernt, decisions.md D15], „zu Ende geschaut“,
 „Später fortsetzen“, **Ablauf des Sleep-Timers** (Sitzung endet ohne Pause, `sleep_end`; Weiterspielen beginnt eine neue Sitzung). Nicht erfasst (Lücke): Ziehen des Mini-Players nach unten (Abbruch ohne Rückfrage), Android-Auto-Wiedergabe.
 
 ## Regeln
@@ -32,7 +32,9 @@ Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergr
 - **Musik:** keine Pause (`abort_exempt`). **Podcasts:** Pause gilt, auch im Hintergrund-/Audio-Player.
 - **Pausenlänge:** 20 % der Wiedergabezeit (10 min -> 2 min, 60 min -> 12 min), Minimum 1 min, Maximum 15 min.
   Läuft schon eine Pause, wird sie nie verkürzt (es gilt das Maximum aus Rest und neuer Länge).
-- **Während der Pause:** Der Start jeder Wiedergabe (Detailseite, Popup, Hintergrund, Playlist, geteilter Link, Einreihen bei
+  [ergänzt 2026-10-13: Ruhezeit-Anrechnung, Pause = max(0, Länge − Ruhezeit); Prozent/Min/Max/Schwelle sind Zen-Einstellungen;
+  siehe rules.md „Ruhezeit-Anrechnung“ und „Zen-Einstellungen“]
+- **Während der Pause:** Der Start jeder Wiedergabe (Detailseite, Popup [überholt: entfernt], Hintergrund, Playlist, geteilter Link, Einreihen bei
   geschlossenem Player) zeigt den Pausenbildschirm mit Countdown statt zu starten, ohne Überspringen. **Ausnahme Praxis**
   (Entscheidung 2026-10-13): Videos eines aktiven Praxis-Kanals bzw. einer Praxis-Playlist (`spec-praxis.md`) dürfen starten;
   die Pause läuft dabei unverändert weiter, ein Praxis-Abbruch erzeugt keine neue Pause. Zählt nur die Zuordnung, nie der Titel.
@@ -53,7 +55,7 @@ Sitzung bleibt offen), Display aus, Wechsel zwischen Video-, Popup- und Hintergr
   Keine Abkürzung in den Einstellungen: Parameter lockern erst nach 24 h und abbrechbar, siehe `spec-einstellungs-sperre.md`;
   **eine laufende Pause wird durch keine Einstellungsänderung verkürzt.**
 - **Protokoll (ZenLog):** `pause_start` (url, Grund, Kind, Wiedergabezeit, Länge), `pause_end`, `abort_short`, `abort_exempt`,
-  `watch_end`, `later`.
+  `watch_end`, `later`. [vollständige Liste: rules.md „Pflichtpause“ / „Protokoll“]
 
 ## Musik/Podcast-Heuristik (Laufzeit, StreamInfo)
 Der Extractor liefert `StreamInfo.getCategory()` (YouTube-Kategorie aus dem Player-Response, z. B. „Music“, „Entertainment“;
@@ -87,5 +89,5 @@ Am Gerät geprüft: Rick-Astley-Video -> Kategorie Music -> `abort_exempt`; Blen
 - Zustand in `zen_state` (`qt_*`, `pause_seq`), nicht Teil von Export/Import/Reset/Auto-Backup. Tests: `ZenQuotesTest`.
 
 ## Offen
-- Prozentsatz/Min/Max sind Konstanten (`ZenPauseRules`), bis die Zen-Einstellungen (Phase 2) sie hinter der Sperre konfigurierbar machen.
+- [überholt: seit Phase 2 Teil 1 sind Prozentsatz/Min/Max/Schwelle Zen-Einstellungen hinter der Sperre (`ZenSettingDefs`), rules.md „Zen-Einstellungen“] Prozentsatz/Min/Max sind Konstanten (`ZenPauseRules`), bis die Zen-Einstellungen (Phase 2) sie hinter der Sperre konfigurierbar machen.
 - Während der Pause entsteht weiter eine Feed-Ausgabe, wenn man den Feed öffnet (W14 aus dem Review ist noch nicht umgesetzt).

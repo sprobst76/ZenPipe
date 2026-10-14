@@ -10,7 +10,7 @@ werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetz
   mit dem Sperrende); rein strengere Gruppen starten nichts. Während der Sperre sind Lockerungen abgelehnt, Strenger geht immer.
 - **Richtung pro Einstellung, Gruppen werden aufgeteilt** (strenger sofort, lockerer Teil ausstehend). „Gemischt = Lockern“ entfällt, bis es die
   Nachtruhe (Zeitfenster) gibt.
-- **Ersteinrichtung:** Ende durch „Fertig“, ersten Wiedergabestart oder 24 h Gerätelaufzeit seit dem ersten Zugriff (consistency-review S8/S9);
+- **Ersteinrichtung:** Ende durch „Fertig“, ersten Wiedergabestart oder 24 h Gerätelaufzeit seit dem ersten Zugriff ([archive/consistency-review.md](archive/consistency-review.md) S8/S9);
   danach beginnt die Sperre. Keine Rückgängig-Funktion in der Einrichtung.
 - **Rückgängig** wirkt auch auf die Sperre: hat die Änderung sie gestartet, wird sie wieder gelöscht. Abbrechen einer ausstehenden Lockerung
   lässt die Sperre dagegen weiterlaufen.
@@ -19,7 +19,7 @@ werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetz
 ## Regel
 - **Asymmetrie (F7):** **Strenger stellen wirkt sofort. Lockern wirkt erst nach 24 h** und ist bis dahin abbrechbar
   („ausstehende Änderung“, im UI sichtbar). Das schützt den heißen Moment, ohne dass man den Tag über festhängt.
-- Jede **bestätigte Änderung** startet eine **24-h-Sperre** für **alle** Zen-Einstellungen (ein globaler Zeitpunkt `lockedUntil`,
+- [überholt: nur eine **Lockerung** startet die Sperre, siehe „Auflösungen“ oben und decisions.md D31] Jede **bestätigte Änderung** startet eine **24-h-Sperre** für **alle** Zen-Einstellungen (ein globaler Zeitpunkt `lockedUntil`,
   nicht pro Einstellung, sonst Umgehung durch Umschalten anderer Werte). 24 h = Dauer in Vertrauenszeit, unabhängig von Zen-Tag
   und Zeitzone. Während der Sperre sind Einstellungen sichtbar, aber ausgegraut: „Änderbar ab <Datum/Uhrzeit>“, **nur Datum und
   Uhrzeit, kein laufender Countdown und keine Benachrichtigung** bei Ablauf.
@@ -27,9 +27,10 @@ werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetz
   Kosmetik ohne Lockerungswirkung (z. B. Graustufen **an**) startet keine Sperre.
 - **Richtung pro Einstellung** fest im Code (`stricterIf(alt, neu)`): z. B. Mindestlänge senken = lockern, Entdecken **an** =
   lockern, aus = strenger, Graustufen an = strenger, Ausgabe-Größe senken bei gleichem Deckel = strenger. Gemischte Änderungen
-  (Zeitfenster verschoben) zählen als Lockern.
+  (Zeitfenster verschoben) zählen als Lockern. [überholt: Gruppen werden pro Einstellung aufgeteilt, siehe „Auflösungen“ oben]
 - **Geltungsbereich:** Ausgabe-Größe/Deckel/Mindestlänge, Pflichtpause-Parameter, Absichtsabfrage-Parameter (Wartezeit, Schwellen),
-  Nachtruhe, Entdecken an/aus, Graustufen aus u. Ä. (alles, was Zen lockern oder abschalten könnte).
+  Nachtruhe, Entdecken an/aus, Graustufen aus u. Ä. [Nachtruhe, Entdecken, Graustufen sind nicht gebaut; tatsächliche Liste plus Praxis,
+  Ausnahmen, Inhalts-Erkennung, Feed-Sprachen: rules.md „Zen-Einstellungen“] (alles, was Zen lockern oder abschalten könnte).
 - **Nicht gesperrt (F8):** Feed-Gruppen-Zuordnung und -Reihenfolge (die Reihenfolge ist die Priorität im Scoring, sie gewichtet nur
   und vergrößert nichts), Abonnieren/Deabonnieren, Playlists, Suche, normale Player-Einstellungen. Die Pflichtfrage nach der
   Gruppe beim Abonnieren (Entdecken) bleibt damit möglich.
@@ -64,7 +65,7 @@ werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetz
 
 ## Offene Entscheidungen (aus der ursprünglichen Spec, entschieden)
 1. Strenger während der Sperre: **ja**, ohne Neustart der Sperre (durch F7 entschieden).
-2. **Notfallschlüssel** (Opal-Stil, 1x pro Woche, mit Wartezeit und Protokoll): standardmäßig aus, in Phase 2 optional.
+2. **Notfallschlüssel** (Opal-Stil, 1x pro Woche, mit Wartezeit und Protokoll): standardmäßig aus, in Phase 2 optional. [überholt: bewusst nicht gebaut, decisions.md D35]
 3. Lockern zusätzlich erst zum nächsten Zen-Tag (4:00)? **Nein**, 24 h sind die einzige Regel.
 
 ## Priorität

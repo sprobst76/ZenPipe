@@ -1,7 +1,7 @@
 # ZenPipe: Designkonzept „ruhiges Hell/Dunkel“
 
 Stand: 2026-10-13. Status: **umgesetzt** (Variante A, Schritte 1-6; Abweichungen siehe „Umsetzung“ am Ende). Vorschau mit drei Varianten:
-`design-preview.html` (lokal erzeugt, eigenständig; Generator mit WCAG-Prüfung siehe Anhang).
+`design-preview.html` (lokal erzeugt, eigenständig, nicht im Repo; Generator mit WCAG-Prüfung siehe Anhang).
 
 ## Empfehlung (zuerst)
 
@@ -125,6 +125,7 @@ Aufwand A: ca. 2-3 h inkl. Gerätprüfung. C zusätzlich ca. 3-4 h und mehr Merg
 - **Zähler weg** (Entscheidung 4): die Detailseite ist mit „Reduzierte Videodetails“
   (`reduced_details`, Commit 162d6dffc) schon zählerfrei. Offen sind die Aufrufzahlen in Listen
   (`StreamInfoItemHolder.getStreamInfoDetailLine`): an dieselbe Einstellung koppeln; „N min · Gruppe“ bleibt.
+  [erledigt: Commit `9edc1647b`, siehe „Umsetzung“]
 - **Dauer-Badge dezent**: 72 % Grüngrau statt Schwarz, Text Off-White (Farbwerte genügen).
 - **Thumbnails** ohne zusätzliche Overlays; Entsättigung **nicht** jetzt (Codeänderung im
   Bildladen, eigener Graustufen-Modus wäre ein späteres Feature).
@@ -171,6 +172,8 @@ mehr Rot (Ausnahme: Thumbnails); Logcat ohne FATAL. Danach `STATE.md` und diese 
 „umgesetzt“ setzen.
 
 ## Offene Entscheidungen (Nutzer)
+
+[überholt: alle vier entschieden wie empfohlen (A, Dunkel, nicht eingefärbt, Listen-Zähler aus), siehe „Umsetzung“ und decisions.md D41]
 
 1. Variante: **A Salbei (Empfehlung)**, B Stein oder C Papier.
 2. Nachtvariante bei „System folgen“: **Dunkel (Empfehlung, Upstream-Default)** oder Schwarz.

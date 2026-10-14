@@ -64,7 +64,8 @@ the store icon (open ring on calm green `#2E4A45`, ring `#F2EFE6`).
   (`app-release-unsigned.apk`), e.g. for local tests or F-Droid. If `ZENPIPE_KEYSTORE` is set but
   one of the other three variables is missing, the build fails with a clear message.
 - `.gitignore` blocks `*.jks *.keystore *.p12 *.pem keystore.properties`.
-- Key (not created yet, see `research-name-und-offene-fragen.md` §3):
+- [überholt: key created 2026-10-13 (alias `zenpipe`), certificate SHA-256 in README.md; passwords ASCII only, see decisions.md D8]
+  Key (not created yet, see `research-name-und-offene-fragen.md` §3):
   `keytool -genkeypair -storetype PKCS12 -keyalg RSA -keysize 4096 -sigalg SHA256withRSA -validity 10000 -alias zenpipe -keystore zenpipe-release.p12`
   Store keystore + passwords in the password manager and two offline copies. Publish the
   SHA-256 fingerprint in the README (`apksigner verify --print-certs ZenPipe_v….apk`).

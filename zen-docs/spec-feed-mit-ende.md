@@ -2,6 +2,10 @@
 
 Anforderung (Nutzer, 2026-10-12): Kein endloses Scrollen im Feed; gute Struktur/Regel entwerfen.
 
+> **Status: umgesetzt (Phase 1, 2026-10-12), seitdem erweitert.** Maßgeblich ist [rules.md](rules.md) (Abschnitte „Feed“ und
+> „Inhalts-Erkennung“); Ausgabe-Größe, Deckel und Mindestlänge sind seit Phase 2 Teil 1 Einstellungen hinter der 24-h-Sperre.
+> Überholte Stellen sind mit „[überholt: …]“ markiert, Entscheidungen in [decisions.md](decisions.md) (D18–D25).
+
 ## Prinzip
 Der Feed ist keine Strömung, sondern eine **Ausgabe** (wie eine Zeitung): begrenzt, abgeschlossen, mit klarem Ende.
 Wer die Ausgabe durch hat, ist durch — bis zur nächsten Ausgabe.
@@ -11,25 +15,25 @@ Wer die Ausgabe durch hat, ist durch — bis zur nächsten Ausgabe.
    **Tages-Deckel (Entscheidung Nutzer):** max. **30 verschiedene Videos pro Zen-Tag** (Tageswechsel 4:00). Ein Video, das in mehreren Ausgaben auftaucht, zählt nur einmal. Ist der Deckel erreicht, entsteht bis 4:00 keine neue Ausgabe („Nächste Ausgabe ab 04:00").
    **Erst nach der Absichtsabfrage:** Die Ausgabe wird erst gebaut, wenn die Absichtsabfrage bestätigt wurde; Öffnen + „Doch nicht" verbraucht nichts.
 2. **Auswahl („passt zum Nutzer"):** Kandidaten sind ungesehene Videos aus den eigenen Abos, **maximal 7 Tage alt**. Die Auswahl der 15 erfolgt über ein **transparentes, lokales Scoring** — kein Empfehlungsalgorithmus, keine YouTube-Empfehlungen, keine Daten verlassen das Gerät:
-   - **Explizite Signale (Vorrang):** Kanal-Priorität bzw. Feed-Gruppe, vom Nutzer gesetzt (z. B. „Lernen" > „Unterhaltung" > „Nebenbei"), plus Stichwort-Filter (ausblenden/bevorzugen, vgl. PipePipe).
-   - **Implizite lokale Signale (schwach gewichtet):** pro Kanal Anteil zu Ende geschauter Videos und geschaute Minuten (aus dem lokalen Verlauf); Kanäle, deren Videos fast immer abgebrochen werden, rutschen nach unten.
+   - **Explizite Signale (Vorrang):** Kanal-Priorität bzw. Feed-Gruppe, vom Nutzer gesetzt (z. B. „Lernen" > „Unterhaltung" > „Nebenbei") [überholt: Priorität ist die Reihenfolge beliebiger Feed-Gruppen, Namen sind frei; rules.md „Scoring“], plus Stichwort-Filter (ausblenden/bevorzugen, vgl. PipePipe).
+   - [überholt: nicht gebaut; Stichwort-Filter und implizite Signale sind offen, Scoring siehe rules.md „Scoring“] **Implizite lokale Signale (schwach gewichtet):** pro Kanal Anteil zu Ende geschauter Videos und geschaute Minuten (aus dem lokalen Verlauf); Kanäle, deren Videos fast immer abgebrochen werden, rutschen nach unten.
    - **Frische:** neuere Videos leicht bevorzugt.
    - **Vielfalt statt Sog:** je Kanal max. 3 Videos pro Ausgabe; keine „mehr davon"-Schleife, kein Boost durch Klicks auf Thumbnails/Reihenfolge.
-   - **Erklärbar:** Jeder Eintrag zeigt auf Wunsch den Grund („Gruppe Lernen · du schaust diesen Kanal meist zu Ende").
+   - [überholt: umgesetzt als Zeile „N min · Gruppe“ plus „Warum“-Zeile der Inhalts-Erkennung, rules.md] **Erklärbar:** Jeder Eintrag zeigt auf Wunsch den Grund („Gruppe Lernen · du schaust diesen Kanal meist zu Ende").
    - **Längenfokus (Entscheidung Nutzer):** Die Ausgabe soll längere Videos bevorzugen (deshalb nur wenige pro Tag). **Mindestlänge 5 min** (`MIN_DURATION_SEC`); kürzere Videos, Livestreams und Videos mit unbekannter Länge kommen nicht vor. **Längenbonus:** ab 15 min +12 Punkte, ab 30 min zusätzlich +6; kleiner als ein Gruppenschritt (15), also nie stärker als die Gruppen-/Kanal-Priorität. Alle Gewichte sind benannte Konstanten in `ZenFeedPlanner`.
    - **Keine Musik:** Musik-Kanäle (Topic-/VEVO-Kanäle, Feed-Gruppe „Musik"/„Music") und Titel mit „Official Video/Audio", „Lyrics", „Full Album" kommen nicht vor; Titel mit „Mix", „Playlist", „DJ Set", „Lofi" u. Ä. bekommen keinen Längenbonus. Reine Heuristik auf Kanal-/Titelebene (die Feed-DB hat keine Kategorie).
    - **Anzeige:** Jeder Eintrag zeigt Länge und Gruppe („42 min · Gruppe Lernen").
    Bereits angesehene Videos kommen nicht vor.
-3. **Ende:** Nach dem letzten Eintrag steht eine Abschlusskarte „Du bist durch. Nächste Ausgabe um HH:00." — kein „Mehr laden", kein Nachladen beim Scrollen, kein Pull-to-load-more.
+3. **Ende:** Nach dem letzten Eintrag steht eine Abschlusskarte „Du bist durch. Nächste Ausgabe um HH:00." [überholt: die nächste Ausgabe kommt frühestens 60 min nach der letzten (F5), nicht zur vollen Stunde; siehe decisions.md D19] — kein „Mehr laden", kein Nachladen beim Scrollen, kein Pull-to-load-more.
 4. **Aktualisieren ist kein Nachschub:** Pull-to-refresh holt nur neue Daten aus dem Netz in den Vorrat. Die laufende Ausgabe wächst dadurch nicht.
 5. **Nächste Ausgabe:** Siehe Regel 1 (60 min nach der letzten). Nicht gesehene Videos warten (Zeitfenster 7 Tage) oder wandern per Knopf in „Später ansehen". Die Später-Liste fasst max. 10 Einträge; Einträge laufen nach 30 Tagen ab.
 6. **Triage statt Scrollen:** Jeder Eintrag hat zwei Aktionen: „Später" (in die budgetierte Später-Liste, max. 10) und „Verwerfen" (aus der Ausgabe nehmen). Ausgabe gilt als erledigt, wenn alles gesehen/verworfen/gemerkt ist oder man am Ende ist.
 7. **Rest-Info:** Abschlusskarte zeigt, wie viele Videos nicht in die Ausgabe passten („23 weitere warten"; bei erreichtem Deckel „bleiben heute liegen") — bewusst ohne Schuldgefühl formuliert.
 
 ## Gleiche Regel überall („keine endlosen Listen")
-- **Kanalseiten:** nur die letzten 10–15 Videos, keine Paginierung; Ende-Karte „Weiter geht's in der Suche".
+- **Kanalseiten:** nur die letzten 10–15 Videos [umgesetzt: 15], keine Paginierung; Ende-Karte „Weiter geht's in der Suche".
 - **Suche:** höchstens 2 Ergebnisseiten, dann „Suche verfeinern".
-- **Playlists:** endlich, ohne Eingriff. „Alle abspielen" bleibt entfernt (siehe Phase 0).
+- **Playlists:** endlich, ohne Eingriff. „Alle abspielen" bleibt entfernt (siehe Phase 0). [überholt: entfernt wurde nur die Leiste auf Kanal-Tabs; Playlists behalten „Alle abspielen“, der Player hält aber am Ende jedes Videos an (außer Praxis-Kette), rules.md „Weiterspielen“]
 - **Verlauf/Bibliothek:** nicht betroffen (nicht algorithmisch, endlich).
 
 ## Umgehungsschutz

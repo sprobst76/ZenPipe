@@ -17,7 +17,7 @@ gibt es bereits. Offene Fragen: Wie zählt Zeit im Hintergrund? Braucht es eine 
 2. **Pflichtpause:** Die Regeln bleiben, Bild und Ton zählen gleich (Podcasts lösen die Pause weiter aus). Neu ist die
    **Ruhezeit-Anrechnung**: Die Zeit seit dem letzten Abspielen der Sitzung wird von der Pause abgezogen. Damit löst sich der
    Fall „Podcast pausiert, Stunden später die Benachrichtigung weggewischt“, ohne eine Hintertür zu öffnen.
-3. **Tageslimit (Phase 3):** Es zählt in **Zen-Minuten**: Bild 1:1, Ton 1:2, Musik und Praxis 0. Ist das Limit erreicht, sind nur
+3. **Tageslimit (Phase 3 [Widerspruch: Abschnitt 8 nennt Phase 4]):** Es zählt in **Zen-Minuten**: Bild 1:1, Ton 1:2, Musik und Praxis 0. Ist das Limit erreicht, sind nur
    noch Bild-Starts gesperrt, Ton bleibt erlaubt (Escape-Ventil, Konzept §3). Gegen Dauerberieselung gibt es einen eigenen
    **Ton-Deckel**.
 4. **Feed-Kontingent:** bleibt eine **Angebotsgrenze**. Gezählt wird, was in Ausgaben **angeboten** wurde, weder Starts noch
@@ -41,8 +41,8 @@ gibt es bereits. Offene Fragen: Wie zählt Zeit im Hintergrund? Braucht es eine 
   (wie heute: kein Abbruch).
 - **Zen-Tag:** Die Zeit wird **laufend** dem Zen-Tag des Messzeitpunkts gutgeschrieben (`ZenClock.trustedMillis`, Wechsel um
   04:00), und zwar bei jedem Persistier-Tick (10 s) sowie bei Zustandswechseln. Eine Sitzung über 04:00 wird damit korrekt
-  aufgeteilt. Praxis bucht heute auf den Tag des Sitzungsendes; das wird angeglichen.
-- **Speicher:** `zen_state`, neuer Schlüssel `wt_<tag>` mit den Feldern Bild, Ton, Musik, Praxis und Bildung in ms, 30 Tage
+  aufgeteilt. Praxis bucht heute auf den Tag des Sitzungsendes; das wird angeglichen. [erledigt, Abschnitt 10.1]
+- **Speicher:** `zen_state`, neuer Schlüssel `wt_<tag>` mit den Feldern Bild, Ton, Musik, Praxis und Bildung [gebaut ohne Feld Bildung, 10.1] in ms, 30 Tage
   aufbewahrt. Er ist nicht Teil von Export, Import, Reset oder Auto-Backup.
 
 ### 2.2 Situationen
@@ -77,7 +77,7 @@ gibt es bereits. Offene Fragen: Wie zählt Zeit im Hintergrund? Braucht es eine 
 - **Hintergrund-Audio und Abbruch:** Benachrichtigung wegwischen oder schließen ist ein Abbruch (unverändert). Mit der
   Ruhezeit-Anrechnung kostet das nur, wenn direkt aus dem Spielen heraus abgebrochen wird.
 
-### 2.4 Tageslimit (Phase 3, F2)
+### 2.4 Tageslimit (Phase 3, F2) [Abschnitt 8: Phase 4]
 
 - **Zen-Minuten = Bild + Ton/2.** Musik und Praxis zählen 0 (Musik nach `ZenContentKind`, Praxis nach Zuordnung). Bildung
   zählt zuerst gegen das Bildungsbudget (Abschnitt 3), der Überlauf gegen das Tageslimit.
@@ -271,7 +271,7 @@ Unit-Tests (Engine mit Fake-`monotonic`, Stil `ZenPauseTest`/`ZenPraxisTest`):
 - Manipulation: Wanduhr ±1 Tag ändert den gebuchten Tag nicht (Trusted Time). Zone fest.
 
 Am Gerät (Defy, Debug-Build mit verkürzten Konstanten, danach zurücksetzen):
-- Hintergrund-Player, Bildschirm aus (`adb shell input keyevent 26`): `wt_*` wächst als Ton. Video-Player + Bildschirm aus:
+- Hintergrund-Player, Bildschirm aus (`adb shell input keyevent 26` [überholt: am Defy verboten wegen PIN-Sperre, nur mit Stefan; ../CLAUDE.md „Operations“]): `wt_*` wächst als Ton. Video-Player + Bildschirm aus:
   pausiert, `wt_*` steht.
 - Pausieren 2 min, Benachrichtigung wegwischen, dann `pause_rest_credit` im ZenLog prüfen. Verkürzte Pause auf dem
   Pausenbildschirm.

@@ -62,7 +62,8 @@ streng „Video“.
 - Kanalseiten (15 Einträge) und Suche (2 Seiten) bleiben wie gehabt nutzbar.
 
 ## Praxis-Minuten
-- Wiedergabezeit jeder Praxis-Sitzung wird beim Sitzungsende (Schließen, Wechsel, zu Ende, Prozess-Kill beim nächsten Start)
+- [überholt 2026-10-13: Praxis-Minuten werden laufend über `ZenWatchTime` (`wt_<Tag>`) gebucht, `px_time` wird nur noch gelesen;
+  rules.md „Praxis-Minuten“] Wiedergabezeit jeder Praxis-Sitzung wird beim Sitzungsende (Schließen, Wechsel, zu Ende, Prozess-Kill beim nächsten Start)
   dem **Zen-Tag** (04:00) des Endzeitpunkts gutgeschrieben (`ZenPraxisTime`, Schlüssel `px_time`, 30 Tage).
 - Anzeige: Praxis-Tab (Kopfzeile) und Einstellungen > Zen (Info-Zeile). Eine eigene Tagesübersicht gibt es (noch) nicht.
 - **Kein Limit** (Entscheidung). Hook für ein späteres optionales weiches Limit: `ZenPraxisTime.msOn(day)`.
@@ -83,7 +84,7 @@ pausiert der Player sofort. Wiederholen „eins“ bleibt Nutzerwahl; bei „all
 Am Defy geprüft: Praxis-Playlist läuft 1 -> 2 -> 3 -> 4 durch, auch bei gesperrtem Bildschirm.
 
 ## Sleep-Timer (2026-10-13)
-Mond-Knopf in der Player-Kopfzeile (Video- und Popup-Player, Text = Countdown) und Menüeintrag „Sleep-Timer“ in der
+Mond-Knopf in der Player-Kopfzeile (Video- und Popup-Player [überholt: Pop-up entfernt, decisions.md D15], Text = Countdown) und Menüeintrag „Sleep-Timer“ in der
 Warteschlange (Hintergrund-Player). 15/30/45/60/90 min (Debug-Builds zusätzlich „1 min (debug)“ für Gerätetests), „Ausschalten“.
 Kein „Ende des Videos“: am Videoende hält der Player ohnehin an. Läuft auf `elapsedRealtime` über Videogrenzen der
 Praxis-Kette hinweg und endet mit dem Player (Entscheidung: an den Player gebunden, nicht ans Video, sonst würde eine
@@ -96,6 +97,6 @@ Einstellungen > Zen (wird im Menü zuerst angeboten, keine Sperre, kein Auto-Sta
 ## Offen / Folgeaufgaben
 - Lokale Playlists als Praxis (bewusst nicht: beliebig befüllbar).
 - Lesezeichen-Playlists (Tab „Lesezeichen“) ohne Long-Press-Eintrag; Markieren dort über die Playlist-Seite.
-- Minuten einer noch laufenden Praxis-Sitzung erscheinen erst nach ihrem Ende.
+- [erledigt 2026-10-13 durch laufende Buchung in `ZenWatchTime`] Minuten einer noch laufenden Praxis-Sitzung erscheinen erst nach ihrem Ende.
 - Weiches Praxis-Limit (Hinweis ab N min/Tag): nur Hook, nicht gebaut.
 - Sleep-Timer: keine Anzeige in der Benachrichtigung; Einschlaferkennung nur als Hook.
