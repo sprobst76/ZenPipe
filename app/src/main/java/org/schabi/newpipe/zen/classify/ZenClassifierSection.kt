@@ -178,12 +178,31 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
         return activity.getString(R.string.zen_class_status_downloading, mb(dl.bytes), mb(dl.total))
     }
 
+    /** "on"/"off" of both content switches (effective values), for the download dialog and the result. */
+    private fun switchStates(): Pair<String, String> {
+        val lock = Zen.settingsLock(activity)
+        fun s(key: String) = activity.getString(if (lock.effective(key) == 1) R.string.zen_on else R.string.zen_off)
+        return s(ZenSettingKeys.CLASS_FEED) to s(ZenSettingKeys.CLASS_HEAVY)
+    }
+
     private fun confirmDownload() {
+        // The switches are not changed by the download, but they only take effect with a model:
+        // say so before (dialog) and after (toast), so nothing starts working unnoticed (spec 4.7).
+        val (feed, heavy) = switchStates()
         AlertDialog.Builder(activity)
             .setTitle(R.string.zen_class_title)
-            .setMessage(activity.getString(R.string.zen_class_download_confirm, mb(ZenClassifierModel.DOWNLOAD_BYTES)))
+            .setMessage(
+                activity.getString(R.string.zen_class_download_confirm, mb(ZenClassifierModel.DOWNLOAD_BYTES)) + "\n\n" +
+                    activity.getString(R.string.zen_class_download_switches, feed, heavy)
+            )
             .setPositiveButton(R.string.zen_class_download_short) { _, _ ->
-                ZenClassifierModel.download.start(activity) { rerender() }
+                ZenClassifierModel.download.start(activity) {
+                    if (!activity.isFinishing && ZenClassifierModel.isReady(activity)) {
+                        val (f, h) = switchStates()
+                        android.widget.Toast.makeText(activity, activity.getString(R.string.zen_class_installed_switches, f, h), android.widget.Toast.LENGTH_LONG).show()
+                    }
+                    rerender()
+                }
                 rerender()
             }
             .setNegativeButton(R.string.cancel, null)
@@ -209,7 +228,7 @@ class ZenClassifierSection(private val activity: Activity, private val rerender:
     }
 
     private fun showNotices(res: Int) {
-        val body = activity.resources.openRawResource(res).bufferedReader().use { it.readText() }
+        val body = ZenNoticeText.reflow(activity.resources.openRawResource(res).bufferedReader().use { it.readText() })
         val tv = text(body, 12f).apply {
             setTextIsSelectable(true)
             val p = dp(20)

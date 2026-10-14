@@ -24,6 +24,9 @@
     <string name="zen_class_review_hint">Latest classifications (newest first): categories with confidence · tone · feed weight · input (T = title and channel only, D = with description). Second line: strongest topics and formats. The recognition is wrong for about one video in seven.</string>
     <string name="zen_class_selftest">Self-test (debug)</string>
     <string name="zen_class_selftest_running">Running self-test…</string>
+    <string name="zen_class_download_switches">The download does not change any switch. Once the model is installed, the two content switches in the list above take effect as they are set now: order the feed by content: %1$s, limit distressing videos: %2$s. Turning them off later is a loosening (24 hours); turning them off now, before the download, too.</string>
+    <string name="zen_class_installed_switches">Content recognition active. Order by content: %1$s, limit distressing videos: %2$s (Settings > Zen).</string>
+    <string name="zen_class_switch_no_model">No effect yet: works only with the content recognition model.</string>
     <!-- AP 4: feed weighting -->
     <string name="zen_set_class_feed">Content recognition: order the feed by content (news and entertainment further back)</string>
     <string name="zen_set_class_heavy">Content recognition: limit distressing videos (at most 1 in 10, never two in a row, not at the top)</string>

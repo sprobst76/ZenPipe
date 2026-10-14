@@ -372,6 +372,10 @@ class ZenSettingsFragment : Fragment() {
         labels.addView(text(getString(labelRes(def.key)), 16f))
         val valueLine = fmtValue(def, shown) + if (shown != current) "  (${fmtValue(def, current)})" else ""
         labels.addView(text(valueLine, 14f, true))
+        // content switches without a working model: visible that they do nothing yet (spec 4.7)
+        if (def.key in ZenSettingKeys.CLASSIFIER && !org.schabi.newpipe.zen.classify.ZenClassifierModel.isReady(requireContext())) {
+            labels.addView(text(getString(R.string.zen_class_switch_no_model), 12f))
+        }
         snap.pending[def.key]?.let {
             labels.addView(text(getString(R.string.zen_row_pending, fmtValue(def, it), fmtTime(snap.lockRemainingMs)), 12f))
         }

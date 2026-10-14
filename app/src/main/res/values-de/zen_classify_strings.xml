@@ -23,6 +23,9 @@
     <string name="zen_class_review_hint">Letzte Einordnungen (neueste zuerst): Kategorien mit Sicherheit · Ton · Feed-Gewicht · Eingabe (T = nur Titel und Kanal, D = mit Beschreibung). Zweite Zeile: stärkste Themen und Formate. Die Erkennung irrt sich bei etwa jedem siebten Video.</string>
     <string name="zen_class_selftest">Selbsttest (Debug)</string>
     <string name="zen_class_selftest_running">Selbsttest läuft …</string>
+    <string name="zen_class_download_switches">Der Download ändert keinen Schalter. Sobald das Modell installiert ist, wirken die beiden Inhalts-Schalter oben in der Liste so, wie sie jetzt stehen: Feed nach Inhalt gewichten: %1$s, belastende Videos begrenzen: %2$s. Ausschalten ist eine Lockerung (24 Stunden), auch jetzt vor dem Download.</string>
+    <string name="zen_class_installed_switches">Inhalts-Erkennung aktiv. Nach Inhalt gewichten: %1$s, belastende Videos begrenzen: %2$s (Einstellungen > Zen).</string>
+    <string name="zen_class_switch_no_model">Noch ohne Wirkung: wirkt erst mit dem Modell der Inhalts-Erkennung.</string>
     <!-- AP 4: Feed-Gewichtung -->
     <string name="zen_set_class_feed">Inhalts-Erkennung: Feed nach Inhalt gewichten (Aktuelles und Unterhaltung weiter hinten)</string>
     <string name="zen_set_class_heavy">Inhalts-Erkennung: belastende Videos begrenzen (höchstens 1 von 10, nie hintereinander, nicht ganz oben)</string>
