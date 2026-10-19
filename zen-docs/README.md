@@ -42,6 +42,7 @@ bindend; **Archiv** = Momentaufnahme.
 | [spec-pause-nach-abbruch.md](spec-pause-nach-abbruch.md) | Pflichtpause, Musik/Podcast-Heuristik, Pausenspruch | Spec |
 | [spec-einstellungs-sperre.md](spec-einstellungs-sperre.md) | 24-h-Sperre, Ersteinrichtung, Rückgängig | Spec |
 | [spec-praxis.md](spec-praxis.md) | Praxis-Kanäle/-Playlists, Kette, Sleep-Timer | Spec |
+| [spec-praxis-themen.md](spec-praxis-themen.md) | Praxis-Unterthemen pro Video, einzelne Praxis-Videos | Entwurf |
 | [spec-design.md](spec-design.md) | Palette „Salbei“, WCAG, Umsetzung | Spec |
 | [spec-absichtsabfrage-motivation.md](spec-absichtsabfrage-motivation.md) | Absichtsabfrage neu: klare Frage ohne Eingabe, Tageszahlen, Praxis-Alternative, wechselnde Fragen, Knopfgewichtung; Schritt 2 Gegenmittel/Kontextton | Spec (Entwurf, nicht gebaut) |
 | [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) | Wiedergabezeit Bild/Ton, Ruhezeit-Anrechnung (gebaut); Bildung, Tageslimit (nur Spec) | Spec |
