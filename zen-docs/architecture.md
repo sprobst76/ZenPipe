@@ -142,7 +142,7 @@ Auslöser: ZenClassifyWorker (nach Feed-Aktualisierung/App-Start, T) · VideoDet
 | `ZenPlausibility.kt`, `ZenPlausibilityCheck.kt` | Prüfung beim Markieren als Praxis (Stichprobe 15, Schwellen 30/60 %) |
 | `ZenChannelProfile.kt` + `zen/ZenChannelImport.kt` | Blatt „Kanal übernehmen“ für Kanal-Links (Hook `RouterActivity.onSuccess`) |
 | `zen/ZenClassExempt.kt`, `zen/ZenClassExemptUi.kt` | Ausnahmeliste (Kanäle, Schlagwörter) |
-| `ZenClassWhy.kt` | Text der Warum-Zeile (Kurznamen DE/EN) |
+| `ZenClassWhy.kt` | Text der Warum-Zeile (Feed: `feedPhrase`/`feedLine` ohne Zahlen; Prüfansicht: `summary`; Kurznamen DE/EN) |
 | `ZenClassifierSection.kt`, `ZenClassReview.kt`, `ZenClassExport.kt`, `ZenClassifierSelfTest.kt` | Einstellungsabschnitt, Prüfansicht mit Korrekturen, Debug-Export (JSON/CSV), Selbsttest (Debug) |
 
 **Invarianten:** Ohne Modell läuft alles wie vorher (Gewicht 1,0); der Klassifikator wirkt automatisch nur strenger, entscheidet

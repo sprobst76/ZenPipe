@@ -57,7 +57,6 @@
     <string name="zen_cat_zerstreuung">Entertainment</string>
     <string name="zen_tone_belastend">distressing</string>
     <string name="zen_tone_positiv">positive</string>
-    <string name="zen_why_weight">weight %1$s</string>
     <string name="zen_why_level_t">uncertain (title only)</string>
     <string name="zen_why_level_d">with description</string>
     <string name="zen_why_no_category">no category</string>
@@ -83,6 +82,9 @@
     <string name="zen_theme_sonstiges">Other</string>
     <string name="zen_why_unclassified">not classified yet</string>
     <string name="zen_why_exempt">exception: content recognition not applied</string>
+    <!-- feed: one short phrase, no numbers (they stay in the review list) -->
+    <string name="zen_why_feed_likely">likely %1$s</string>
+    <string name="zen_why_feed_exempt">exception</string>
     <!-- AP 5: plausibility check when marking practice -->
     <string name="zen_check_loading_list">Content recognition: loading the newest videos …</string>
     <string name="zen_check_progress">Content recognition: checking %1$d of %2$d …</string>

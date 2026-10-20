@@ -169,17 +169,51 @@ object ZenClassWhy {
         return parts.joinToString(" · ")
     }
 
-    /** Feed entry line from a stored [ZenFeedPlanner.Pick.why]; null = nothing to show. */
+    /**
+     * What the feed says about a pick: one short phrase without numbers (the numbers, weight and
+     * level stay in the review list). [key] is a category or theme key, [likely] = classified from
+     * title + channel only (said as "likely …"), [heavy] = distressing tone.
+     */
+    data class FeedPhrase(val kind: Kind, val key: String? = null, val likely: Boolean = false, val heavy: Boolean = false) {
+        enum class Kind { EXEMPT, UNCLASSIFIED, CATEGORY, THEME, NONE }
+    }
+
+    /**
+     * [FeedPhrase] of a stored [ZenFeedPlanner.Pick.why]; null = nothing to say (no "why", or no
+     * category and no clear theme and a normal tone).
+     */
+    @JvmStatic
+    fun feedPhrase(why: String?): FeedPhrase? {
+        if (why.isNullOrEmpty()) return null
+        if (why == ZenFeedPlanner.WHY_EXEMPT) return FeedPhrase(FeedPhrase.Kind.EXEMPT)
+        if (why == ZenFeedPlanner.WHY_UNCLASSIFIED) return FeedPhrase(FeedPhrase.Kind.UNCLASSIFIED)
+        val p = ZenFeedPlanner.parseWhy(why) ?: return null
+        val likely = p.level != LEVEL_DETAILS
+        val heavy = p.tone == ZenRules.TONE_HEAVY
+        val cat = p.cats.maxByOrNull { it.value }?.key
+        return when {
+            cat != null -> FeedPhrase(FeedPhrase.Kind.CATEGORY, cat, likely, heavy)
+            p.theme != null && !belowThreshold(p.theme.second) -> FeedPhrase(FeedPhrase.Kind.THEME, p.theme.first, likely, heavy)
+            heavy -> FeedPhrase(FeedPhrase.Kind.NONE, heavy = true)
+            else -> null
+        }
+    }
+
+    private const val LEVEL_DETAILS = "D"
+
+    /** Feed entry line from a stored [ZenFeedPlanner.Pick.why] ([feedPhrase]); null = nothing to show. */
     @JvmStatic
     fun feedLine(context: Context, why: String?): String? {
-        if (why.isNullOrEmpty()) return null
-        if (why == ZenFeedPlanner.WHY_EXEMPT) return context.getString(R.string.zen_why_exempt)
-        if (why == ZenFeedPlanner.WHY_UNCLASSIFIED) return context.getString(R.string.zen_why_unclassified)
-        val p = ZenFeedPlanner.parseWhy(why) ?: return null
-        val main = summary(context, p.cats, p.tone, null, listOfNotNull(p.theme))
-        val level = levelName(context, p.level)
-        // weight only when it moves the video back (1.0 = normal place)
-        val w = if (p.weight < 0.995) context.getString(R.string.zen_why_weight, num(p.weight)) else null
-        return listOfNotNull(main, w, level).joinToString(" · ")
+        val f = feedPhrase(why) ?: return null
+        val name = when (f.kind) {
+            FeedPhrase.Kind.EXEMPT -> return context.getString(R.string.zen_why_feed_exempt)
+            FeedPhrase.Kind.UNCLASSIFIED -> return context.getString(R.string.zen_why_unclassified)
+            FeedPhrase.Kind.CATEGORY -> catName(context, f.key!!)
+            FeedPhrase.Kind.THEME -> themeName(context, f.key!!)
+            FeedPhrase.Kind.NONE -> null
+        }
+        val main = name?.let { if (f.likely) context.getString(R.string.zen_why_feed_likely, it) else it }
+        val tone = if (f.heavy) context.getString(R.string.zen_tone_belastend) else null
+        return listOfNotNull(main, tone).joinToString(" · ").ifEmpty { null }
     }
 }
