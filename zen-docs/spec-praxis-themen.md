@@ -2,7 +2,7 @@
 
 Anforderung (Stefan, 2026-10-19): Praxis nach Themen gliedern (Fitness, Yoga, Schlaf, Meditation, Breathwork/Pranayama).
 Jedes Video kann eigene Zuordnungen haben, auch mehrere (ein Yoga-Kanal liefert auch Breathwork oder Meditation).
-**Status: Entwurf, nicht gebaut.** Maßgeblich bleibt `rules.md`/`spec-praxis.md`, bis dies freigegeben ist.
+**Status: umgesetzt (2026-10-20)**, Unit-Tests grün; Gerätestatus in `.planning/STATE.md`. Maßgeblich sind die Werte in `rules.md` (Abschnitt „Praxis“) und D61, D66–D70 in `decisions.md`. Commits: Messung `2f87b35c9`, Erkennung `81edae341`, Chips `2dd7b2b39`, Standardthema/Korrektur `84e082605`, Einzelvideos `e6c6365b5`, weicher Deckel `585d767be`.
 
 ## 1. Entscheidungen (Stefan, 2026-10-19)
 - Unterthemen hängen **am Video**, bis zu 3 pro Video.
@@ -59,6 +59,7 @@ Training (Restmenge, schwer), **P** = 30 Praxis-Kanäle × 15 neueste Videos = 4
   Vorträge/Ankündigungen eines Yoga-Kanals, die das strenge Label „ohne Thema“ bekamen.
 
 ## 4. Anzeige und Bedienung
+[Umsetzung: rules.md „Praxis-Tab“, D67; Korrektur als minimale Mehrfachauswahl in der Prüfansicht, D70]
 - Praxis-Tab: Chips „Alle · Fitness · Yoga · Schlaf · Meditation · Atemarbeit · Weitere“, Mehrfachvideos erscheinen unter jedem ihrer Themen. Reihenfolge unverändert (Datum), kein Nachladen-Zwang.
 - Korrektur am Video: Der geplante Korrektur-Dialog bekommt eine Zeile mit den Praxis-Themen (Mehrfachauswahl). Jede Korrektur wird lokal gespeichert und im Debug-Export ausgegeben (Regel-Kalibrierung).
 - Beim Markieren eines Kanals/einer Playlist: im selben Dialog optional ein Standardthema wählen.
@@ -67,16 +68,17 @@ Training (Restmenge, schwer), **P** = 30 Praxis-Kanäle × 15 neueste Videos = 4
 Praxis bleibt eine Einheit: kein Tageslimit, keine Pflichtpause, Start in laufender Pause erlaubt, Kette wie bisher. Ausnahmen aus `spec-praxis.md` gelten auch für einzelne Praxis-Videos.
 
 ## 6. Folgen für andere Dokumente (bei Freigabe)
-- `spec-praxis.md` „nur pro Kanal, nie pro Video, keine automatische Erkennung“ -> mit „[überholt: …]“ markieren (Einzelvideos, Themen-Erkennung nur als Anzeige).
-- `rules.md` Abschnitt Praxis ergänzen; `decisions.md` D61 von „Entwurf“ auf beschlossen.
+- [erledigt 2026-10-20] `spec-praxis.md` „nur pro Kanal, nie pro Video, keine automatische Erkennung“ mit „[überholt: …]“ markiert.
+- [erledigt 2026-10-20] `rules.md` Abschnitt Praxis ergänzt; `decisions.md` D61 beschlossen/umgesetzt, D66–D70 neu.
 - Abo-Sichtung: Zuordnung der 30 Praxis-Kanäle zu Standardthemen im Artefakt vorbereiten (optional).
 
 ## 7. Tests
 Regelwörterbuch-Tests mit Titelbeispielen DE/EN, Quellen-Reihenfolge (U vor R vor Standard), Bitmasken, Chip-Filter, Sperrlogik für Einzelvideos (Lockerung/Verschärfung), Migration ohne Themen-Daten.
 
 ## 8. Offene Punkte
-- Anzahl pro Thema (Vorschlag 5) und genaue Auswahl der übrigen Plätze (Datum, Klassifikator-Sicherheit).
-- Schwelle des weichen Praxis-Deckels (Vorschlag 90 min) und Wortlaut der Rückfrage (am Gerät abstimmen).
-- Wörterbuch-Inhalt und Schwellen (am Gerät/Eval kalibrieren).
+- [entschieden 2026-10-20, D67] Anzahl pro Thema 5: die ersten 4 in Tab-Reihenfolge + höchstens ein beliebtes (Verhältnis > 1, sonst leer).
+- [Standard 90 min umgesetzt, D69] Schwelle des weichen Praxis-Deckels; **Wortlaut der Rückfrage am Gerät mit Stefan abstimmen**.
+- [erste Fassung 2026-10-20, D66] Wörterbuch-Inhalt und Schwellen; nachkalibrieren mit Stefans Korrekturen aus dem Debug-Export.
+- Einzelvideos im Praxis-Tab nur mit Titel (kein Vorschaubild, kein Abruf); Standardthema in der Ersteinrichtung und im Kanal-Blatt nur nachträglich.
 - Wo „Schlaf“ an den Sleep-Timer anknüpft (derzeit nicht verknüpft).
 - Reihenfolge der Chips (fest oder nach Nutzung).

@@ -115,9 +115,13 @@ gegen neuen und ausstehenden Zielzustand; alle Fristen sind `ZenCountdown`. Jede
 
 | Datei | Zweck |
 |---|---|
-| `zen/ZenPraxis.kt` | `ZenPraxisChannel` (Kanal oder Online-Playlist, normalisierte URL), `ZenPraxisTime` (Praxis-Minuten), `ZenPraxisPlaylistItems` (`px_pl_items`, eingefroren: Basis + neue Videos mit 24-h-Wartezeit), `ZenPraxis.isPraxisStream` |
-| `zen/ZenPraxisFragment.kt` | Tab „Praxis“ (`settings/tabs/Tab.PraxisTab`, ID 10; `TabsManager` ergänzt ihn immer nach dem Feed) und Drawer-Eintrag |
-| `zen/ZenPraxisUi.kt` | Markieren/Abbrechen/Entfernen (Menü, Long-Press, Bestätigung, Plausibilitätsprüfung davor) |
+| `zen/ZenPraxis.kt` | `ZenPraxisChannel` (Kanal, Online-Playlist oder Einzelvideo `v`, normalisierte URL, Standardthemen-Bitmaske), `ZenPraxisTime` (Praxis-Minuten), `ZenPraxisPlaylistItems` (`px_pl_items`, eingefroren: Basis + neue Videos mit 24-h-Wartezeit), `ZenPraxis.isPraxisStream` |
+| `zen/ZenPraxisFragment.kt` | Tab „Praxis“ (`settings/tabs/Tab.PraxisTab`, ID 10; `TabsManager` ergänzt ihn immer nach dem Feed) und Drawer-Eintrag; Themen-Chips, Hintergrund-Einordnung ungesehener Videos (`ZenClassifier.classifyForPraxis`) |
+| `zen/ZenPraxisUi.kt` | Markieren/Abbrechen/Entfernen (Menü, Long-Press, Bestätigung mit optionalem Standardthema, Plausibilitätsprüfung davor), Einzelvideos (`onVideoMenu`, `showVideoLongPress`), Themen-Auswahl (`pickThemes`, `pickDefaultThemes`) |
+| `zen/ZenPraxisThemes.kt` | `ZenPraxisTheme` (5 feste Themen, Bit, Modell-Kopf, Schwellen T/D), `ZenPraxisThemes` (Titelregeln, Modell-Themen, `resolve`: Korrektur > Titel ∪ Modell > Standard > Weitere) – rein, ohne Android |
+| `zen/ZenPraxisThemeData.kt` | liest Korrekturen (`praxis_theme`) und Modellwerte (`pxt`) aus `ZenClassCache`, `resolveAll`, `setCorrection` |
+| `zen/ZenPraxisSelection.kt` | Themenansicht: 5 je Thema, höchstens ein beliebtes (Aufrufe/Kanal-Median) – rein |
+| `zen/ZenPraxisCap.kt`, `zen/ZenPraxisCapActivity.kt` | weicher Praxis-Tagesdeckel: Prüfung aus `ZenPause.onProgress` (alle 30 s, nur Praxis), Dialog-Activity „Noch Praxis oder schon Schauen?“ |
 | `zen/ZenSleep.kt`, `zen/ZenSleepUi.kt` | `ZenSleepTimer` (Gerätelaufzeit, Fade 30 s), `ZenSleepSignal` (Hook Einschlaferkennung), Mond-Knopf/Menü |
 
 Kette: `Player.initPlayer` setzt `setPauseAtEndOfMediaItems(true)`; am Ende ruft `Player.zenOnItemEnd` →
@@ -173,14 +177,15 @@ und reduzierte Details (`VideoDetailFragment`), Drawer (`MainActivity`), Kiosk-T
 | `player/Player.java` | `initPlayer` (`setPauseAtEndOfMediaItems`), `zenOnItemEnd`, `ZenPause.onPlaying/setAudio/onProgress/onStreamInfo/onClosed/onItem/onCompleted`, `ZenPlayback.setPlaying`, `ZenSleep.bind` |
 | `player/PlayerService.java` | Sicherheitsnetz `ZenPause.blockForService` (`ZenPauseRules.intentStartsPlayback`), verwirft POPUP-Intents |
 | `player/PlayQueueActivity.java`, `player/ui/VideoPlayerUi.java` | Sleep-Timer-Menü (Hintergrund) bzw. Mond-Knopf (`zenSleepButton`), kein Pop-up; Suchleiste Salbei (`zenSeekColor`) |
-| `fragments/detail/VideoDetailFragment.java` | Related/Kommentare aus, `zenReduced`, `ZenPause.blockStart/confirmClose`, `ZenClassifier.onStreamInfo`, kein Download/Pop-up |
+| `fragments/detail/VideoDetailFragment.java` | Related/Kommentare aus, `zenReduced`, `ZenPause.blockStart/confirmClose`, `ZenClassifier.onStreamInfo`, kein Download/Pop-up, langer Druck auf den Titel: `ZenPraxisUi.showVideoLongPress` |
 | `local/feed/FeedViewModel.kt`, `FeedFragment.kt`, `item/StreamItem.kt` | `ZenFeedProvider`, Vorbereitungs-/Detail-Listener, Triage, Warum-Zeile |
 | `local/subscription/SubscriptionFragment.kt` | Long-Press: Praxis markieren, Ausnahme |
 | `fragments/list/BaseListFragment.java` | Long-Press auf Kanal/Playlist: `ZenPraxisUi.showLongPress` |
 | `fragments/list/channel/ChannelFragment.java`, `fragments/list/playlist/PlaylistFragment.java` | Menü „Als Praxis markieren“, `ZenPraxis.registerPlaylistItems` |
 | `util/NavigationHelper.java` | `ZenPause.blockStart` vor jedem Start, Pop-up/Downloads no-op, Praxis-Seite |
 | `info_list/InfoListAdapter.java`, `fragments/list/search/SearchFragment.java` | Listenende (15 Einträge / 2 Seiten), Shorts-Filter |
-| `info_list/dialog/InfoItemDialog.java`, `QueueItemMenuUtil.java`, `util/PlayButtonHelper.kt`, `settings/*`, `download/*` | `ZenFeatures`-Prüfungen |
+| `info_list/dialog/InfoItemDialog.java`, `QueueItemMenuUtil.java`, `util/PlayButtonHelper.kt`, `settings/*`, `download/*` | `ZenFeatures`-Prüfungen; `InfoItemDialog.addDefaultEndEntries` + `StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO` („Praxis-Video…“) |
+| `AndroidManifest.xml` | `ZenPauseActivity`, `ZenPraxisCapActivity` (Dialog-Theme), Telemetrie-Provider entfernt |
 | `database/feed/dao/FeedGroupDAO.kt` | `getZenGroupRanks` |
 
 ## Release, CI, F-Droid

@@ -4,7 +4,7 @@ Anforderung (Nutzer, 2026-10-13): Eine Kategorie „Praxis“ für Inhalte, die 
 `rules.md` (Abschnitt „Praxis“); diese Spec beschreibt Begründung und Umsetzung. **Status: umgesetzt (2026-10-13).**
 
 ## Zuordnung
-- **Nur durch den Nutzer**, pro **Kanal** (nie pro Video, keine automatische Erkennung über Titel/Stichworte/Kategorie).
+- **Nur durch den Nutzer**, pro **Kanal** (nie pro Video, keine automatische Erkennung über Titel/Stichworte/Kategorie). [überholt 2026-10-20: zusätzlich **einzelne Videos** (D68, ebenfalls nur durch den Nutzer und mit 24-h-Sperre); Titelregeln und Klassifikator ordnen Praxis-Videos nur noch **Themen zur Anzeige** zu (D61), entscheiden aber weiterhin nie, ob etwas Praxis ist – siehe `spec-praxis-themen.md`]
 - Identität: `serviceId` + normalisierte Kanal-URL (`ZenPraxisChannel.keyOf`: Schema, `www.`/`m.` und abschließender `/` egal,
   Host klein, Pfad/Kanal-ID unverändert). Auf der Kanalseite wird `ChannelInfo.getUrl()` (kanonisch `/channel/UC…`) gespeichert,
   dieselbe Form liefern `StreamInfo.getUploaderUrl()` (Wiedergabe) und `StreamEntity.uploaderUrl` (Feed-DB).
@@ -70,7 +70,7 @@ streng „Video“.
 ## Praxis-Tab
 - Eigener Tab **„Praxis“** (`Tab.PraxisTab`, ID 10, immer direkt nach dem Feed, wird auch bei bestehenden Tab-Listen ergänzt)
   und Drawer-Eintrag „Praxis“ (`ZenPraxisFragment`).
-- Inhalt: die neuesten Videos (Videos-Tab des Kanals, ohne Shorts/Livestreams) jedes **aktiven** Praxis-Kanals, **max. 15 pro
+- [ergänzt 2026-10-20: Chips je Praxis-Thema mit 5 Videos, D67; einzelne Praxis-Videos, D68] Inhalt: die neuesten Videos (Videos-Tab des Kanals, ohne Shorts/Livestreams) jedes **aktiven** Praxis-Kanals, **max. 15 pro
   Kanal**, zusammen nach Datum sortiert, **kein Nachladen** (endliche Liste), kein Auswahl-Kontingent. Geladen wie eine
   Kanalseite übers Netz (der Kanal muss nicht abonniert sein; `ExtractorHelper`-Cache). Kopfzeile: „Praxis heute: N min“ und
   Anzahl ausstehender Kanäle. Nach Änderungen an der Liste lädt der Tab beim nächsten Anzeigen neu.
@@ -81,7 +81,7 @@ streng „Video“.
   rules.md „Praxis-Minuten“] Wiedergabezeit jeder Praxis-Sitzung wird beim Sitzungsende (Schließen, Wechsel, zu Ende, Prozess-Kill beim nächsten Start)
   dem **Zen-Tag** (04:00) des Endzeitpunkts gutgeschrieben (`ZenPraxisTime`, Schlüssel `px_time`, 30 Tage).
 - Anzeige: Praxis-Tab (Kopfzeile) und Einstellungen > Zen (Info-Zeile). Eine eigene Tagesübersicht gibt es (noch) nicht.
-- **Kein Limit** (Entscheidung). Hook für ein späteres optionales weiches Limit: `ZenPraxisTime.msOn(day)`.
+- **Kein Limit** (Entscheidung). Hook für ein späteres optionales weiches Limit: `ZenPraxisTime.msOn(day)`. [überholt 2026-10-20: weicher Tagesdeckel mit ruhiger Rückfrage, D69, `ZenPraxisCap`; weiterhin kein harter Stopp]
 
 ## Praxis während der Pflichtpause (2026-10-13)
 Praxis-Videos dürfen auch während einer laufenden Pflichtpause starten; alles andere bleibt gesperrt, die Pause läuft weiter.
@@ -113,5 +113,5 @@ Einstellungen > Zen (wird im Menü zuerst angeboten, keine Sperre, kein Auto-Sta
 - Lokale Playlists als Praxis (bewusst nicht: beliebig befüllbar).
 - Lesezeichen-Playlists (Tab „Lesezeichen“) ohne Long-Press-Eintrag; Markieren dort über die Playlist-Seite.
 - [erledigt 2026-10-13 durch laufende Buchung in `ZenWatchTime`] Minuten einer noch laufenden Praxis-Sitzung erscheinen erst nach ihrem Ende.
-- Weiches Praxis-Limit (Hinweis ab N min/Tag): nur Hook, nicht gebaut.
+- [erledigt 2026-10-20, D69] Weiches Praxis-Limit (Hinweis ab N min/Tag).
 - Sleep-Timer: keine Anzeige in der Benachrichtigung; Einschlaferkennung nur als Hook.
