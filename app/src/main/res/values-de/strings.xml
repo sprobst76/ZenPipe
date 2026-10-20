@@ -996,6 +996,15 @@
     <string name="zen_review_praxis_info">Ordnet nur den Praxis-Tab. Wird auf diesem Gerät gespeichert und mit exportiert.</string>
     <string name="zen_review_praxis_user">Praxis-Themen (eigene): %1$s</string>
     <string name="zen_review_praxis_auto">Praxis-Themen: %1$s</string>
+    <string name="zen_copy_title">Titel kopieren</string>
+    <string name="zen_praxis_video_menu">Praxis-Video…</string>
+    <string name="zen_praxis_video_mark">Als Praxis-Video markieren</string>
+    <string name="zen_praxis_video_unmark">Aus Praxis-Videos entfernen</string>
+    <string name="zen_praxis_video_cancel_pending">Ausstehendes Praxis-Video abbrechen</string>
+    <string name="zen_praxis_video_confirm_title">Als Praxis-Video markieren?</string>
+    <string name="zen_praxis_video_confirm_message">„%1$s“ wird am %2$s (in 24 Stunden) zum Praxis-Video; bis dahin kannst du es abbrechen. Es erscheint dann im Tab Praxis, gehört nicht zur Feed-Ausgabe und ihren Grenzen, darf während einer Pflichtpause laufen, und ein vorzeitiger Abbruch löst keine Pause aus.</string>
+    <string name="zen_praxis_video_added_pending">%1$s wird am %2$s zum Praxis-Video</string>
+    <string name="zen_praxis_state_video">Video</string>
     <string name="zen_praxis_mark">Als Praxis-Kanal markieren</string>
     <string name="zen_praxis_unmark">Aus Praxis-Kanälen entfernen</string>
     <string name="zen_praxis_cancel_pending">Ausstehenden Praxis-Kanal abbrechen</string>

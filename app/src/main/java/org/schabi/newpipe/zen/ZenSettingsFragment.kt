@@ -360,7 +360,13 @@ class ZenSettingsFragment : Fragment() {
             labels.addView(text(ch.name.ifEmpty { ch.url }, 16f))
             labels.addView(
                 text(
-                    (if (ch.playlist) getString(R.string.zen_praxis_state_playlist) + " · " else "") +
+                    (
+                        when {
+                            ch.video -> getString(R.string.zen_praxis_state_video) + " · "
+                            ch.playlist -> getString(R.string.zen_praxis_state_playlist) + " · "
+                            else -> ""
+                        }
+                        ) +
                         if (pending) {
                             getString(R.string.zen_praxis_state_pending, fmtTime(snap.lockRemainingMs))
                         } else {

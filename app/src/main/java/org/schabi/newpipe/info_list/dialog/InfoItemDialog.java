@@ -340,6 +340,7 @@ public final class InfoItemDialog {
             addPlayWithKodiEntryIfNeeded();
             addMarkAsWatchedEntryIfNeeded();
             addEntry(StreamDialogDefaultEntry.SHOW_CHANNEL_DETAILS);
+            addEntry(StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO); // zen: single practice video (D61)
             return this;
         }
 

@@ -196,7 +196,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
     private fun rawCandidateRows(): List<Pair<Int, ZenFeedPlanner.Candidate>> {
         val ranks = db.database().feedGroupDAO().getZenGroupRanks().associateBy { it.streamId }
         val praxis = ZenPraxis.activeKeys()
-        val praxisStreams = ZenPraxis.activePlaylistStreamKeys()
+        val praxisStreams = ZenPraxis.activePraxisStreamKeys()
         val exempt = ZenClassExemptions(ZenSettings.lock()?.exemptions() ?: emptyList())
         return db.getStreams(FeedGroupEntity.GROUP_ALL_ID, false, false, false)
             .blockingGet(arrayListOf()).mapNotNull {

@@ -1031,6 +1031,15 @@
     <string name="zen_review_praxis_info">Only sorts the practice tab. Stored on this device and included in the export.</string>
     <string name="zen_review_praxis_user">Practice themes (yours): %1$s</string>
     <string name="zen_review_praxis_auto">Practice themes: %1$s</string>
+    <string name="zen_copy_title">Copy title</string>
+    <string name="zen_praxis_video_menu">Practice video…</string>
+    <string name="zen_praxis_video_mark">Mark as practice video</string>
+    <string name="zen_praxis_video_unmark">Remove from practice videos</string>
+    <string name="zen_praxis_video_cancel_pending">Cancel pending practice video</string>
+    <string name="zen_praxis_video_confirm_title">Mark as practice video?</string>
+    <string name="zen_praxis_video_confirm_message">\"%1$s\" becomes a practice video on %2$s (in 24 hours); you can cancel it until then. It then appears in the Practice tab, is not part of the feed edition or its limits, may play during a mandatory pause and stopping it early starts no pause.</string>
+    <string name="zen_praxis_video_added_pending">%1$s becomes a practice video on %2$s</string>
+    <string name="zen_praxis_state_video">Video</string>
     <string name="zen_praxis_mark">Mark as practice channel</string>
     <string name="zen_praxis_unmark">Remove from practice channels</string>
     <string name="zen_praxis_cancel_pending">Cancel pending practice channel</string>

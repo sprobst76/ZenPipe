@@ -83,6 +83,61 @@ object ZenPraxisUi {
         }
     }
 
+    // ---------------------------------------------------------------- single practice videos (D61)
+
+    @JvmStatic
+    fun videoMenuTitle(context: Context, serviceId: Int, url: String): String = context.getString(
+        when (ZenPraxis.state(context, serviceId, url)) {
+            ZenPraxis.State.ACTIVE -> R.string.zen_praxis_video_unmark
+            ZenPraxis.State.PENDING -> R.string.zen_praxis_video_cancel_pending
+            ZenPraxis.State.NONE -> R.string.zen_praxis_video_mark
+        }
+    )
+
+    /**
+     * Mark/unmark one video as practice. Adding is a loosening exactly like a channel (3 s wait,
+     * pending 24 h, starts the lock, 5 min undo; rejected while locked; at once in the first-time
+     * setup), also when the content recognition agrees (decision Stefan). Removing applies at once.
+     */
+    @JvmStatic
+    fun onVideoMenu(activity: Activity, serviceId: Int, url: String, name: String, changed: Runnable) {
+        val lock = Zen.settingsLock(activity)
+        when (ZenPraxis.state(activity, serviceId, url)) {
+            ZenPraxis.State.ACTIVE, ZenPraxis.State.PENDING -> {
+                val pending = ZenPraxis.state(activity, serviceId, url) == ZenPraxis.State.PENDING
+                lock.removePraxis(ZenPraxisChannel.keyOf(serviceId, url))
+                toast(activity, activity.getString(if (pending) R.string.zen_praxis_pending_cancelled else R.string.zen_praxis_removed, name))
+                changed.run()
+            }
+
+            ZenPraxis.State.NONE -> {
+                val snap = lock.snapshot()
+                val entry = ZenPraxisChannel(serviceId, url, name, video = true)
+                when {
+                    snap.setupMode -> {
+                        commitAdd(activity, entry)?.let { toast(activity, it) }
+                        changed.run()
+                    }
+
+                    snap.lockRemainingMs > 0 -> toast(activity, activity.getString(R.string.zen_praxis_locked, fmtTime(snap.lockRemainingMs)))
+
+                    else -> confirmAdd(activity, entry, changed)
+                }
+            }
+        }
+    }
+
+    /** Long press on a video's title (detail page): copy the title, or the practice action. */
+    @JvmStatic
+    fun showVideoLongPress(activity: Activity, serviceId: Int, url: String, name: String, copyTitle: Runnable) {
+        AlertDialog.Builder(activity)
+            .setTitle(name)
+            .setItems(arrayOf(activity.getString(R.string.zen_copy_title), videoMenuTitle(activity, serviceId, url))) { _, which ->
+                if (which == 0) copyTitle.run() else onVideoMenu(activity, serviceId, url, name) {}
+            }
+            .show()
+    }
+
     /**
      * Long press on a channel or playlist entry of a list (search, subscriptions, channel tabs):
      * a small dialog with the practice action.
@@ -145,7 +200,11 @@ object ZenPraxisUi {
         AddPlan.ALREADY -> ""
 
         AddPlan.PENDING -> context.getString(
-            if (channel.playlist) R.string.zen_praxis_pl_confirm_message else R.string.zen_praxis_confirm_message,
+            when {
+                channel.video -> R.string.zen_praxis_video_confirm_message
+                channel.playlist -> R.string.zen_praxis_pl_confirm_message
+                else -> R.string.zen_praxis_confirm_message
+            },
             channel.name,
             fmtTime(ZenSettingsRules.LOCK_MS)
         ) + "\n\n" + context.getString(R.string.zen_confirm_footer_lock) + " " + context.getString(R.string.zen_confirm_footer_undo)
@@ -163,7 +222,11 @@ object ZenPraxisUi {
                 context.getString(R.string.zen_praxis_added_setup, channel.name)
             } else {
                 context.getString(
-                    if (channel.playlist) R.string.zen_praxis_pl_added_pending else R.string.zen_praxis_added_pending,
+                    when {
+                        channel.video -> R.string.zen_praxis_video_added_pending
+                        channel.playlist -> R.string.zen_praxis_pl_added_pending
+                        else -> R.string.zen_praxis_added_pending
+                    },
                     channel.name,
                     fmtTime(lock.snapshot().lockRemainingMs)
                 )
@@ -268,7 +331,13 @@ object ZenPraxisUi {
             channel.themes
         )
         val dialog = AlertDialog.Builder(activity)
-            .setTitle(if (channel.playlist) R.string.zen_praxis_pl_confirm_title else R.string.zen_praxis_confirm_title)
+            .setTitle(
+                when {
+                    channel.video -> R.string.zen_praxis_video_confirm_title
+                    channel.playlist -> R.string.zen_praxis_pl_confirm_title
+                    else -> R.string.zen_praxis_confirm_title
+                }
+            )
             .setView(boxes.view)
             .setPositiveButton(R.string.zen_confirm_ok) { _, _ ->
                 commitAdd(activity, channel.copy(themes = boxes.current()))?.let { toast(activity, it) }

@@ -567,9 +567,12 @@ public final class VideoDetailFragment
     }
 
     private void setOnLongClickListeners() {
+        // zen: long press on the title also offers "mark as practice video" (D61)
         binding.detailTitleRootLayout.setOnLongClickListener(makeOnLongClickListener(info ->
-                ShareUtils.copyToClipboard(requireContext(),
-                        binding.detailVideoTitleView.getText().toString())));
+                org.schabi.newpipe.zen.ZenPraxisUi.showVideoLongPress(requireActivity(),
+                        info.getServiceId(), info.getUrl(), info.getName(), () ->
+                        ShareUtils.copyToClipboard(requireContext(),
+                                binding.detailVideoTitleView.getText().toString()))));
         binding.detailUploaderRootLayout.setOnLongClickListener(makeOnLongClickListener(info -> {
             if (isEmpty(info.getSubChannelUrl())) {
                 Log.w(TAG, "Can't open parent channel because we got no parent channel URL");

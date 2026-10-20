@@ -242,9 +242,13 @@ object ZenPraxis {
 
     enum class State { NONE, PENDING, ACTIVE }
 
-    /** Keys of the ACTIVE practice channels (read once per decision, e.g. per feed edition). */
+    /** Keys of the ACTIVE practice channels and playlists (read once per decision, e.g. per feed edition); no single videos. */
     @JvmStatic
-    fun activeKeys(): Set<String> = ZenSettings.lock()?.praxisChannels()?.map { it.key }?.toHashSet() ?: emptySet()
+    fun activeKeys(): Set<String> = ZenSettings.lock()?.praxisChannels()?.filter { !it.video }?.map { it.key }?.toHashSet() ?: emptySet()
+
+    /** Keys of the ACTIVE single practice videos (D61). */
+    @JvmStatic
+    fun activeVideoKeys(): Set<String> = ZenSettings.lock()?.praxisChannels()?.filter { it.video }?.map { it.key }?.toHashSet() ?: emptySet()
 
     /** Keys of the ACTIVE practice playlists. */
     @JvmStatic
@@ -273,16 +277,23 @@ object ZenPraxis {
     }
 
     /**
-     * Whether a stream counts as practice: its uploader is an active practice channel, or it is a
-     * known video of an active practice playlist. Only the user's assignment counts, never
-     * title/keywords (no heuristic, no bypass via titles).
+     * Whether a stream counts as practice: its uploader is an active practice channel, it is a
+     * known video of an active practice playlist, or it is an active single practice video. Only
+     * the user's assignment counts, never title/keywords or the practice themes (no heuristic, no
+     * bypass via titles).
      */
     @JvmStatic
-    fun isPraxisStream(serviceId: Int, streamUrl: String?, uploaderUrl: String?): Boolean = isPraxis(serviceId, uploaderUrl) || (items?.contains(serviceId, streamUrl, activePlaylistKeys()) ?: false)
+    fun isPraxisStream(serviceId: Int, streamUrl: String?, uploaderUrl: String?): Boolean = isPraxis(serviceId, uploaderUrl) ||
+        (!streamUrl.isNullOrEmpty() && ZenPraxisChannel.keyOf(serviceId, streamUrl) in activeVideoKeys()) ||
+        (items?.contains(serviceId, streamUrl, activePlaylistKeys()) ?: false)
 
     /** Stream keys of the known videos of all active practice playlists (e.g. once per feed edition). */
     @JvmStatic
     fun activePlaylistStreamKeys(): Set<String> = items?.streamKeys(activePlaylistKeys()) ?: emptySet()
+
+    /** Stream keys that are practice by themselves: playlist videos and single practice videos (feed). */
+    @JvmStatic
+    fun activePraxisStreamKeys(): Set<String> = activePlaylistStreamKeys() + activeVideoKeys()
 
     /** Keys of the PENDING practice playlists (their loads are the frozen base). */
     @JvmStatic

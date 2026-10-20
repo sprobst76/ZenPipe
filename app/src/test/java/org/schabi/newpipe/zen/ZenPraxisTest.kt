@@ -387,6 +387,55 @@ class ZenPraxisTest {
         }
     }
 
+    // ------------------------------------------------------------------ single practice videos (D61)
+
+    private val video = ZenPraxisChannel(0, "https://www.youtube.com/watch?v=v1", "Morning flow", video = true)
+
+    @Test
+    fun `a single video is added like a channel - pending 24 h, lock, undo, removing at once`() {
+        val (env, l) = ready()
+        val r = l.addPraxis(video) as ZenSettingsLock.Result.Applied
+        assertTrue(r.lockStarted)
+        assertTrue(l.praxisChannels().isEmpty())
+        assertTrue(l.pendingPraxis().single().video)
+        assertTrue(l.addPraxis(yoga) is ZenSettingsLock.Result.Rejected) // global lock
+        assertTrue(l.undo()) // 5 min undo restores list and lock
+        assertTrue(l.pendingPraxis().isEmpty())
+        assertFalse(l.isLocked())
+        l.addPraxis(video)
+        env.mono += 24 * h
+        assertEquals(listOf(video), l.praxisChannels())
+        assertTrue(l.removePraxis(video.key) is ZenSettingsLock.Result.Applied)
+        assertTrue(l.praxisChannels().isEmpty())
+        assertFalse(l.isLocked()) // removing never starts the lock
+    }
+
+    @Test
+    fun `in the first-time setup a single video applies at once`() {
+        val l = Env().lock()
+        assertTrue((l.addPraxis(video) as ZenSettingsLock.Result.Applied).setupMode)
+        assertEquals(listOf(video), l.praxisChannels())
+    }
+
+    @Test
+    fun `only an active single video is practice, it never makes its channel practice`() {
+        val (env, l) = ready()
+        ZenSettings.install(l)
+        try {
+            l.addPraxis(video)
+            assertFalse(ZenPraxis.isPraxisStream(0, video.url, yoga.url)) // pending
+            env.mono += 24 * h
+            assertTrue(ZenPraxis.isPraxisStream(0, "https://youtube.com/watch?v=v1", null))
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=v2", null))
+            assertFalse(ZenPraxis.isPraxisStream(1, video.url, null)) // other service
+            assertFalse(ZenPraxis.isPraxis(0, video.url)) // not an uploader key
+            assertTrue(video.key in ZenPraxis.activePraxisStreamKeys()) // kept out of the feed edition
+            assertTrue(ZenPraxis.activeKeys().isEmpty())
+        } finally {
+            ZenSettings.install(null)
+        }
+    }
+
     // ------------------------------------------------------------------ playlists
 
     private val yogaList = ZenPraxisChannel(0, "https://www.youtube.com/playlist?list=PLyoga", "Yoga list", playlist = true)

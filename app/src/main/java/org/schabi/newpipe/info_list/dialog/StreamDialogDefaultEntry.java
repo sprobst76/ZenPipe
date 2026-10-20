@@ -137,6 +137,11 @@ public enum StreamDialogDefaultEntry {
     OPEN_IN_BROWSER(R.string.zen_copy_link, (fragment, item) ->
             ShareUtils.openUrlInBrowser(fragment.requireContext(), item.getUrl())),
 
+    // zen: mark/unmark one video as practice (D61, same lock rules as a practice channel)
+    ZEN_PRAXIS_VIDEO(R.string.zen_praxis_video_menu, (fragment, item) ->
+            org.schabi.newpipe.zen.ZenPraxisUi.onVideoMenu(fragment.requireActivity(),
+                    item.getServiceId(), item.getUrl(), item.getName(), () -> { })),
+
 
     MARK_AS_WATCHED(R.string.mark_as_watched, (fragment, item) ->
         new HistoryRecordManager(fragment.getContext())

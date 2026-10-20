@@ -168,7 +168,7 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
         }
     }
 
-    private fun signature(): String = ZenPraxis.activeKeys().sorted().joinToString("|")
+    private fun signature(): String = signatureOf(Zen.settingsLock(requireContext()).praxisChannels())
 
     private fun selectedTheme(): ZenPraxisTheme? = ZenPraxisTheme.entries.getOrNull(chip)
 
@@ -226,9 +226,12 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
         super.startLoading(forceLoad)
         disposable?.dispose()
         val lock = Zen.settingsLock(requireContext())
-        val all = lock.praxisChannels()
-        loadedSignature = all.map { it.key }.sorted().joinToString("|")
-        ZenPraxis.playlistItems(requireContext()).prune((all + lock.pendingPraxis()).map { it.key }.toHashSet())
+        val everything = lock.praxisChannels()
+        loadedSignature = signatureOf(everything)
+        // single practice videos (D61) are shown from the stored entry, without loading anything
+        val videos = everything.filter { it.video }
+        val all = everything.filter { !it.video }
+        ZenPraxis.playlistItems(requireContext()).prune((everything + lock.pendingPraxis()).map { it.key }.toHashSet())
         val ctx = requireContext().applicationContext
         // pending playlists are loaded only to remember their content (frozen base, D63), not shown
         val pendingLists = lock.pendingPraxis().filter { it.playlist }
@@ -248,12 +251,20 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
                     .sortedByDescending { it.uploadDate?.offsetDateTime()?.toInstant()?.toEpochMilli() ?: Long.MIN_VALUE }
                 val playlistLists = perEntry.filter { it.head != null }
                 val playlistItems = playlistLists.flatMap { listOf(it.head!!) + it.items }
+                val videoLists = videos.map { v -> ChannelItems(listOf(videoItem(v)), true, source = v) }
+                val videoItems = videoLists.flatMap { it.items }
                 // the theme view: channel videos newest first, then the playlists' videos in order
                 val source = HashMap<StreamInfoItem, ZenPraxisChannel?>()
-                perEntry.forEach { ce -> ce.items.forEach { source[it] = ce.source } }
-                val entries = (channelItems + playlistLists.flatMap { it.items }).map { it.toEntry(source[it]) }
+                (perEntry + videoLists).forEach { ce -> ce.items.forEach { source[it] = ce.source } }
+                val entries = (channelItems + videoItems + playlistLists.flatMap { it.items }).map { it.toEntry(source[it]) }
                     .let { list -> mergeDefaults(list) }
-                Loaded(channelItems + playlistItems, all.size, perEntry.count { !it.ok }, entries, ZenPraxisThemeData.resolveAll(ctx, themeVideos(entries)))
+                Loaded(
+                    channelItems + videoItems + playlistItems,
+                    all.size + videos.size,
+                    perEntry.count { !it.ok },
+                    entries,
+                    ZenPraxisThemeData.resolveAll(ctx, themeVideos(entries))
+                )
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -411,6 +422,11 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
                 e.copy(defaultMask = ZenPraxisThemes.mask(ZenPraxisThemes.themes(union.getValue(e.key)).take(ZenPraxisThemes.MAX)))
             }
         }
+
+        fun signatureOf(list: List<ZenPraxisChannel>) = list.map { "${it.key}:${it.themes}" }.sorted().joinToString("|")
+
+        /** A single practice video as list item: only what the entry stores (no request). */
+        fun videoItem(v: ZenPraxisChannel) = StreamInfoItem(v.serviceId, v.url, v.name, StreamType.VIDEO_STREAM)
 
         fun themeVideos(entries: List<Entry>) = entries.map { ZenPraxisThemeData.Video(it.key, it.item.name, it.defaultMask) }
 
