@@ -44,7 +44,7 @@ Status: **umgesetzt** = im Code und am Gerät geprüft; **Spec** = nur beschrieb
 
 | Regel | Wert / Default | Gilt für | Ausnahme | Code / Quelle | Status |
 |---|---|---|---|---|---|
-| Wartezeit | 5 s, „Weiter“ erst danach, „Doch nicht“ schließt die App | alle Abfragen | – | `ZenSettings.intentWaitSeconds()` (`intent_wait_s`, 3-30), `ZenIntentPrompt` | umgesetzt |
+| Wartezeit | 5 s, „Weiter“ erst danach, „App schließen“ (bis 2026-10-20 „Doch nicht“) schließt die App bzw. bricht den geteilten Link ab | alle Abfragen | – | `ZenSettings.intentWaitSeconds()` (`intent_wait_s`, 3-30), `ZenIntentPrompt` | umgesetzt |
 | Auslöser | App-Start (bis einmal bestätigt, auch nach „Doch nicht“ und nach neu erzeugter Activity), geteilter/externer Link, Rückkehr nach >= 5 min im Hintergrund, **Video-/Hintergrund-Wiedergabe über geteilte Links (RouterActivity)** | MainActivity und RouterActivity | – | `ZenIntentPrompt` | umgesetzt |
 | Cooldown | 5 min nach einer **bestätigten** Abfrage | alle Auslöser außer App-Start | – | `ZenIntentPrompt.MIN_INTERVAL_MS` (Cooldown, fest), `ZenSettings.intentBackgroundMs()` (`intent_background_min`, Rückkehr-Schwelle) | umgesetzt |
 | Kanal-Link geteilt | Das Blatt „Kanal übernehmen“ fragt selbst nicht; „Nur ansehen“ öffnet `MainActivity` als externen Link und fragt, wenn die letzte Bestätigung ≥ 5 min her ist, ebenso die Rückkehr nach ≥ `intent_background_min` im Hintergrund (beim Teilen aus der YouTube-App liegt ZenPipe dazwischen im Hintergrund). Eine erneute Abfrage nach ~6 min ist also **gewollt** (geprüft 2026-10-14, kein Fehler) | Router, MainActivity | – | `ZenIntentPrompt.onExternalLink/onActivityStarted` | umgesetzt |

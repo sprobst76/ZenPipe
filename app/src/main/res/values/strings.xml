@@ -909,7 +909,7 @@
     <string name="zen_intent_message">Take a moment: what is your plan, and when are you done?</string>
     <string name="zen_intent_continue">Continue</string>
     <string name="zen_intent_continue_wait">Continue (%1$d)</string>
-    <string name="zen_intent_not_now">Never mind</string>
+    <string name="zen_intent_not_now">Close app</string>
     <string name="zen_shorts_blocked">Shorts are not available in ZenPipe</string>
     <string name="zen_copy_link">Copy link</string>
     <string name="zen_reason_group">%1$d min · Group %2$s</string>

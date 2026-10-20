@@ -28,7 +28,7 @@ public final class ZenIntentPrompt {
     private static AlertDialog currentDialog = null;
     private static Activity dialogActivity = null;
     // ZenPipe: true once the user confirmed the latest prompt of this process. The feed edition
-    // is only built then, so "Never mind" never uses up any of the daily cap.
+    // is only built then, so "Close app" never uses up any of the daily cap.
     private static boolean confirmed = false;
     private static Runnable onConfirmedListener = null;
     // a shared-link playback that arrived while a prompt was already open waits for its answer
@@ -55,7 +55,7 @@ public final class ZenIntentPrompt {
     private ZenIntentPrompt() { }
 
     // App start: ask until the user has confirmed once in this process. A restart after
-    // "Never mind" (process still alive) asks again because nothing was confirmed.
+    // "Close app" (process still alive) asks again because nothing was confirmed.
     public static void showIfNeeded(final Activity activity) {
         if (!confirmed && !isDialogShowing()) {
             show(activity, activity::finishAffinity, null);
@@ -84,7 +84,7 @@ public final class ZenIntentPrompt {
 
     // For playback that starts without MainActivity (shared link -> background/popup/video
     // player via RouterActivity): runs onProceed at once when no prompt is needed, otherwise
-    // shows the prompt first. "Never mind" runs onDeclined.
+    // shows the prompt first. "Close app" runs onDeclined.
     public static void gate(final Activity activity, final Runnable onProceed,
                             final Runnable onDeclined) {
         if (isSkippable()) {
