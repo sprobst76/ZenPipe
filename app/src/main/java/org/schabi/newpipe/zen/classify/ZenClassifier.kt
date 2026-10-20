@@ -73,6 +73,18 @@ class ZenClassifier private constructor(private val app: Context) {
         exec.schedule({ classifyNow(key, v) }, delayMs, TimeUnit.MILLISECONDS)
     }
 
+    /**
+     * For the practice tab (D61): classifies [v] now (blocking, waits at most [timeoutMs]) when the
+     * cache has no entry or one without practice theme values. Title + channel only, no network.
+     */
+    fun classifyForPraxis(key: String, v: VideoText, timeoutMs: Long): ClassEntry? = try {
+        exec.submit(Callable { classifyNow(key, v, wantPraxis = true) }).get(timeoutMs, TimeUnit.MILLISECONDS)
+    } catch (e: java.util.concurrent.TimeoutException) {
+        null
+    } catch (e: java.util.concurrent.ExecutionException) {
+        null
+    }
+
     /** Closes the session (e.g. before the model files are replaced or deleted). */
     fun closeNow() {
         exec.execute { close() }
@@ -110,11 +122,11 @@ class ZenClassifier private constructor(private val app: Context) {
         return ZenPipeline(p.tokenizer, p.vocabMap, enc, p.heads)
     }
 
-    private fun classifyNow(key: String, v: VideoText): ClassEntry? {
+    private fun classifyNow(key: String, v: VideoText, wantPraxis: Boolean = false): ClassEntry? {
         idle?.cancel(false)
         try {
             val old = cache.get(key)
-            if (!cache.needsWork(old, v.level, ZenClassifierModel.VERSION)) return old
+            if (!cache.needsWork(old, v.level, ZenClassifierModel.VERSION, wantPraxis)) return old
             val pipe = pipeline() ?: return null
             val t0 = System.nanoTime()
             val a = pipe.analyze(v)
@@ -134,7 +146,8 @@ class ZenClassifier private constructor(private val app: Context) {
                 ms = ms,
                 createdMillis = now,
                 accessedMillis = now,
-                previousT = ZenClassCache.previousTFor(old, v.level, ZenClassifierModel.VERSION)
+                previousT = ZenClassCache.previousTFor(old, v.level, ZenClassifierModel.VERSION),
+                praxisThemes = praxisThemesOf(a)
             )
             cache.put(e)
             // the details also tell the language (feed language filter)
@@ -271,6 +284,13 @@ class ZenClassifier private constructor(private val app: Context) {
         fun describe(context: Context, e: ClassEntry): String {
             val w = "w ${"%.1f".format(java.util.Locale.ROOT, if (e.cats.isEmpty()) 1.0 else e.weight)}"
             return "${ZenClassWhy.summary(context, e.cats, e.tone, e.level, e.top)} · $w\n${ZenClassWhy.topLine(context, e.top)}"
+        }
+
+        /** The practice theme values of an analysis (only the five heads of [org.schabi.newpipe.zen.ZenPraxisTheme]). */
+        @JvmStatic
+        fun praxisThemesOf(a: Analysis): Map<String, Double> {
+            val keys = org.schabi.newpipe.zen.ZenPraxisTheme.entries.map { it.modelKey }.toSet()
+            return a.themes.filterKeys { it in keys }
         }
 
         internal fun log(context: Context, type: String, detail: String) = Zen.log(context).add(type, detail)

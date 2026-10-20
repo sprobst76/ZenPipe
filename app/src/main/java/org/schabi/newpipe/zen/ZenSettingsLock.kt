@@ -345,6 +345,28 @@ class ZenSettingsLock(
         return Result.Applied(listOf(key), emptyList(), lockStarted = false, setupMode = setup)
     }
 
+    /**
+     * Sets the default practice theme(s) of an active or pending entry (D61). Only grouping and
+     * display, so it is neutral: at once, also while locked, no lock, no undo entry; a pending entry
+     * stays pending. False if the entry is unknown or nothing changed.
+     */
+    @Synchronized
+    fun setPraxisThemes(key: String, themes: Int): Boolean {
+        applyDue()
+        val mask = ZenPraxisThemes.sanitize(themes)
+        val eff = readPraxis(K_PX)
+        val pend = readPraxis(K_PX_PEND)
+        val changedEff = eff.any { it.key == key && it.themes != mask }
+        val changedPend = pend.any { it.key == key && it.themes != mask }
+        if (!changedEff && !changedPend) return false
+        store.put(
+            praxisEntry(K_PX, eff.map { if (it.key == key) it.copy(themes = mask) else it }),
+            praxisEntry(K_PX_PEND, pend.map { if (it.key == key) it.copy(themes = mask) else it })
+        )
+        log?.invoke("praxis_theme_default", "key=$key themes=${ZenPraxisThemes.keys(mask)}")
+        return true
+    }
+
     // ---------------------------------------------------------------- classifier exceptions
 
     private fun readExempt(key: String) = ZenClassExempt.decodeList(store.getString(key, null))

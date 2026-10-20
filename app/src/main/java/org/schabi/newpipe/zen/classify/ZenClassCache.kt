@@ -36,7 +36,12 @@ data class ClassEntry(
      * The title-only (level T) result this entry replaced when it was computed again with details
      * ([encodeSnapshot]); null if there was none. Only for the review/export (T and D side by side).
      */
-    val previousT: String? = null
+    val previousT: String? = null,
+    /**
+     * The model's values for the five practice themes (D61, [org.schabi.newpipe.zen.ZenPraxisThemes]),
+     * only those >= 0.05; null = not recorded (entry of an older version), empty = none.
+     */
+    val praxisThemes: Map<String, Double>? = null
 ) {
     /** A stored earlier result: tone, weight, categories and top themes/formats. */
     data class Snapshot(val tone: String?, val weight: Double, val cats: Map<String, Double>, val top: List<Pair<String, Double>>)
@@ -87,6 +92,24 @@ data class UserLabel(
 }
 
 /**
+ * The user's own practice themes of a video (correction in the review list, D61): [mask] of
+ * [org.schabi.newpipe.zen.ZenPraxisTheme] bits, 0 = "none of them". It only groups the practice
+ * tab; it never changes a lock, a limit or a pause. [src] "U" = user. Kept without expiry, exported.
+ */
+data class PraxisThemeLabel(
+    val key: String,
+    val mask: Int,
+    val title: String,
+    val channel: String,
+    val atMillis: Long,
+    val src: String = SRC_USER
+) {
+    companion object {
+        const val SRC_USER = "U"
+    }
+}
+
+/**
  * Detected language of a video (feed language filter). Kept separately from [ClassEntry] because
  * it works without the classifier model. [channel] = channel key of the feed (uploader URL or name).
  * [guess] = the stored result; [signals] = raw detail signals (if the details were loaded), from
@@ -118,6 +141,17 @@ interface ClassStore {
 
     /** All labels, newest first. */
     fun labels(): List<UserLabel>
+
+    fun praxisTheme(key: String): PraxisThemeLabel?
+    fun praxisThemes(keys: Collection<String>): Map<String, PraxisThemeLabel>
+    fun putPraxisTheme(l: PraxisThemeLabel)
+    fun removePraxisTheme(key: String)
+
+    /** All practice theme corrections, newest first. */
+    fun allPraxisThemes(): List<PraxisThemeLabel>
+
+    /** Entries for [keys] (one query per chunk, e.g. the practice tab). */
+    fun getAll(keys: Collection<String>): Map<String, ClassEntry>
 
     fun langs(keys: Collection<String>): Map<String, LangEntry>
     fun putLangs(list: Collection<LangEntry>)
@@ -167,6 +201,24 @@ class MemoryClassStore : ClassStore {
 
     @Synchronized override fun labels() = lbl.values.sortedByDescending { it.atMillis }
 
+    private val pxt = LinkedHashMap<String, PraxisThemeLabel>()
+
+    @Synchronized override fun praxisTheme(key: String) = pxt[key]
+
+    @Synchronized override fun praxisThemes(keys: Collection<String>) = keys.mapNotNull { k -> pxt[k]?.let { k to it } }.toMap()
+
+    @Synchronized override fun putPraxisTheme(l: PraxisThemeLabel) {
+        pxt[l.key] = l
+    }
+
+    @Synchronized override fun removePraxisTheme(key: String) {
+        pxt.remove(key)
+    }
+
+    @Synchronized override fun allPraxisThemes() = pxt.values.sortedByDescending { it.atMillis }
+
+    @Synchronized override fun getAll(keys: Collection<String>) = keys.mapNotNull { k -> map[k]?.let { k to it } }.toMap()
+
     private val lng = LinkedHashMap<String, LangEntry>()
 
     @Synchronized override fun langs(keys: Collection<String>) = keys.mapNotNull { k -> lng[k]?.let { k to it } }.toMap()
@@ -198,7 +250,16 @@ class ZenClassCache(private val store: ClassStore) : ClassStore by store {
      * True if [existing] must be (re)computed for input [level] with model [model]: missing,
      * other model version, or title-only while details are available now.
      */
-    fun needsWork(existing: ClassEntry?, level: String, model: String): Boolean = existing == null || existing.model != model || (existing.level == "T" && level == "D")
+    fun needsWork(existing: ClassEntry?, level: String, model: String): Boolean = needsWork(existing, level, model, false)
+
+    /**
+     * [wantPraxis]: the practice tab needs the practice theme values; an entry of an older version
+     * without them is computed again at the same level (never D downgraded to T).
+     */
+    fun needsWork(existing: ClassEntry?, level: String, model: String, wantPraxis: Boolean): Boolean = existing == null ||
+        existing.model != model ||
+        (existing.level == "T" && level == "D") ||
+        (wantPraxis && existing.praxisThemes == null && !(existing.level == "D" && level == "T"))
 
     companion object {
         /**
@@ -211,6 +272,24 @@ class ZenClassCache(private val store: ClassStore) : ClassStore by store {
             old.level == "D" && level == "D" -> old.previousT
             else -> null
         }
+
+        /**
+         * Schema additions made in `onOpen` (no version bump, older versions keep reading the file):
+         * the statements for a database whose `cls` table has [clsColumns]. Every existing entry
+         * stays valid; `pxt` (practice theme values) is NULL for old entries = not recorded.
+         */
+        fun additions(clsColumns: Set<String>): List<String> = listOfNotNull(
+            if ("tprev" !in clsColumns) "ALTER TABLE cls ADD COLUMN tprev TEXT" else null,
+            if ("pxt" !in clsColumns) "ALTER TABLE cls ADD COLUMN pxt TEXT" else null,
+            "CREATE TABLE IF NOT EXISTS lbl (k TEXT PRIMARY KEY, verdict TEXT, cats TEXT, title TEXT, channel TEXT, at INTEGER)",
+            "CREATE TABLE IF NOT EXISTS lang (k TEXT PRIMARY KEY, channel TEXT, title TEXT, chname TEXT, lang TEXT, conf REAL, " +
+                "src TEXT, scores TEXT, at INTEGER)",
+            "CREATE INDEX IF NOT EXISTS lang_channel ON lang(channel, at)",
+            "CREATE TABLE IF NOT EXISTS praxis_theme (k TEXT PRIMARY KEY, themes INTEGER, src TEXT, title TEXT, channel TEXT, ts INTEGER)"
+        )
+
+        /** Practice theme values of a cached row: NULL column = not recorded. */
+        fun decodePraxisThemes(s: String?): Map<String, Double>? = s?.let { ClassEntry.decodeMap(it) }
 
         const val RETENTION_MS = 30L * 24 * 60 * 60 * 1000
         const val DB_FILE = "zen_class_cache.db"
@@ -233,7 +312,7 @@ private class SqliteClassStore(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             "CREATE TABLE cls (k TEXT PRIMARY KEY, title TEXT, channel TEXT, level TEXT, model TEXT, cats TEXT, " +
-                "tone TEXT, top TEXT, weight REAL, tokens INTEGER, ms INTEGER, created INTEGER, accessed INTEGER, tprev TEXT)"
+                "tone TEXT, top TEXT, weight REAL, tokens INTEGER, ms INTEGER, created INTEGER, accessed INTEGER, tprev TEXT, pxt TEXT)"
         )
         db.execSQL("CREATE INDEX cls_created ON cls(created)")
     }
@@ -254,13 +333,7 @@ private class SqliteClassStore(context: Context) :
             while (c.moveToNext()) out.add(c.getString(1))
             out
         }
-        if ("tprev" !in cols) db.execSQL("ALTER TABLE cls ADD COLUMN tprev TEXT")
-        db.execSQL("CREATE TABLE IF NOT EXISTS lbl (k TEXT PRIMARY KEY, verdict TEXT, cats TEXT, title TEXT, channel TEXT, at INTEGER)")
-        db.execSQL(
-            "CREATE TABLE IF NOT EXISTS lang (k TEXT PRIMARY KEY, channel TEXT, title TEXT, chname TEXT, lang TEXT, conf REAL, " +
-                "src TEXT, scores TEXT, at INTEGER)"
-        )
-        db.execSQL("CREATE INDEX IF NOT EXISTS lang_channel ON lang(channel, at)")
+        ZenClassCache.additions(cols).forEach { db.execSQL(it) }
         val langTable = db.rawQuery("PRAGMA table_info(lang)", null).use { c ->
             val out = HashSet<String>()
             while (c.moveToNext()) out.add(c.getString(1))
@@ -297,10 +370,11 @@ private class SqliteClassStore(context: Context) :
         ms = c.getLong(10),
         createdMillis = c.getLong(11),
         accessedMillis = c.getLong(12),
-        previousT = c.getString(13)
+        previousT = c.getString(13),
+        praxisThemes = ZenClassCache.decodePraxisThemes(c.getString(14))
     )
 
-    private val cols = "k, title, channel, level, model, cats, tone, top, weight, tokens, ms, created, accessed, tprev"
+    private val cols = "k, title, channel, level, model, cats, tone, top, weight, tokens, ms, created, accessed, tprev, pxt"
 
     override fun get(key: String): ClassEntry? = readableDatabase.rawQuery("SELECT $cols FROM cls WHERE k = ?", arrayOf(key)).use {
         if (it.moveToFirst()) row(it) else null
@@ -322,6 +396,7 @@ private class SqliteClassStore(context: Context) :
             put("created", e.createdMillis)
             put("accessed", e.accessedMillis)
             put("tprev", e.previousT)
+            put("pxt", e.praxisThemes?.let { ClassEntry.encodeMap(it) })
         }
         writableDatabase.insertWithOnConflict("cls", null, v, SQLiteDatabase.CONFLICT_REPLACE)
     }
@@ -349,6 +424,63 @@ private class SqliteClassStore(context: Context) :
         while (it.moveToNext()) out.add(row(it))
         out
     }
+
+    override fun getAll(keys: Collection<String>): Map<String, ClassEntry> {
+        val out = HashMap<String, ClassEntry>()
+        keys.distinct().chunked(SQL_CHUNK).forEach { part ->
+            val q = part.joinToString(",") { "?" }
+            readableDatabase.rawQuery("SELECT $cols FROM cls WHERE k IN ($q)", part.toTypedArray()).use {
+                while (it.moveToNext()) row(it).let { e -> out[e.key] = e }
+            }
+        }
+        return out
+    }
+
+    private val pxtCols = "k, themes, src, title, channel, ts"
+
+    private fun pxtRow(c: Cursor) = PraxisThemeLabel(
+        key = c.getString(0),
+        mask = c.getInt(1),
+        src = c.getString(2) ?: PraxisThemeLabel.SRC_USER,
+        title = c.getString(3) ?: "",
+        channel = c.getString(4) ?: "",
+        atMillis = c.getLong(5)
+    )
+
+    private fun pxtQuery(sql: String, args: Array<String>): List<PraxisThemeLabel> = readableDatabase.rawQuery(sql, args).use {
+        val out = ArrayList<PraxisThemeLabel>()
+        while (it.moveToNext()) out.add(pxtRow(it))
+        out
+    }
+
+    override fun praxisTheme(key: String): PraxisThemeLabel? = pxtQuery("SELECT $pxtCols FROM praxis_theme WHERE k = ?", arrayOf(key)).firstOrNull()
+
+    override fun praxisThemes(keys: Collection<String>): Map<String, PraxisThemeLabel> {
+        val out = HashMap<String, PraxisThemeLabel>()
+        keys.distinct().chunked(SQL_CHUNK).forEach { part ->
+            val q = part.joinToString(",") { "?" }
+            pxtQuery("SELECT $pxtCols FROM praxis_theme WHERE k IN ($q)", part.toTypedArray()).forEach { out[it.key] = it }
+        }
+        return out
+    }
+
+    override fun putPraxisTheme(l: PraxisThemeLabel) {
+        val v = ContentValues().apply {
+            put("k", l.key)
+            put("themes", l.mask)
+            put("src", l.src)
+            put("title", l.title)
+            put("channel", l.channel)
+            put("ts", l.atMillis)
+        }
+        writableDatabase.insertWithOnConflict("praxis_theme", null, v, SQLiteDatabase.CONFLICT_REPLACE)
+    }
+
+    override fun removePraxisTheme(key: String) {
+        writableDatabase.delete("praxis_theme", "k = ?", arrayOf(key))
+    }
+
+    override fun allPraxisThemes(): List<PraxisThemeLabel> = pxtQuery("SELECT $pxtCols FROM praxis_theme ORDER BY ts DESC", emptyArray())
 
     override fun count(): Int = readableDatabase.rawQuery("SELECT COUNT(*) FROM cls", null).use { if (it.moveToFirst()) it.getInt(0) else 0 }
 

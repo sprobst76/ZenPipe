@@ -3,13 +3,27 @@ package org.schabi.newpipe.zen
 import android.content.Context
 
 /**
- * A "practice" channel or (remote) playlist (yoga, breathwork, meditation, sleep aids), maintained by
- * the user (see zen-docs/spec-praxis.md). The assignment is per channel/playlist, never per video,
- * and never automatic. [playlist] = a playlist (its videos are practice, see [ZenPraxisPlaylistItems]).
- * Identity is [key] = service id + normalised channel URL, so http/https, "www."/"m." and a
- * trailing slash do not matter.
+ * A "practice" channel, (remote) playlist or single video (yoga, breathwork, meditation, sleep
+ * aids), maintained by the user (see zen-docs/spec-praxis.md). Never automatic: the user adds every
+ * entry through the lock. [playlist] = a playlist (its videos are practice, see
+ * [ZenPraxisPlaylistItems]); [video] = one single video ([url] is the video URL, D61).
+ * [themes] = default practice theme(s) of the entry ([ZenPraxisTheme] bits, 0 = none), only for
+ * grouping the practice tab. Identity is [key] = service id + normalised URL, so http/https,
+ * "www."/"m." and a trailing slash do not matter.
+ *
+ * Stored one per line: `serviceId<TAB>url<TAB>name[<TAB>flag[<TAB>themes]]`, flag "p" (playlist),
+ * "v" (video) or empty. Older versions split into at most 4 fields and treat any flag other than
+ * exactly "p" as a channel: a video or a playlist with themes then never matches an uploader URL,
+ * so it is simply not practice there (fail-closed).
  */
-data class ZenPraxisChannel(val serviceId: Int, val url: String, val name: String, val playlist: Boolean = false) {
+data class ZenPraxisChannel(
+    val serviceId: Int,
+    val url: String,
+    val name: String,
+    val playlist: Boolean = false,
+    val video: Boolean = false,
+    val themes: Int = 0
+) {
     val key: String get() = keyOf(serviceId, url)
 
     companion object {
@@ -32,15 +46,28 @@ data class ZenPraxisChannel(val serviceId: Int, val url: String, val name: Strin
 
         @JvmStatic
         fun encodeList(list: List<ZenPraxisChannel>): String = list.joinToString("\n") {
-            "${it.serviceId}\t${clean(it.url)}\t${clean(it.name)}" + if (it.playlist) "\tp" else ""
+            val flag = if (it.video) {
+                "v"
+            } else if (it.playlist) {
+                "p"
+            } else {
+                ""
+            }
+            "${it.serviceId}\t${clean(it.url)}\t${clean(it.name)}" + when {
+                it.themes != 0 -> "\t$flag\t${it.themes}"
+                flag.isNotEmpty() -> "\t$flag"
+                else -> ""
+            }
         }
 
         @JvmStatic
         fun decodeList(raw: String?): List<ZenPraxisChannel> = (raw ?: "").split('\n').filter { it.isNotEmpty() }.mapNotNull {
-            val p = it.split('\t', limit = 4)
+            val p = it.split('\t', limit = 5)
             val id = p.getOrNull(0)?.toIntOrNull()
             val url = p.getOrNull(1)
-            if (id == null || url.isNullOrEmpty()) null else ZenPraxisChannel(id, url, p.getOrElse(2) { "" }, p.getOrNull(3) == "p")
+            val flag = p.getOrNull(3)
+            val themes = ZenPraxisThemes.sanitize(p.getOrNull(4)?.toIntOrNull() ?: 0)
+            if (id == null || url.isNullOrEmpty()) null else ZenPraxisChannel(id, url, p.getOrElse(2) { "" }, flag == "p", flag == "v", themes)
         }
     }
 }
