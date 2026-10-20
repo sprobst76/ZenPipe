@@ -141,11 +141,7 @@ class ZenSettingsFragment : Fragment() {
             content.addView(
                 Button(requireContext()).apply {
                     setText(R.string.zen_setup_done)
-                    setOnClickListener {
-                        lock.completeSetup()
-                        draft.clear()
-                        render()
-                    }
+                    setOnClickListener { finishSetup() }
                 }
             )
         }
@@ -207,6 +203,34 @@ class ZenSettingsFragment : Fragment() {
         renderQuotes()
         classifier = org.schabi.newpipe.zen.classify.ZenClassifierSection(requireActivity()) { render() }
             .also { it.render(content) }
+    }
+
+    /**
+     * "Done" of the first-time setup. Changes not applied yet would be lost and from now on every
+     * loosening takes 24 h: then ask first and name them; without open changes finish at once.
+     */
+    private fun finishSetup() {
+        val eff = lock.effectiveAll()
+        val changed = changedMap(eff)
+        val done = {
+            lock.completeSetup()
+            draft.clear()
+            render()
+        }
+        if (changed.isEmpty()) {
+            done()
+            return
+        }
+        val list = changed.entries.joinToString("\n") { (k, v) ->
+            val d = ZenSettingDefs.get(k)!!
+            "${getString(labelRes(k))}: ${fmtValue(d, eff.getValue(k))} → ${fmtValue(d, v)}"
+        }
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.zen_setup_done_confirm_title)
+            .setMessage(getString(R.string.zen_setup_done_confirm_message, list))
+            .setNegativeButton(R.string.zen_setup_done_confirm_back, null)
+            .setPositiveButton(R.string.zen_setup_done_confirm_discard) { _, _ -> done() }
+            .show()
     }
 
     /** Own pause quotes: add/remove and "only own quotes" (comfort, no lock). */

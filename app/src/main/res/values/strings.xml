@@ -970,8 +970,12 @@
     <string name="zen_off">Off</string>
     <string name="zen_turn_on">Turn on</string>
     <string name="zen_turn_off">Turn off</string>
-    <string name="zen_lock_setup">First-time setup: changes apply immediately and without a lock. Tap \"Done\" when you are finished (the lock also starts with your first video, or after 24 hours of use).</string>
+    <string name="zen_lock_setup">First-time setup: changes apply without a lock as soon as you apply them. Tap \"Done\" when you are finished (the lock also starts with your first video, or after 24 hours of use).</string>
     <string name="zen_setup_done">Done</string>
+    <string name="zen_setup_done_confirm_title">Changes not applied</string>
+    <string name="zen_setup_done_confirm_message">These changes are not applied yet:\n%1$s\n\n\"Done\" discards them. After that, every loosening needs 24 hours.</string>
+    <string name="zen_setup_done_confirm_back">Back</string>
+    <string name="zen_setup_done_confirm_discard">Discard and finish</string>
     <string name="zen_lock_active">Locked: loosening is possible again from %1$s. Making a setting stricter is always possible and applies immediately.</string>
     <string name="zen_lock_free">Not locked. A loosening takes effect after 24 hours and locks further loosening until then. Stricter changes apply immediately.</string>
     <string name="zen_pending_title">Pending loosening (takes effect %1$s):</string>

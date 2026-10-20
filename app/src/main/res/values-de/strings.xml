@@ -935,8 +935,12 @@
     <string name="zen_off">Aus</string>
     <string name="zen_turn_on">Einschalten</string>
     <string name="zen_turn_off">Ausschalten</string>
-    <string name="zen_lock_setup">Ersteinrichtung: Änderungen gelten sofort und ohne Sperre. Tippe auf \"Fertig\", wenn du fertig bist (die Sperre beginnt spätestens mit dem ersten Video oder nach 24 Stunden Nutzung).</string>
+    <string name="zen_lock_setup">Ersteinrichtung: Änderungen gelten ohne Sperre, sobald du sie übernimmst. Tippe auf „Fertig“, wenn du fertig bist (die Sperre beginnt spätestens mit dem ersten Video oder nach 24 Stunden Nutzung).</string>
     <string name="zen_setup_done">Fertig</string>
+    <string name="zen_setup_done_confirm_title">Nicht übernommene Änderungen</string>
+    <string name="zen_setup_done_confirm_message">Diese Änderungen sind noch nicht übernommen:\n%1$s\n\n„Fertig“ verwirft sie. Danach braucht jede Lockerung 24 Stunden.</string>
+    <string name="zen_setup_done_confirm_back">Zurück</string>
+    <string name="zen_setup_done_confirm_discard">Verwerfen und fertig</string>
     <string name="zen_lock_active">Gesperrt: Lockern ist wieder möglich ab %1$s. Strenger stellen geht immer und gilt sofort.</string>
     <string name="zen_lock_free">Nicht gesperrt. Eine Lockerung wirkt erst nach 24 Stunden und sperrt bis dahin weiteres Lockern. Strengere Werte gelten sofort.</string>
     <string name="zen_pending_title">Ausstehende Lockerung (wirkt ab %1$s):</string>
