@@ -1021,6 +1021,16 @@
     <string name="zen_praxis_theme_meditation">Meditation</string>
     <string name="zen_praxis_theme_breath">Breathwork</string>
     <string name="zen_praxis_theme_empty">No videos on this theme right now.</string>
+    <string name="zen_praxis_theme_none">none</string>
+    <string name="zen_praxis_theme_max">At most %1$d themes</string>
+    <string name="zen_praxis_theme_pick_caption">Practice themes</string>
+    <string name="zen_praxis_theme_default_caption">Default theme (optional)</string>
+    <string name="zen_praxis_theme_default_info">For videos without a clear theme of their own. Only sorts the practice tab and applies at once.</string>
+    <string name="zen_praxis_theme_default_line">Theme: %1$s (tap to change)</string>
+    <string name="zen_review_praxis_pick">Practice themes…</string>
+    <string name="zen_review_praxis_info">Only sorts the practice tab. Stored on this device and included in the export.</string>
+    <string name="zen_review_praxis_user">Practice themes (yours): %1$s</string>
+    <string name="zen_review_praxis_auto">Practice themes: %1$s</string>
     <string name="zen_praxis_mark">Mark as practice channel</string>
     <string name="zen_praxis_unmark">Remove from practice channels</string>
     <string name="zen_praxis_cancel_pending">Cancel pending practice channel</string>

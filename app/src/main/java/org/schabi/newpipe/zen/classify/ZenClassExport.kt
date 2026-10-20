@@ -16,7 +16,8 @@ import java.time.Instant
  *
  * Contains per video only what the classifier saw and said plus the user's own correction:
  * service id, URL, title, channel name/URL, duration, time of the classification, input level,
- * model, categories, top themes/formats, tone, weight, the "why" text, language and `user_label`.
+ * model, categories, top themes/formats, tone, weight, the "why" text, language and `user_label`, and the
+ * practice themes (D61: model values, title rules + model, the user's own correction).
  * It never contains watch history, subscriptions, Zen settings, lock/pause state or the Zen log
  * ([VIDEO_FIELDS] / [TOP_FIELDS] are the complete lists, checked by a unit test).
  */
@@ -27,12 +28,14 @@ object ZenClassExport {
     /** Every key an exported video may have. */
     val VIDEO_FIELDS = setOf(
         "key", "service_id", "url", "title", "channel", "channel_url", "duration_s", "classified_at", "level", "model",
-        "categories", "top", "tone", "weight", "why", "language", "user_label", "previous_title_only"
+        "categories", "top", "tone", "weight", "why", "language", "user_label", "previous_title_only",
+        "practice_theme_values", "practice_themes", "user_practice_themes"
     )
 
     /** Every top-level key of the JSON file. */
     val TOP_FIELDS = setOf(
-        "format", "version", "exported_at", "app_version", "model", "note", "videos", "labels_without_video", "feed_edition", "languages"
+        "format", "version", "exported_at", "app_version", "model", "note", "videos", "labels_without_video", "feed_edition", "languages",
+        "practice_themes_without_video"
     )
 
     /** Keys of one entry of "languages" (every video the feed language filter has judged). */
@@ -49,7 +52,11 @@ object ZenClassExport {
         /** Readable "why" summary in the app language (same text as the review list). */
         val why: String,
         val label: UserLabel?,
-        val language: Language? = null
+        val language: Language? = null,
+        /** Practice themes from title rules + model alone (no correction, no channel default), D61. */
+        val practiceAuto: org.schabi.newpipe.zen.ZenPraxisThemes.Resolved? = null,
+        /** The user's practice theme correction. */
+        val practiceUser: PraxisThemeLabel? = null
     )
 
     /** One pick of the current feed edition with its classification(s) (T and D side by side). */
@@ -94,6 +101,10 @@ object ZenClassExport {
         "at" to iso(l.atMillis)
     )
 
+    private fun themeKeys(mask: Int): List<String> = org.schabi.newpipe.zen.ZenPraxisThemes.themes(mask).map { it.key }
+
+    private fun practiceUserMap(l: PraxisThemeLabel): Map<String, Any?> = linkedMapOf("themes" to themeKeys(l.mask), "at" to iso(l.atMillis))
+
     private fun languageMap(l: Language): Map<String, Any?> = linkedMapOf(
         "code" to l.code,
         "confidence" to r3(l.confidence),
@@ -124,7 +135,10 @@ object ZenClassExport {
             "why" to v.why,
             "language" to v.language?.let { languageMap(it) },
             "user_label" to v.label?.let { labelMap(it) },
-            "previous_title_only" to ClassEntry.decodeSnapshot(e.previousT)?.let { snapshotMap(it) }
+            "previous_title_only" to ClassEntry.decodeSnapshot(e.previousT)?.let { snapshotMap(it) },
+            "practice_theme_values" to e.praxisThemes?.let { catsMap(it) },
+            "practice_themes" to v.practiceAuto?.let { linkedMapOf<String, Any?>("themes" to themeKeys(it.mask), "source" to it.source.name.lowercase()) },
+            "user_practice_themes" to v.practiceUser?.let { practiceUserMap(it) }
         )
     }
 
@@ -151,7 +165,14 @@ object ZenClassExport {
      */
     @JvmStatic
     @JvmOverloads
-    fun json(meta: Meta, videos: List<Video>, orphanLabels: List<UserLabel>, edition: Edition?, languages: List<LangVideo> = emptyList()): String {
+    fun json(
+        meta: Meta,
+        videos: List<Video>,
+        orphanLabels: List<UserLabel>,
+        edition: Edition?,
+        languages: List<LangVideo> = emptyList(),
+        orphanPractice: List<PraxisThemeLabel> = emptyList()
+    ): String {
         val root = linkedMapOf<String, Any?>(
             "format" to FORMAT,
             "version" to FORMAT_VERSION,
@@ -174,6 +195,9 @@ object ZenClassExport {
             "languages" to languages.map { l ->
                 linkedMapOf<String, Any?>("key" to l.key, "title" to l.title, "channel" to l.channel) + languageMap(l.language) +
                     ("scores" to catsMap(l.scores))
+            },
+            "practice_themes_without_video" to orphanPractice.map {
+                linkedMapOf<String, Any?>("key" to it.key, "title" to it.title, "channel" to it.channel) + practiceUserMap(it)
             }
         )
         return JsonWriter.indent("  ").string().value(root).done()
@@ -185,7 +209,7 @@ object ZenClassExport {
     val CSV_COLUMNS = listOf(
         "key", "service_id", "url", "title", "channel", "channel_url", "duration_s", "classified_at", "level", "model",
         "categories", "top", "tone", "weight", "why", "language", "language_confidence", "language_hidden",
-        "user_verdict", "user_categories"
+        "user_verdict", "user_categories", "practice_themes", "user_practice_themes"
     )
 
     private fun csvCell(v: Any?): String {
@@ -207,7 +231,8 @@ object ZenClassExport {
                 v.entry.top.joinToString(";") { "${it.first}=${r3(it.second)}" },
                 m["tone"], m["weight"], m["why"],
                 lang?.code, lang?.let { r3(it.confidence) }, lang?.hiddenInFeed,
-                v.label?.let { if (it.correct) "correct" else "wrong" }, v.label?.cats?.joinToString(";")
+                v.label?.let { if (it.correct) "correct" else "wrong" }, v.label?.cats?.joinToString(";"),
+                v.practiceAuto?.let { themeKeys(it.mask).joinToString(";") }, v.practiceUser?.let { themeKeys(it.mask).joinToString(";") }
             )
             sb.append(row.joinToString(",") { csvCell(it) }).append("\r\n")
         }

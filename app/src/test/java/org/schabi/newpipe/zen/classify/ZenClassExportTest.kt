@@ -22,7 +22,16 @@ class ZenClassExportTest {
         val tPrev = ClassEntry.encodeSnapshot(entry("x", "T").copy(cats = mapOf("aktuelles" to 0.6), weight = 0.6))
         val videos = listOf(
             ZenClassExport.Video(entry("0:https://www.youtube.com/watch?v=a", prevT = tPrev), "https://www.youtube.com/channel/UC1", 1234, "Bildung 0,85", label),
-            ZenClassExport.Video(entry("0:https://www.youtube.com/watch?v=b", "T"), null, null, "Bildung 0,85", null, ZenClassExport.Language("ca", 0.9, "T", true))
+            ZenClassExport.Video(
+                entry("0:https://www.youtube.com/watch?v=b", "T").copy(praxisThemes = mapOf("yoga" to 0.91)),
+                null,
+                null,
+                "Bildung 0,85",
+                null,
+                ZenClassExport.Language("ca", 0.9, "T", true),
+                org.schabi.newpipe.zen.ZenPraxisThemes.Resolved(2, org.schabi.newpipe.zen.ZenPraxisThemes.Source.MODEL),
+                PraxisThemeLabel("0:https://www.youtube.com/watch?v=b", 2 or 16, "Titel", "Kanal", 5)
+            )
         )
         val orphan = UserLabel("0:https://www.youtube.com/watch?v=gone", true, emptyList(), "Alt", "Kanal", 1)
         val edition = ZenClassExport.Edition(
@@ -31,7 +40,8 @@ class ZenClassExportTest {
             3,
             listOf(ZenClassExport.Pick("https://www.youtube.com/watch?v=a", 34, "Tech", "D||1.00|bildung=0.85", videos[0].entry))
         )
-        val json = ZenClassExport.json(ZenClassExport.Meta(1_791_000_200_000, "0.1.0-zen.4", "e5s-1"), videos, listOf(orphan), edition)
+        val orphanPx = PraxisThemeLabel("0:https://www.youtube.com/watch?v=gone2", 8, "Alt", "Kanal", 1)
+        val json = ZenClassExport.json(ZenClassExport.Meta(1_791_000_200_000, "0.1.0-zen.4", "e5s-1"), videos, listOf(orphan), edition, emptyList(), listOf(orphanPx))
         return JsonParser.`object`().from(json)
     }
 
@@ -62,6 +72,13 @@ class ZenClassExportTest {
         assertEquals("ca", b.getObject("language").getString("code"))
         assertTrue(b.getObject("language").getBoolean("hidden_in_feed"))
         assertEquals(1, o.getArray("labels_without_video").size)
+        // practice themes (D61): model values, title rules + model, the user's correction
+        assertTrue(a.isNull("practice_theme_values"))
+        assertEquals(0.91, b.getObject("practice_theme_values").getDouble("yoga"), 1e-9)
+        assertEquals("model", b.getObject("practice_themes").getString("source"))
+        assertEquals("yoga", b.getObject("practice_themes").getArray("themes").getString(0))
+        assertEquals(listOf("yoga", "breath"), b.getObject("user_practice_themes").getArray("themes").map { it as String })
+        assertEquals("meditation", o.getArray("practice_themes_without_video").getObject(0).getArray("themes").getString(0))
         val pick = o.getObject("feed_edition").getArray("picks").getObject(0)
         assertEquals(0.6, pick.getObject("title_only").getDouble("weight"), 1e-9)
         assertEquals(0.851, pick.getObject("with_details").getObject("categories").getDouble("bildung"), 1e-9)
@@ -97,7 +114,7 @@ class ZenClassExportTest {
         assertEquals(ZenClassExport.CSV_COLUMNS.joinToString(","), lines[0])
         assertTrue(lines[1].contains("\"Titel, mit \"\"Komma\"\"\""))
         assertTrue(lines[1].contains("\"why, text\""))
-        assertTrue(lines[1].endsWith(",wrong,aktuelles"))
+        assertTrue(lines[1].endsWith(",wrong,aktuelles,,"))
     }
 
     @Test

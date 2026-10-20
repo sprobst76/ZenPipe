@@ -49,7 +49,7 @@ class ZenSettingsFragment : Fragment() {
     }
 
     private fun signatureOf(s: ZenSettingsLock.Snapshot) = "${s.setupMode}|${s.lockRemainingMs > 0}|${s.undoRemainingMs > 0}|${s.pending}|" +
-        "${s.praxis.map { it.key }}|${s.praxisPending.map { it.key }}|${s.exempt.map { it.key }}|${s.exemptPending.map { it.key }}"
+        "${s.praxis.map { it.key + it.themes }}|${s.praxisPending.map { it.key + it.themes }}|${s.exempt.map { it.key }}|${s.exemptPending.map { it.key }}"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         lock = Zen.settingsLock(requireContext())
@@ -369,6 +369,9 @@ class ZenSettingsFragment : Fragment() {
                     12f
                 )
             )
+            // default practice theme(s) (D61): neutral, changeable at once by tapping the entry
+            labels.addView(text(getString(R.string.zen_praxis_theme_default_line, ZenPraxisUi.themesText(requireContext(), ch.themes)), 12f))
+            labels.setOnClickListener { ZenPraxisUi.pickDefaultThemes(requireActivity(), ch) { render() } }
             box.addView(labels, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
             box.addView(
                 Button(requireContext()).apply {

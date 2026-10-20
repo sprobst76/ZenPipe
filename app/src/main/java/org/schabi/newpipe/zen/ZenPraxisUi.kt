@@ -175,13 +175,103 @@ object ZenPraxisUi {
         }
     }
 
+    // ---------------------------------------------------------------- practice themes (D61)
+
+    @JvmStatic
+    fun themeName(context: Context, t: ZenPraxisTheme): String = context.getString(
+        when (t) {
+            ZenPraxisTheme.FITNESS -> R.string.zen_praxis_theme_fitness
+            ZenPraxisTheme.YOGA -> R.string.zen_praxis_theme_yoga
+            ZenPraxisTheme.SLEEP -> R.string.zen_praxis_theme_sleep
+            ZenPraxisTheme.MEDITATION -> R.string.zen_praxis_theme_meditation
+            ZenPraxisTheme.BREATH -> R.string.zen_praxis_theme_breath
+        }
+    )
+
+    /** "Yoga, Breathwork", or [none] for no theme. */
+    @JvmStatic
+    fun themesText(context: Context, mask: Int, none: String = context.getString(R.string.zen_praxis_theme_none)): String = ZenPraxisThemes.themes(mask).joinToString(", ") { themeName(context, it) }.ifEmpty { none }
+
+    /**
+     * Checkboxes of the five themes (at most [ZenPraxisThemes.MAX] can be ticked) under [message]
+     * and a caption; [current] returns the ticked mask.
+     */
+    private class ThemeBoxes(val view: android.view.View, val current: () -> Int)
+
+    private fun themeBoxes(activity: Activity, message: String, caption: String, initial: Int): ThemeBoxes {
+        val d = activity.resources.displayMetrics.density
+        val pad = (20 * d).toInt()
+        val box = android.widget.LinearLayout(activity).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(pad, (12 * d).toInt(), pad, 0)
+        }
+        if (message.isNotEmpty()) box.addView(android.widget.TextView(activity).apply { text = message })
+        box.addView(
+            android.widget.TextView(activity).apply {
+                text = caption
+                setPadding(0, (12 * d).toInt(), 0, (4 * d).toInt())
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            }
+        )
+        val checks = ZenPraxisTheme.entries.map { t ->
+            android.widget.CheckBox(activity).apply {
+                text = themeName(activity, t)
+                isChecked = ZenPraxisThemes.has(initial, t)
+            }
+        }
+        checks.forEach { c ->
+            c.setOnCheckedChangeListener { b, on ->
+                if (on && checks.count { it.isChecked } > ZenPraxisThemes.MAX) {
+                    b.isChecked = false
+                    toast(activity, activity.getString(R.string.zen_praxis_theme_max, ZenPraxisThemes.MAX))
+                }
+            }
+            box.addView(c)
+        }
+        val scroll = android.widget.ScrollView(activity).apply { addView(box) }
+        return ThemeBoxes(scroll) { ZenPraxisThemes.mask(ZenPraxisTheme.entries.filterIndexed { i, _ -> checks[i].isChecked }) }
+    }
+
+    /**
+     * Multi-choice of the practice themes ([initial] ticked). [onPick] gets the mask (0 = none);
+     * [onRemove] (optional, e.g. "remove correction") adds a neutral button.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun pickThemes(activity: Activity, title: String, message: String, initial: Int, onPick: (Int) -> Unit, onRemove: (() -> Unit)? = null) {
+        if (activity.isFinishing) return
+        val boxes = themeBoxes(activity, message, activity.getString(R.string.zen_praxis_theme_pick_caption), initial)
+        val b = AlertDialog.Builder(activity)
+            .setTitle(title)
+            .setView(boxes.view)
+            .setPositiveButton(R.string.zen_review_save) { _, _ -> onPick(boxes.current()) }
+            .setNegativeButton(R.string.cancel, null)
+        if (onRemove != null) b.setNeutralButton(R.string.zen_review_remove) { _, _ -> onRemove() }
+        b.show()
+    }
+
+    /** Default theme(s) of an active or pending entry: neutral, at once ([ZenSettingsLock.setPraxisThemes]). */
+    @JvmStatic
+    fun pickDefaultThemes(activity: Activity, entry: ZenPraxisChannel, changed: Runnable) {
+        pickThemes(activity, entry.name.ifEmpty { entry.url }, activity.getString(R.string.zen_praxis_theme_default_info), entry.themes, { mask ->
+            if (Zen.settingsLock(activity).setPraxisThemes(entry.key, mask)) changed.run()
+        })
+    }
+
     private fun confirmAdd(activity: Activity, channel: ZenPraxisChannel, changed: Runnable, note: String? = null) {
         if (activity.isFinishing) return
+        // optional default theme(s) in the same dialog (D61); only grouping, the lock is unchanged
+        val boxes = themeBoxes(
+            activity,
+            (note?.let { "$it\n\n" } ?: "") + addText(activity, channel, AddPlan.PENDING),
+            activity.getString(R.string.zen_praxis_theme_default_caption),
+            channel.themes
+        )
         val dialog = AlertDialog.Builder(activity)
             .setTitle(if (channel.playlist) R.string.zen_praxis_pl_confirm_title else R.string.zen_praxis_confirm_title)
-            .setMessage((note?.let { "$it\n\n" } ?: "") + addText(activity, channel, AddPlan.PENDING))
+            .setView(boxes.view)
             .setPositiveButton(R.string.zen_confirm_ok) { _, _ ->
-                commitAdd(activity, channel)?.let { toast(activity, it) }
+                commitAdd(activity, channel.copy(themes = boxes.current()))?.let { toast(activity, it) }
                 changed.run()
             }
             .setNegativeButton(R.string.cancel, null)

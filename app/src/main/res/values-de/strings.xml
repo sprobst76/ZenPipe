@@ -986,6 +986,16 @@
     <string name="zen_praxis_theme_meditation">Meditation</string>
     <string name="zen_praxis_theme_breath">Atemarbeit</string>
     <string name="zen_praxis_theme_empty">Zu diesem Thema gerade keine Videos.</string>
+    <string name="zen_praxis_theme_none">keins</string>
+    <string name="zen_praxis_theme_max">Höchstens %1$d Themen</string>
+    <string name="zen_praxis_theme_pick_caption">Praxis-Themen</string>
+    <string name="zen_praxis_theme_default_caption">Standardthema (optional)</string>
+    <string name="zen_praxis_theme_default_info">Für Videos ohne eigenes klares Thema. Ordnet nur den Praxis-Tab und gilt sofort.</string>
+    <string name="zen_praxis_theme_default_line">Thema: %1$s (tippen zum Ändern)</string>
+    <string name="zen_review_praxis_pick">Praxis-Themen…</string>
+    <string name="zen_review_praxis_info">Ordnet nur den Praxis-Tab. Wird auf diesem Gerät gespeichert und mit exportiert.</string>
+    <string name="zen_review_praxis_user">Praxis-Themen (eigene): %1$s</string>
+    <string name="zen_review_praxis_auto">Praxis-Themen: %1$s</string>
     <string name="zen_praxis_mark">Als Praxis-Kanal markieren</string>
     <string name="zen_praxis_unmark">Aus Praxis-Kanälen entfernen</string>
     <string name="zen_praxis_cancel_pending">Ausstehenden Praxis-Kanal abbrechen</string>

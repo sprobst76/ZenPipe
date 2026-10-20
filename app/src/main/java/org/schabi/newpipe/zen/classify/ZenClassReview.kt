@@ -32,6 +32,9 @@ import org.schabi.newpipe.R
 import org.schabi.newpipe.zen.Zen
 import org.schabi.newpipe.zen.ZenFeedLanguages
 import org.schabi.newpipe.zen.ZenFeedState
+import org.schabi.newpipe.zen.ZenPraxisThemeData
+import org.schabi.newpipe.zen.ZenPraxisThemes
+import org.schabi.newpipe.zen.ZenPraxisUi
 import org.schabi.newpipe.zen.ZenSettings
 
 /**
@@ -40,7 +43,7 @@ import org.schabi.newpipe.zen.ZenSettings
  * on the feed, weights or locks) and the debug export (JSON + CSV via the share sheet).
  */
 class ZenClassReview(private val activity: Activity) {
-    private class Row(val entry: ClassEntry, var label: UserLabel?, val language: ZenClassExport.Language?)
+    private class Row(val entry: ClassEntry, var label: UserLabel?, val language: ZenClassExport.Language?, var praxis: PraxisThemeLabel? = null)
 
     private val app = activity.applicationContext
     private val cache get() = ZenClassCache.get(app)
@@ -52,7 +55,8 @@ class ZenClassReview(private val activity: Activity) {
             val entries = cache.recent(REVIEW_LIMIT)
             val langs = languages(entries.map { it.key })
             langResults = langs
-            val rows = entries.map { Row(it, cache.label(it.key), langs[it.key]?.let { r -> exportLanguage(r) }) }
+            val praxis = cache.praxisThemes(entries.map { it.key })
+            val rows = entries.map { Row(it, cache.label(it.key), langs[it.key]?.let { r -> exportLanguage(r) }, praxis[it.key]) }
             activity.runOnUiThread { if (!activity.isFinishing) showList(rows) }
         }.start()
     }
@@ -89,6 +93,14 @@ class ZenClassReview(private val activity: Activity) {
                 else -> activity.getString(R.string.zen_review_label_wrong, catsText(l.cats))
             }
         )
+        // practice themes (D61): the user's own, else what title rules + model say (no channel default here)
+        val px = r.praxis
+        val auto = autoThemes(e)
+        if (px != null) {
+            sb.append('\n').append(activity.getString(R.string.zen_review_praxis_user, ZenPraxisUi.themesText(activity, px.mask)))
+        } else if (auto.mask != 0) {
+            sb.append('\n').append(activity.getString(R.string.zen_review_praxis_auto, ZenPraxisUi.themesText(activity, auto.mask)))
+        }
         return sb
     }
 
@@ -144,8 +156,14 @@ class ZenClassReview(private val activity: Activity) {
             .show()
     }
 
+    private fun autoThemes(e: ClassEntry) = ZenPraxisThemes.resolve(null, e.title, if (ZenClassifierModel.isReady(app)) e.praxisThemes else null, e.level, 0)
+
     private fun chooseLabel(r: Row, changed: () -> Unit) {
-        val items = arrayListOf(activity.getString(R.string.zen_review_correct), activity.getString(R.string.zen_review_wrong))
+        val items = arrayListOf(
+            activity.getString(R.string.zen_review_correct),
+            activity.getString(R.string.zen_review_wrong),
+            activity.getString(R.string.zen_review_praxis_pick)
+        )
         if (r.label != null) items.add(activity.getString(R.string.zen_review_remove))
         AlertDialog.Builder(activity)
             .setTitle(r.entry.title)
@@ -155,6 +173,8 @@ class ZenClassReview(private val activity: Activity) {
 
                     1 -> chooseCategories(r, changed)
 
+                    2 -> choosePraxisThemes(r, changed)
+
                     else -> {
                         r.label = null
                         Thread { cache.removeLabel(r.entry.key) }.start()
@@ -163,6 +183,34 @@ class ZenClassReview(private val activity: Activity) {
                 }
             }
             .show()
+    }
+
+    /**
+     * The practice themes of the video (minimal multiple choice, D61): stored locally, exported,
+     * only grouping in the practice tab; no lock, no limit, no pause changes.
+     */
+    private fun choosePraxisThemes(r: Row, changed: () -> Unit) {
+        val start = r.praxis?.mask ?: autoThemes(r.entry).mask
+        ZenPraxisUi.pickThemes(
+            activity,
+            r.entry.title,
+            activity.getString(R.string.zen_review_praxis_info),
+            start,
+            { mask ->
+                r.praxis = PraxisThemeLabel(r.entry.key, mask, r.entry.title, r.entry.channel, System.currentTimeMillis())
+                Thread { ZenPraxisThemeData.setCorrection(app, r.entry.key, mask, r.entry.title, r.entry.channel) }.start()
+                changed()
+            },
+            if (r.praxis != null) {
+                {
+                    r.praxis = null
+                    Thread { ZenPraxisThemeData.removeCorrection(app, r.entry.key) }.start()
+                    changed()
+                }
+            } else {
+                null
+            }
+        )
     }
 
     /** "Not correct": the right categories (the seven of the rules, or "none"). */
@@ -238,6 +286,8 @@ class ZenClassReview(private val activity: Activity) {
         val entries = cache.recent(EXPORT_LIMIT)
         val labels = cache.labels()
         val labelByKey = labels.associateBy { it.key }
+        val praxisLabels = cache.allPraxisThemes()
+        val praxisByKey = praxisLabels.associateBy { it.key }
         val streams = NewPipeDatabase.getInstance(app).streamDAO()
         val allLangs = ZenFeedLanguages.decide(cache, cache.recentLangs(EXPORT_LIMIT), ZenSettings.feedLanguages())
         val videos = entries.map { e ->
@@ -253,7 +303,9 @@ class ZenClassReview(private val activity: Activity) {
                 durationSec = s?.duration?.takeIf { it > 0 },
                 why = ZenClassWhy.summary(activity, e.cats, e.tone, e.level, e.top),
                 label = labelByKey[e.key],
-                language = (allLangs[e.key] ?: languages(listOf(e.key))[e.key])?.let { exportLanguage(it) }
+                language = (allLangs[e.key] ?: languages(listOf(e.key))[e.key])?.let { exportLanguage(it) },
+                practiceAuto = ZenPraxisThemes.resolve(null, e.title, e.praxisThemes, e.level, 0),
+                practiceUser = praxisByKey[e.key]
             )
         }
         val inExport = entries.map { it.key }.toHashSet()
@@ -278,7 +330,9 @@ class ZenClassReview(private val activity: Activity) {
         val langVideos = allLangs.values.map { r ->
             ZenClassExport.LangVideo(r.entry.key, r.entry.title, r.entry.channelName, exportLanguage(r), r.guess.scores)
         }
-        json.writeText(ZenClassExport.json(meta, videos, labels.filter { it.key !in inExport }, edition, langVideos))
+        json.writeText(
+            ZenClassExport.json(meta, videos, labels.filter { it.key !in inExport }, edition, langVideos, praxisLabels.filter { it.key !in inExport })
+        )
         csv.writeText(ZenClassExport.csv(videos))
         Zen.log(app).add(
             "class_export",
