@@ -902,6 +902,7 @@
     <string name="zen_pause_back">Zurück</string>
     <string name="zen_pause_ok">OK</string>
     <string name="zen_pause_toast">Die Pause nach einem abgebrochenen Video läuft noch</string>
+    <string name="zen_pause_a11y_left">Noch %1$s Pause</string>
     <string name="zen_later_resume_action">Später fortsetzen</string>
     <string name="zen_later_resume_saved">Position gemerkt, keine Pause. Heute noch %1$d x „Später fortsetzen“.</string>
     <string name="zen_later_resume_none">Heute kein „Später fortsetzen“ mehr. Schließen startet eine Pause.</string>
@@ -944,6 +945,8 @@
     <string name="zen_undo">Letzte Änderung rückgängig (%1$s)</string>
     <string name="zen_undo_done">Änderung zurückgesetzt</string>
     <string name="zen_apply">Änderungen übernehmen</string>
+    <string name="zen_step_decrease">%1$s verringern</string>
+    <string name="zen_step_increase">%1$s erhöhen</string>
     <string name="zen_confirm_title">Änderungen bestätigen</string>
     <string name="zen_confirm_now">Gilt sofort:</string>
     <string name="zen_confirm_later">Gilt ab %1$s (bis dahin abbrechbar):</string>

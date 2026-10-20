@@ -397,6 +397,8 @@ class ZenSettingsFragment : Fragment() {
 
         fun stepButton(label: String, delta: Int): Button = Button(requireContext()).apply {
             text = label
+            // TalkBack: "Decrease videos per edition" instead of "minus"
+            contentDescription = getString(if (delta < 0) R.string.zen_step_decrease else R.string.zen_step_increase, getString(labelRes(def.key)))
             val target = shown + delta * def.step
             val inRange = def.inRange(target)
             // while locked the loosening direction is greyed out

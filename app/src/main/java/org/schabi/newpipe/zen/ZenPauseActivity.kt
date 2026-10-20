@@ -26,6 +26,10 @@ class ZenPauseActivity : AppCompatActivity() {
     private lateinit var message: TextView
     private lateinit var back: Button
 
+    // TalkBack: what was said last (minutes left, message), so a tick does not repeat it
+    private var spokenMinutes = -1
+    private var shownMessage: String? = null
+
     private val tick = object : Runnable {
         override fun run() {
             update()
@@ -75,6 +79,7 @@ class ZenPauseActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setTextColor(textPrimary)
             setPadding(0, pad, 0, 0)
+            androidx.core.view.ViewCompat.setAccessibilityHeading(this, true)
         }
         message = TextView(this).apply {
             textSize = 15f
@@ -82,6 +87,8 @@ class ZenPauseActivity : AppCompatActivity() {
             setLineSpacing(0f, 1.2f)
             setTextColor(textSecondary)
             setPadding(0, pad, 0, pad)
+            // announced when it changes (the end of the pause), never on every tick
+            accessibilityLiveRegion = View.ACCESSIBILITY_LIVE_REGION_POLITE
         }
         countdown = TextView(this).apply {
             textSize = 52f
@@ -89,7 +96,7 @@ class ZenPauseActivity : AppCompatActivity() {
             typeface = android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL)
             fontFeatureSettings = "tnum"
             setTextColor(textPrimary)
-            contentDescription = getString(R.string.zen_pause_title)
+            // read as "5 minutes of pause left" (updated per minute in update()), not "4:59"
         }
         back = AppCompatButton(this, null, androidx.appcompat.R.attr.borderlessButtonStyle).apply {
             setText(R.string.zen_pause_back)
@@ -160,14 +167,33 @@ class ZenPauseActivity : AppCompatActivity() {
     private fun update() {
         val left = ZenPause.remainingMs(this)
         if (left <= 0) {
-            message.setText(R.string.zen_pause_over)
+            setMessage(getString(R.string.zen_pause_over))
             countdown.text = ""
+            countdown.contentDescription = null
             back.setText(R.string.zen_pause_ok)
             return
         }
         val minutes = (ZenPause.playedMs(this) / 60_000L).toInt()
-        message.text = getString(R.string.zen_pause_message, minutes)
+        setMessage(getString(R.string.zen_pause_message, minutes))
         val secs = (left + 999) / 1000
         countdown.text = String.format(java.util.Locale.ROOT, "%d:%02d", secs / 60, secs % 60)
+        val spoken = ZenPauseRules.spokenMinutesLeft(left)
+        if (spoken != spokenMinutes) {
+            val text = getString(
+                R.string.zen_pause_a11y_left,
+                resources.getQuantityString(R.plurals.zen_minutes, spoken, spoken)
+            )
+            countdown.contentDescription = text
+            // one announcement per minute (the first value is read with the screen)
+            if (spokenMinutes >= 0) countdown.announceForAccessibility(text)
+            spokenMinutes = spoken
+        }
+    }
+
+    /** Sets the message only when it changes (it is a live region). */
+    private fun setMessage(text: String) {
+        if (text == shownMessage) return
+        shownMessage = text
+        message.text = text
     }
 }

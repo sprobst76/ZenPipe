@@ -41,6 +41,10 @@ object ZenPauseRules {
     /** The running session is written to the Zen preferences at most this often. */
     const val PERSIST_INTERVAL_MS = 10 * 1000L
 
+    /** Minutes left as read by TalkBack on the pause screen (rounded up: "1 minute" until the end). */
+    @JvmStatic
+    fun spokenMinutesLeft(leftMs: Long): Int = ((leftMs.coerceAtLeast(0) + 59_999) / 60_000L).toInt()
+
     @JvmStatic
     fun pauseLengthMs(playedMs: Long): Long = (playedMs * ZenSettings.pauseFraction()).toLong().coerceIn(ZenSettings.minPauseMs(), ZenSettings.maxPauseMs())
 

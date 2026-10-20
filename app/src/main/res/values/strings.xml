@@ -937,6 +937,7 @@
     <string name="zen_pause_back">Back</string>
     <string name="zen_pause_ok">OK</string>
     <string name="zen_pause_toast">Pause after an aborted video is still running</string>
+    <string name="zen_pause_a11y_left">%1$s of pause left</string>
     <string name="zen_later_resume_action">Resume later</string>
     <string name="zen_later_resume_saved">Position saved, no pause. %1$d \"resume later\" left today.</string>
     <string name="zen_later_resume_none">No \"resume later\" left today. Closing the video starts a pause.</string>
@@ -979,6 +980,8 @@
     <string name="zen_undo">Undo last change (%1$s)</string>
     <string name="zen_undo_done">Change reverted</string>
     <string name="zen_apply">Apply changes</string>
+    <string name="zen_step_decrease">Decrease %1$s</string>
+    <string name="zen_step_increase">Increase %1$s</string>
     <string name="zen_confirm_title">Confirm changes</string>
     <string name="zen_confirm_now">Applies now:</string>
     <string name="zen_confirm_later">Applies on %1$s (can be cancelled until then):</string>

@@ -694,4 +694,13 @@ class ZenPauseTest {
         env.watch(e, "live", 0, 20 * min)
         assertEquals(ZenPauseEngine.Outcome.Finished, e.onCompleted())
     }
+
+    @Test
+    fun `the pause screen says the minutes left once per minute, rounded up`() {
+        assertEquals(5, ZenPauseRules.spokenMinutesLeft(5 * min))
+        assertEquals(5, ZenPauseRules.spokenMinutesLeft(4 * min + 1))
+        assertEquals(4, ZenPauseRules.spokenMinutesLeft(4 * min))
+        assertEquals(1, ZenPauseRules.spokenMinutesLeft(1000))
+        assertEquals(0, ZenPauseRules.spokenMinutesLeft(0))
+    }
 }
