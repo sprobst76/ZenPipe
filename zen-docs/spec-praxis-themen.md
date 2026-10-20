@@ -22,14 +22,17 @@ Jedes Video kann eigene Zuordnungen haben, auch mehrere (ein Yoga-Kanal liefert 
 - Kanal-/Playlist-Standardthema: zusätzliches Feld im Praxis-Eintrag (`zs_praxis`), Bitmaske. Ändern ist neutral/strenger -> sofort.
 - Einzelnes Praxis-Video: eigener Eintrag mit Videoschlüssel in der Praxis-Liste (analog Kanal, Flag `v`); Hinzufügen = Lockerung (24-h-Sperre, 3-s-Wartezeit, 5-min-Rückgängig wie bei Kanälen).
 
-## 3. Reihenfolge der Quellen je Video
-1. Nutzer-Korrektur (`src=U`) -> gilt allein.
-2. Schlüsselwort-Regeln aus Titel, Beschreibung, Tags (`src=R`), bis 3 Themen.
-3. Kanal-/Playlist-Standardthema.
-4. „Ohne Thema“ (Abschnitt „Weitere“).
-Die Regeln sind ein kleines lokales Wörterbuch (DE/EN), kein ML-Modell. Ob Thema-Kopf des Klassifikators die Feinunterteilung stützt, wird vor dem Bau an den Eval-Daten geprüft (Vorbedingung, nicht Annahme).
-Beispiele: Breathwork = Pranayama, Atemübung, Atemtechnik, breathwork, box breathing; Meditation = Meditation, Body Scan, Achtsamkeit; Schlaf = Einschlafen, Schlafmeditation, sleep; Yoga = Yoga, Vinyasa, Yin, Asana; Fitness = Workout, Training, HIIT, Mobility.
-Mehrdeutiges (Yoga vs. Fitness) darf mehrfach zugeordnet werden; Schwellen werden an Beispielen kalibriert.
+## 3. Erkennung: Titelregeln zuerst, dann der vorhandene Klassifikator (Stefan, 2026-10-20)
+Das Modell hat die Praxis-Themen bereits (`ZenRules.PRACTICE_THEMES`, Thema-Kopf ist multi-label): `yoga`, `atmen_breathwork`, `meditation_hypnose`, `mobilitaet_kraft_training`, `schlaf_klang`. Kein neues Training nötig; Yoga lag in der Bundle-Auswertung bei Precision/Recall 90/88 (Support 64, Schwelle 0,5; `student-multilabel.md`). Für die anderen vier liegen hier keine Zahlen vor: vor dem Bau auf den Eval-Daten (`~/.ytplaylist/zen-eval`) und den 30 Praxis-Kanälen messen.
+Abbildung: fitness = mobilitaet_kraft_training (deckt Cardio/HIIT evtl. nicht ab: messen, sonst Titelregel), yoga = yoga, sleep = schlaf_klang, meditation = meditation_hypnose, breath = atmen_breathwork.
+
+Reihenfolge je Video (Stufe T = Titel+Kanal, D = mit Beschreibung):
+1. Nutzer-Korrektur (`src=U`) gilt allein.
+2. **Titelregeln** (kleines DE/EN-Wörterbuch, streng, nur eindeutige Begriffe wie Pranayama, Breathwork, Vinyasa, Body Scan) -> sicher, auch ohne Modell und ohne Beschreibung.
+3. **Modell-Themenwerte** (Wahrscheinlichkeit je Thema >= Schwelle, Start 0,6 wie `MIN_P`, bis 3 Themen); die Werte werden beim Klassifizieren ohnehin berechnet und müssen nur mit abgelegt werden (ggf. Spalte in `ZenClassCache`). Stufe T ist unsicherer als D: bei T nur bei hoher Sicherheit.
+4. Kanal-/Playlist-Standardthema.
+5. Sonst "Weitere".
+Ohne installiertes Modell arbeiten nur 1, 2, 4. Titelregel und Modell widersprechen sich selten; die Vereinigung beider Treffer (Titelregel stärker) gilt, begrenzt auf 3.
 
 ## 4. Anzeige und Bedienung
 - Praxis-Tab: Chips „Alle · Fitness · Yoga · Schlaf · Meditation · Atemarbeit · Weitere“, Mehrfachvideos erscheinen unter jedem ihrer Themen. Reihenfolge unverändert (Datum), kein Nachladen-Zwang.
