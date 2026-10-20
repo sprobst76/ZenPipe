@@ -44,9 +44,31 @@ object ZenPauseRules {
     @JvmStatic
     fun pauseLengthMs(playedMs: Long): Long = (playedMs * ZenSettings.pauseFraction()).toLong().coerceIn(ZenSettings.minPauseMs(), ZenSettings.maxPauseMs())
 
+    /**
+     * Share of the stretch from where the session started playing to where it ended that must
+     * really have been played for "watched to the end" (seeking to the end is no shortcut). 0.5
+     * leaves room for skipping an intro or a chapter and for playback up to 2x speed.
+     */
+    const val FINISHED_PLAYED_SHARE = 0.5
+
+    /** Position criterion only: at least [FINISHED_FRACTION] or at most [FINISHED_REMAINING_MS] left. */
     @JvmStatic
     fun isFinished(positionMs: Long, durationMs: Long): Boolean = durationMs > 0 && positionMs >= 0 &&
         (positionMs >= durationMs * FINISHED_FRACTION || durationMs - positionMs <= FINISHED_REMAINING_MS)
+
+    /**
+     * "Watched to the end" of a session: the end position counts as finished ([isFinished]) AND
+     * the end was reached by playing, i.e. at least [FINISHED_PLAYED_SHARE] of the stretch from
+     * the session's first playing position [startMs] (resume point; unknown = 0) to [positionMs]
+     * was real playing time [playedMs]. Dragging the seek bar to the end therefore counts as an
+     * abort; resuming a video near its end and watching the rest does not.
+     */
+    @JvmStatic
+    fun watchedToEnd(positionMs: Long, durationMs: Long, startMs: Long, playedMs: Long): Boolean {
+        if (!isFinished(positionMs, durationMs)) return false
+        val covered = (minOf(positionMs, durationMs) - startMs.coerceAtLeast(0)).coerceAtLeast(0)
+        return playedMs >= covered * FINISHED_PLAYED_SHARE
+    }
 
     @JvmStatic
     fun qualifies(playedMs: Long, kind: ZenKind): Boolean = ZenSettings.pauseEnabled() && !kind.pauseExempt && playedMs >= minWatchMs()
@@ -111,7 +133,8 @@ object ZenContentKind {
  * bypass the pause) and decides at the end whether a pause follows. Pure logic, no Android.
  *
  * Session = one playback of one video (url) in the player. It ends by
- *  - finish (state ended, or [ZenPauseRules.isFinished] when it is closed): no abort;
+ *  - finish ([ZenPauseRules.watchedToEnd]: end position reached AND reached by playing, also
+ *    when the player reports "ended"; seeking to the end does not count): no abort;
  *  - close (player destroyed: close button, notification swipe, task removed, also while paused),
  *    switch to another video, or process kill (detected at the next start): abort;
  *  - "resume later" ([later]): no abort, at most [ZenPauseRules.LATER_PER_DAY] per Zen day.
@@ -149,6 +172,9 @@ class ZenPauseEngine(
     private var played = 0L
     private var pos = 0L
     private var dur = 0L
+
+    // position where the session first played (resume point), -1 = not known yet
+    private var startPos = -1L
     private var kind: ZenKind? = null
     private var playingSince = -1L
     private var lastPersist = 0L
@@ -199,6 +225,7 @@ class ZenPauseEngine(
             url = newUrl
             played = 0
             pos = 0
+            startPos = -1
             dur = durationMs
             kind = null
             playingSince = -1
@@ -218,6 +245,7 @@ class ZenPauseEngine(
         accumulate()
         setPlayingNow(playing)
         if (positionMs >= 0) pos = positionMs
+        noteStart(playing, positionMs)
         persist()
     }
 
@@ -243,6 +271,7 @@ class ZenPauseEngine(
         if (playing != (playingSince >= 0)) setPlayingNow(playing)
         if (positionMs >= 0) pos = positionMs
         if (durationMs > 0) dur = durationMs
+        noteStart(playing, positionMs)
         if (monotonic() - lastPersist >= ZenPauseRules.PERSIST_INTERVAL_MS) persist()
     }
 
@@ -271,6 +300,7 @@ class ZenPauseEngine(
         played = store.getLong(K_PLAYED, 0)
         pos = store.getLong(K_POS, 0)
         dur = store.getLong(K_DUR, 0)
+        startPos = store.getLong(K_START, -1) // missing in older versions: 0 (strict)
         kind = store.getString(K_KIND, null)?.let { runCatching { ZenKind.valueOf(it) }.getOrNull() }
         playingSince = -1
         pendingMs = 0
@@ -288,7 +318,7 @@ class ZenPauseEngine(
     fun abandonForNewStart(newUrl: String): Boolean {
         if (!open || newUrl == url) return false
         accumulate()
-        if (!ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) || ZenPauseRules.isFinished(pos, dur)) {
+        if (!ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) || endReached(pos, dur)) {
             return false // harmless: the normal switch handling decides when the new item arrives
         }
         return finish(Reason.SWITCHED, pos, dur) is Outcome.Paused
@@ -328,7 +358,7 @@ class ZenPauseEngine(
     fun later(): Boolean {
         if (!open) return false
         accumulate()
-        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !ZenPauseRules.isFinished(pos, dur) && pauseCostMs() > 0
+        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !endReached(pos, dur) && pauseCostMs() > 0
         if (!wouldPause) {
             finish(Reason.CLOSED, pos, dur)
             return true
@@ -348,7 +378,7 @@ class ZenPauseEngine(
     fun previewClose(): ClosePreview? {
         if (!open) return null
         accumulate()
-        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !ZenPauseRules.isFinished(pos, dur)
+        val wouldPause = ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) && !endReached(pos, dur)
         val cost = if (wouldPause) pauseCostMs() else 0
         return if (cost > 0) ClosePreview(played, cost, laterLeft()) else null
     }
@@ -439,6 +469,14 @@ class ZenPauseEngine(
 
     // ---------------------------------------------------------------- internals
 
+    /** [ZenPauseRules.watchedToEnd] for the open session ending at [endPos] of [endDur]. */
+    private fun endReached(endPos: Long, endDur: Long) = ZenPauseRules.watchedToEnd(endPos, endDur, startPos, played)
+
+    /** Remembers the first position at which the session plays (resume point after a reopen). */
+    private fun noteStart(playing: Boolean, positionMs: Long) {
+        if (playing && startPos < 0 && positionMs >= 0) startPos = positionMs
+    }
+
     private fun accumulate() {
         if (playingSince >= 0) {
             val now = monotonic()
@@ -484,6 +522,7 @@ class ZenPauseEngine(
             K_PLAYED to played,
             K_POS to pos,
             K_DUR to dur,
+            K_START to startPos,
             K_KIND to kind?.name,
             K_REST to if (playingSince >= 0) -1L else restSince,
             K_REST_BOOT to restBoot,
@@ -497,18 +536,21 @@ class ZenPauseEngine(
         open = false
         playingSince = -1
         restSince = -1
-        store.put(*listOf(K_OPEN, K_URL, K_PLAYED, K_POS, K_DUR, K_KIND, K_REST, K_REST_BOOT, K_SOUND).map { it to null }.toTypedArray())
+        store.put(*listOf(K_OPEN, K_URL, K_PLAYED, K_POS, K_DUR, K_START, K_KIND, K_REST, K_REST_BOOT, K_SOUND).map { it to null }.toTypedArray())
     }
 
     private fun finish(reason: Reason, endPos: Long, endDur: Long): Outcome {
         accumulate()
         val playedMs = played
         val k = kind ?: ZenKind.VIDEO
-        val finished = reason == Reason.COMPLETED || ZenPauseRules.isFinished(endPos, endDur)
+        // "completed" (the player reached the end) only counts if the end was reached by playing
+        // (without a known duration, e.g. a live stream that ended, the end is trusted as before)
+        val finished = endReached(endPos, endDur) || (reason == Reason.COMPLETED && endDur <= 0)
+        val start = startPos
         val u = url
         val rest = restMs()
         clearSession()
-        val detail = "url=$u reason=$reason kind=$k playedMs=$playedMs soundMs=$soundMs posMs=$endPos durMs=$endDur"
+        val detail = "url=$u reason=$reason kind=$k playedMs=$playedMs soundMs=$soundMs posMs=$endPos durMs=$endDur startMs=$start"
         if (finished) {
             log("watch_end", detail)
             return Outcome.Finished
@@ -543,6 +585,7 @@ class ZenPauseEngine(
         private const val K_PLAYED = "ps_played"
         private const val K_POS = "ps_pos"
         private const val K_DUR = "ps_dur"
+        private const val K_START = "ps_start"
         private const val K_KIND = "ps_kind"
         private const val K_REST = "ps_rest"
         private const val K_REST_BOOT = "ps_rest_boot"

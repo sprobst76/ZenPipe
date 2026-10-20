@@ -11,6 +11,9 @@ folgt eine anteilige, verpflichtende Pause. Umgesetzt in `org.schabi.newpipe.zen
   Spulen und Springen zählen nicht. Mehrere Sitzungen desselben Videos werden **nicht** addiert.
 - **Zu Ende geschaut:** Position >= 90 % der Länge **oder** Rest <= 60 s (bei Videos unter 10 min greift die Restzeit-Regel,
   sonst die 90-%-Regel). Ein 5:20-Video, das bei 5:05 endet, ist zu Ende geschaut. Ohne bekannte Länge gilt es nie als zu Ende.
+  [ergänzt 2026-10-20, Analyse 2026-10 Befund A1.1: zusätzlich muss das Ende **abspielend erreicht** sein, d. h. mindestens 50 %
+  der Strecke von der ersten Abspielposition bis zum Ende wurde wirklich gespielt; Spulen ans Ende ist ein Abbruch. Geltende
+  Regel: rules.md „Zu Ende geschaut“.]
 
 ## Abbruch
 Eine Sitzung ist **abgebrochen**, wenn sie endet, ohne dass sie zu Ende geschaut ist, durch:

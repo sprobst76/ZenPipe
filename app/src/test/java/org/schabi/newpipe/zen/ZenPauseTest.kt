@@ -588,4 +588,110 @@ class ZenPauseTest {
         assertEquals(ZenWatchTime.Day(5, 0, 0, 0), ZenWatchTime.Day.decode("5"))
         assertEquals(ZenWatchTime.Day(), ZenWatchTime.Day.decode(null))
     }
+    // ------------------------------------------------------------------ seeking to the end
+
+    @Test
+    fun `watched to the end needs the end reached by playing`() {
+        // position criterion plus at least half of the covered stretch really played
+        assertTrue(ZenPauseRules.watchedToEnd(18 * min, 20 * min, 0, 18 * min))
+        assertTrue(ZenPauseRules.watchedToEnd(20 * min, 20 * min, 0, 10 * min)) // e.g. 2x speed
+        assertFalse(ZenPauseRules.watchedToEnd(20 * min, 20 * min, 0, 10 * min - 1))
+        assertFalse(ZenPauseRules.watchedToEnd(60 * min, 60 * min, 0, 20 * min)) // seek bar to the end
+        assertTrue(ZenPauseRules.watchedToEnd(60 * min, 60 * min, 50 * min, 10 * min)) // resumed at 50:00
+        assertTrue(ZenPauseRules.watchedToEnd(60 * min, 60 * min, -1, 30 * min)) // start unknown = 0
+        assertFalse(ZenPauseRules.watchedToEnd(30 * min, 60 * min, 0, 30 * min)) // not at the end at all
+    }
+
+    @Test
+    fun `seeking to the end and closing is an abort with a pause`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 20 * min)
+        e.onProgress(59 * min + 30_000, 60 * min, true) // drag the seek bar to the end
+        val out = e.onClosed(59 * min + 30_000, 60 * min)
+        assertEquals(ZenPauseEngine.Outcome.Paused(20 * min, 4 * min), out)
+        assertTrue(e.isActive())
+        assertTrue(env.logged.any { it.startsWith("pause_start") && it.contains("startMs=0") })
+        assertFalse(env.logged.any { it.startsWith("watch_end") })
+    }
+
+    @Test
+    fun `seeking to the end until the player reports ended is an abort too`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 20 * min)
+        e.onProgress(60 * min, 60 * min, true)
+        assertTrue(e.onCompleted() is ZenPauseEngine.Outcome.Paused)
+        assertTrue(e.isActive())
+    }
+
+    @Test
+    fun `resuming near the end and watching the rest is finished`() {
+        val env = Env()
+        val e = env.engine()
+        e.onItem("v1", 60 * min)
+        e.onPlaying(true, 50 * min) // the player resumes at 50:00 (history)
+        var t = 50 * min
+        while (t < 60 * min) {
+            env.advance(1000)
+            t += 1000
+            e.onProgress(t, 60 * min, true)
+        }
+        assertEquals(ZenPauseEngine.Outcome.Finished, e.onClosed(60 * min, 60 * min))
+        assertFalse(e.isActive())
+    }
+
+    @Test
+    fun `skipping an intro still counts as watched to the end`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 20 * min, 1 * min)
+        e.onProgress(3 * min, 20 * min, true) // skip 2 minutes
+        var t = 3 * min
+        while (t < 18 * min) {
+            env.advance(1000)
+            t += 1000
+            e.onProgress(t, 20 * min, true)
+        }
+        assertEquals(ZenPauseEngine.Outcome.Finished, e.onClosed(18 * min, 20 * min))
+    }
+
+    @Test
+    fun `after seeking to the end, resume later costs an allowance and a new start pauses`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 20 * min)
+        e.onProgress(59 * min + 30_000, 60 * min, true)
+        assertTrue(e.previewClose() != null)
+        assertEquals(2, e.laterLeft())
+        assertTrue(e.later())
+        assertEquals(1, e.laterLeft())
+
+        env.watch(e, "v2", 60 * min, 20 * min)
+        e.onProgress(59 * min + 30_000, 60 * min, true)
+        assertTrue(e.abandonForNewStart("v3"))
+        assertTrue(e.isActive())
+    }
+
+    @Test
+    fun `a kill after seeking to the end pauses, also with state from older versions`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 20 * min)
+        e.onPlaying(false, 59 * min + 30_000) // seeked to the end, then paused (persisted)
+        assertTrue(env.engine().recover() is ZenPauseEngine.Outcome.Paused)
+
+        // an open session persisted by an older version has no start position: strict (0)
+        val env2 = Env()
+        env2.store.put("ps_open" to 1, "ps_url" to "v1", "ps_played" to 20 * min, "ps_pos" to 59 * min + 30_000, "ps_dur" to 60 * min)
+        assertTrue(env2.engine().recover() is ZenPauseEngine.Outcome.Paused)
+    }
+
+    @Test
+    fun `a completed stream without known duration still counts as finished`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "live", 0, 20 * min)
+        assertEquals(ZenPauseEngine.Outcome.Finished, e.onCompleted())
+    }
 }
