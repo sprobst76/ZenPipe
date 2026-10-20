@@ -16,6 +16,8 @@ Jedes Video kann eigene Zuordnungen haben, auch mehrere (ein Yoga-Kanal liefert 
 - **Erkennung streng**: nur klare Treffer bekommen ein Thema, Zweifel landen unter "Weitere".
 - **Reihenfolge**: erst zen.5-Härtung, dann dieses Paket.
 
+- **Praxis-Tab je Thema mit fester Anzahl** (Stefan, 2026-10-20): je Thema eine feste Zahl Videos (Vorschlag 5, Wert offen), davon höchstens ein "beliebtes" Video. Beliebt = Aufrufe geteilt durch den Median der letzten Videos desselben Kanals (Ausreißer nach oben, kleine Kanäle nicht benachteiligt); fehlen Aufrufzahlen, entfällt der Platz. Mehr als ein beliebtes pro Thema bewusst nicht (Zen statt Algorithmus). Eingefrorene Playlists (D63) speisen dieselbe Auswahl. Praxis-Tab bisher: 15 je Kanal, kein Nachladen; die Quote gilt zusätzlich als Themenansicht.
+
 ## 2. Datenmodell
 - Themenschlüssel: `fitness`, `yoga`, `sleep`, `meditation`, `breath` (Anzeige DE: Fitness, Yoga, Schlaf, Meditation, Atemarbeit).
 - Tabelle `praxis_theme` in der eigenen SQLite (`ZenClassCache`-Umfeld, noBackupFilesDir): `video_key`, `themes` (Bitmaske), `src` (`U` Nutzer, `R` Regeln), `ts`.
@@ -51,6 +53,7 @@ Praxis bleibt eine Einheit: kein Tageslimit, keine Pflichtpause, Start in laufen
 Regelwörterbuch-Tests mit Titelbeispielen DE/EN, Quellen-Reihenfolge (U vor R vor Standard), Bitmasken, Chip-Filter, Sperrlogik für Einzelvideos (Lockerung/Verschärfung), Migration ohne Themen-Daten.
 
 ## 8. Offene Punkte
+- Anzahl pro Thema (Vorschlag 5) und genaue Auswahl der übrigen Plätze (Datum, Klassifikator-Sicherheit).
 - Schwelle des weichen Praxis-Deckels (Vorschlag 90 min) und Wortlaut der Rückfrage (am Gerät abstimmen).
 - Wörterbuch-Inhalt und Schwellen (am Gerät/Eval kalibrieren).
 - Wo „Schlaf“ an den Sleep-Timer anknüpft (derzeit nicht verknüpft).
