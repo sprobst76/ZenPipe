@@ -36,6 +36,28 @@ Reihenfolge je Video (Stufe T = Titel+Kanal, D = mit Beschreibung):
 5. Sonst "Weitere".
 Ohne installiertes Modell arbeiten nur 1, 2, 4. Titelregel und Modell widersprechen sich selten; die Vereinigung beider Treffer (Titelregel stärker) gilt, begrenzt auf 3.
 
+### 3.1 Messung vor dem Bau (2026-10-20, ausgeliefertes `model-e5s-1`, kein Training)
+Details, Skripte und Grenzen: `resources/analyse-2026-10/praxis-themen-messung.md` (privat). Mengen: **H** = `zen-eval/holdout`+`final`
+(400, nicht im Training; dort nur Kategorie-Konsens, Themen-Wahrheit = Lehrer-Labels für 197 davon), **O** = 1 102 Lehrer-Labels nach dem
+Training (Restmenge, schwer), **P** = 30 Praxis-Kanäle × 15 neueste Videos = 450, blind gelabelt (Opus 5.5, streng). Precision/Recall in %:
+
+| Thema | H Stufe D @0,6 / @0,8 | P Stufe T @0,6 / @0,8 | P Stufe D @0,6 / @0,8 | Stütze H+O / P |
+|---|---|---|---|---|
+| yoga | 86/79 · 100/75 | 76/83 · 81/70 | 75/82 · 81/67 | 38 / 216 |
+| meditation | 100/82 · 100/36 | 86/82 · 92/68 | 88/92 · 99/80 (@0,7: 97/85) | 16 / 87 |
+| breath | 100/100 · 100/80 | 85/76 · 87/69 | 87/69 · 89/59 | 7 / 29 |
+| sleep | 33/33 · 33/33 | 95/78 · 100/48 | 94/70 · 100/39 | 6 / 23 |
+| fitness | 92/73 · 100/20 | 58/47 · 68/31 | 57/47 · 65/32 (@0,9: 77/25) | 47 / 68 |
+
+- **Cardio/HIIT:** das Modell erkennt es unzuverlässig (echtes „HIIT Workout“ 0,26, Tabata/Zumba/Aerobic-Sonden 0,30–0,47) -> **Titelregel
+  nötig**. fitness verwechselt außerdem ruhige Yoga-Dehnflows mit Training.
+- **Schwellen (umgesetzt):** yoga T/D 0,8; meditation T 0,8, D 0,7; breath T/D 0,8; sleep T/D 0,8 (**Daten reichen nicht**: H nur 3
+  Videos, daher die strengere Schwelle); fitness **nur Stufe D ab 0,9**, bei T nie (Titelregeln tragen fitness). Die Start-Schwelle 0,6
+  ergab auf den Praxis-Kanälen nur 57–88 % Precision.
+- Titelregeln allein auf P: fitness 79/16, yoga 85/76, sleep 91/87, meditation 86/85, breath 96/79; Regeln + Modell (Stufe D):
+  fitness 71/29, yoga 80/85, sleep 91/91, meditation 87/100, breath 93/93; 117 von 450 Videos „Weitere“. Die meisten Fehltreffer sind
+  Vorträge/Ankündigungen eines Yoga-Kanals, die das strenge Label „ohne Thema“ bekamen.
+
 ## 4. Anzeige und Bedienung
 - Praxis-Tab: Chips „Alle · Fitness · Yoga · Schlaf · Meditation · Atemarbeit · Weitere“, Mehrfachvideos erscheinen unter jedem ihrer Themen. Reihenfolge unverändert (Datum), kein Nachladen-Zwang.
 - Korrektur am Video: Der geplante Korrektur-Dialog bekommt eine Zeile mit den Praxis-Themen (Mehrfachauswahl). Jede Korrektur wird lokal gespeichert und im Debug-Export ausgegeben (Regel-Kalibrierung).
