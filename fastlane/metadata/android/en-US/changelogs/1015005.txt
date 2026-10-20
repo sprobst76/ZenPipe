@@ -1,0 +1,7 @@
+Fifth ZenPipe development release: hardening.
+• Seeking to the end no longer skips the mandatory break (at least half of the way must really be played)
+• Practice playlists are frozen when activated; new videos count as practice after 24 h
+• Videos under 5 minutes: low priority in the feed and a fixed 60 s break after each
+• Feed: the "why" line is a short phrase instead of numbers (numbers stay in the review view)
+• TalkBack: the break countdown is announced once a minute, +/- buttons are named
+• "Done" in the first-time setup asks before it discards open drafts; "Never mind" now says "Close app"
