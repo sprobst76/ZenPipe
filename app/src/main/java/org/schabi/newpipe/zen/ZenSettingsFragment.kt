@@ -88,6 +88,7 @@ class ZenSettingsFragment : Fragment() {
     private fun fmtValue(def: ZenSettingDef, v: Int): String = when {
         def.isMask -> langNames(v)
         def.isBool -> getString(if (v == 1) R.string.zen_on else R.string.zen_off)
+        def.key == ZenSettingKeys.PRAXIS_CAP_MIN && v == ZenPraxisCap.OFF -> getString(R.string.zen_off)
         else -> getString(unitRes(def.key), v)
     }
 
@@ -112,6 +113,7 @@ class ZenSettingsFragment : Fragment() {
         ZenSettingKeys.CLASS_FEED -> R.string.zen_set_class_feed
         ZenSettingKeys.CLASS_HEAVY -> R.string.zen_set_class_heavy
         ZenSettingKeys.FEED_LANGS -> R.string.zen_set_feed_langs
+        ZenSettingKeys.PRAXIS_CAP_MIN -> R.string.zen_set_praxis_cap
         else -> R.string.zen_set_intent_bg
     }
 

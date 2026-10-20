@@ -54,6 +54,13 @@ object ZenSettingKeys {
      */
     const val FEED_LANGS = "feed_langs"
 
+    /**
+     * Soft practice cap (D61): from this much practice time per Zen day a calm question "still
+     * practice or already watching?" (once per day and threshold, no stop). Minutes, 30..240 in
+     * steps of 15, [ZenPraxisCap.OFF] = off. Lower = stricter; higher or off = loosening (24 h).
+     */
+    const val PRAXIS_CAP_MIN = "praxis_cap_min"
+
     /** Settings that only matter with the content recognition (shown only where it is supported). */
     @JvmField
     val CLASSIFIER = setOf(CLASS_FEED, CLASS_HEAVY)
@@ -86,7 +93,8 @@ object ZenSettingDefs {
             max = ZenLangOptions.ALL_MASK,
             strictHigher = false,
             isMask = true
-        )
+        ),
+        ZenSettingDef(ZenSettingKeys.PRAXIS_CAP_MIN, default = 90, min = 30, max = ZenPraxisCap.OFF, strictHigher = false, step = 15)
     )
 
     private val byKey = all.associateBy { it.key }
@@ -173,6 +181,10 @@ object ZenSettings {
 
     @JvmStatic
     fun classHeavyLimit() = get(ZenSettingKeys.CLASS_HEAVY) == 1
+
+    /** Soft practice cap in minutes, or [ZenPraxisCap.OFF]. */
+    @JvmStatic
+    fun praxisCapMin() = get(ZenSettingKeys.PRAXIS_CAP_MIN)
 
     /** ISO codes of the languages the feed may offer. */
     @JvmStatic

@@ -1040,6 +1040,11 @@
     <string name="zen_praxis_video_confirm_message">\"%1$s\" becomes a practice video on %2$s (in 24 hours); you can cancel it until then. It then appears in the Practice tab, is not part of the feed edition or its limits, may play during a mandatory pause and stopping it early starts no pause.</string>
     <string name="zen_praxis_video_added_pending">%1$s becomes a practice video on %2$s</string>
     <string name="zen_praxis_state_video">Video</string>
+    <string name="zen_set_praxis_cap">Practice: ask from (per day)</string>
+    <string name="zen_praxis_cap_title">Still practice, or already watching?</string>
+    <string name="zen_praxis_cap_message">%1$d minutes of practice today. If this is still practice, just carry on.</string>
+    <string name="zen_praxis_cap_continue">Keep practising</string>
+    <string name="zen_praxis_cap_pause">Pause</string>
     <string name="zen_praxis_mark">Mark as practice channel</string>
     <string name="zen_praxis_unmark">Remove from practice channels</string>
     <string name="zen_praxis_cancel_pending">Cancel pending practice channel</string>

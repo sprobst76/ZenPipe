@@ -230,6 +230,10 @@ class ZenPauseEngine(
     @Synchronized
     fun needsKind() = open && kind == null
 
+    /** Kind of the open session (null = none open or not known yet). */
+    @Synchronized
+    fun currentKind(): ZenKind? = if (open) kind else null
+
     @Synchronized
     fun playedMs(): Long {
         accumulate()
@@ -676,7 +680,11 @@ object ZenPause {
     fun onPlaying(context: Context, playing: Boolean, positionMs: Long) = engine(context).onPlaying(playing, positionMs)
 
     @JvmStatic
-    fun onProgress(context: Context, positionMs: Long, durationMs: Long, playing: Boolean) = engine(context).onProgress(positionMs, durationMs, playing)
+    fun onProgress(context: Context, positionMs: Long, durationMs: Long, playing: Boolean) {
+        engine(context).onProgress(positionMs, durationMs, playing)
+        // soft practice cap (D61): a calm question once the practice time of today passes the threshold
+        if (playing && engine(context).currentKind() == ZenKind.PRAXIS) ZenPraxisCap.onPraxisProgress(context)
+    }
 
     @JvmStatic
     fun needsKind(context: Context) = engine(context).needsKind()

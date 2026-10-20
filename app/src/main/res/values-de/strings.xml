@@ -1005,6 +1005,11 @@
     <string name="zen_praxis_video_confirm_message">„%1$s“ wird am %2$s (in 24 Stunden) zum Praxis-Video; bis dahin kannst du es abbrechen. Es erscheint dann im Tab Praxis, gehört nicht zur Feed-Ausgabe und ihren Grenzen, darf während einer Pflichtpause laufen, und ein vorzeitiger Abbruch löst keine Pause aus.</string>
     <string name="zen_praxis_video_added_pending">%1$s wird am %2$s zum Praxis-Video</string>
     <string name="zen_praxis_state_video">Video</string>
+    <string name="zen_set_praxis_cap">Praxis: Rückfrage ab (pro Tag)</string>
+    <string name="zen_praxis_cap_title">Noch Praxis oder schon Schauen?</string>
+    <string name="zen_praxis_cap_message">Heute schon %1$d Minuten Praxis. Wenn es noch Übung ist, mach einfach weiter.</string>
+    <string name="zen_praxis_cap_continue">Weiter üben</string>
+    <string name="zen_praxis_cap_pause">Pausieren</string>
     <string name="zen_praxis_mark">Als Praxis-Kanal markieren</string>
     <string name="zen_praxis_unmark">Aus Praxis-Kanälen entfernen</string>
     <string name="zen_praxis_cancel_pending">Ausstehenden Praxis-Kanal abbrechen</string>

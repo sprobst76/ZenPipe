@@ -106,6 +106,13 @@
             android:label="@string/zen_pause_title" />
 
         <activity
+            android:name=".zen.ZenPraxisCapActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.AppCompat.DayNight.Dialog"
+            android:label="@string/zen_praxis_cap_title" />
+
+        <activity
             android:name=".settings.SettingsActivity"
             android:exported="false"
             android:label="@string/settings" />
