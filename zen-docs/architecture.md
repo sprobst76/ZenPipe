@@ -32,7 +32,7 @@ Pfade relativ zu `app/src/main/java/org/schabi/newpipe/` (kurz `zen/` = Paket `o
 | Datei | Zweck |
 |---|---|
 | `zen/ZenStore.kt` | `ZenKeyValueStore` (Interface), `SharedPrefsZenStore`, `MemoryZenStore` (Tests), Objekt `Zen` = Zugriff auf Store/Uhr/Log |
-| `zen/ZenClock.kt` | `ZenClock` (Vertrauenszeit: Wanduhr gegen `elapsedRealtime`, Toleranz 2 min, Boot-Zähler) und `ZenCountdown` (Fristen nur auf Gerätelaufzeit) |
+| `zen/ZenClock.kt` | `ZenClock` (Vertrauenszeit: Wanduhr gegen `elapsedRealtime`, Toleranz 2 min, Boot-Zähler) und `ZenCountdown` (Fristen nur auf Gerätelaufzeit), `ZenUptime` (aufsteigender Laufzeit-Zähler für Wartezeiten je Eintrag, z. B. neue Praxis-Playlist-Videos) |
 | `zen/ZenDay.kt` | Zen-Tag, Wechsel 04:00 (`ROLLOVER_HOUR`); `ZenZone` (feste Zeitzone) liegt in `zen/ZenFeedState.kt` |
 | `zen/ZenLog.kt` | Zen-Protokoll (Ereignisse wie `pause_start`, `settings_change`), nicht im Export |
 | `zen/ZenPlayback.kt` | „läuft gerade eigene Wiedergabe?“ (für Absichtsabfrage, Thread-Zahl des Klassifikators, Ende der Ersteinrichtung) |
@@ -81,8 +81,8 @@ Einstellungen oder Details nie neu gewürfelt (nur `why` wird ersetzt); Kanalsei
 
 | Datei | Zweck |
 |---|---|
-| `zen/ZenPause.kt` | `ZenKind` (Video/Podcast/Musik/Praxis), `ZenPauseRules` (feste Schwellen wie „zu Ende“ 90 %/60 s, `LATER_PER_DAY`), `ZenContentKind` (Musik/Podcast-Heuristik), `ZenPauseEngine` (reine Logik: Sitzung, Wiedergabezeit, Ruhezeit, Abbruch, Kette, Sleep-Ende), Fassade `ZenPause` (Android-Hooks, `blockStart`, `onStreamInfo`, `recover`, `confirmClose`) |
-| `zen/ZenPauseActivity.kt` | Pausenbildschirm mit Countdown und Spruch |
+| `zen/ZenPause.kt` | `ZenKind` (Video/Podcast/Musik/Praxis), `ZenPauseRules` (feste Schwellen wie „zu Ende“ 90 %/60 s + abspielend erreicht `watchedToEnd`, Kurzvideo-Pause 60 s, `LATER_PER_DAY`), `ZenContentKind` (Musik/Podcast-Heuristik), `ZenPauseEngine` (reine Logik: Sitzung, Wiedergabezeit, Ruhezeit, Abbruch, Kette, Sleep-Ende), Fassade `ZenPause` (Android-Hooks, `blockStart`, `onStreamInfo`, `recover`, `confirmClose`) |
+| `zen/ZenPauseActivity.kt` | Pausenbildschirm mit Countdown (TalkBack: Minuten-Ansage) und Spruch, eigener Text für die Kurzvideo-Pause |
 | `zen/ZenQuotes.kt` | Spruchauswahl (einer pro Pause, Runden), eigene Sprüche |
 | `zen/ZenWatchTime.kt` | Wiedergabezeit pro Zen-Tag (`wt_<Tag>` = Bild, Ton, Musik, Praxis), Zen-Minuten-Hook |
 
@@ -115,7 +115,7 @@ gegen neuen und ausstehenden Zielzustand; alle Fristen sind `ZenCountdown`. Jede
 
 | Datei | Zweck |
 |---|---|
-| `zen/ZenPraxis.kt` | `ZenPraxisChannel` (Kanal oder Online-Playlist, normalisierte URL), `ZenPraxisTime` (Praxis-Minuten), `ZenPraxisPlaylistItems` (`px_pl_items`), `ZenPraxis.isPraxisStream` |
+| `zen/ZenPraxis.kt` | `ZenPraxisChannel` (Kanal oder Online-Playlist, normalisierte URL), `ZenPraxisTime` (Praxis-Minuten), `ZenPraxisPlaylistItems` (`px_pl_items`, eingefroren: Basis + neue Videos mit 24-h-Wartezeit), `ZenPraxis.isPraxisStream` |
 | `zen/ZenPraxisFragment.kt` | Tab „Praxis“ (`settings/tabs/Tab.PraxisTab`, ID 10; `TabsManager` ergänzt ihn immer nach dem Feed) und Drawer-Eintrag |
 | `zen/ZenPraxisUi.kt` | Markieren/Abbrechen/Entfernen (Menü, Long-Press, Bestätigung, Plausibilitätsprüfung davor) |
 | `zen/ZenSleep.kt`, `zen/ZenSleepUi.kt` | `ZenSleepTimer` (Gerätelaufzeit, Fade 30 s), `ZenSleepSignal` (Hook Einschlaferkennung), Mond-Knopf/Menü |
