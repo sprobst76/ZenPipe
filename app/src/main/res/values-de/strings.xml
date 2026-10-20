@@ -963,6 +963,10 @@
     <string name="zen_watch_hint">Echte Abspielzeit seit 04:00 (Pausieren und Puffern zählen nicht). Bild = Video-Player, Ton = Hintergrund. Es gibt kein Limit.</string>
     <string name="zen_praxis_today">Praxis heute: %1$d Min.</string>
     <string name="zen_praxis_pending_count">%1$d Praxis-Kanal/-Playlist(s) ausstehend (siehe Einstellungen > Zen)</string>
+    <plurals name="zen_praxis_waiting_items">
+        <item quantity="one">%1$d neues Playlist-Video zählt ab %2$s als Praxis</item>
+        <item quantity="other">%1$d neue Playlist-Videos zählen 24 h nach ihrem Auftauchen als Praxis (das nächste ab %2$s)</item>
+    </plurals>
     <string name="zen_praxis_empty">Noch keine Praxis-Kanäle oder -Playlists. Markiere sie über das Menü ihrer Seite oder per langem Druck in einer Liste.</string>
     <string name="zen_praxis_failed">%1$d Kanal/Kanäle bzw. Playlist(s) konnten nicht geladen werden</string>
     <string name="zen_praxis_mark">Als Praxis-Kanal markieren</string>

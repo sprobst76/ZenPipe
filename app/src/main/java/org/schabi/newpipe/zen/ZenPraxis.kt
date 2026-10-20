@@ -82,46 +82,128 @@ class ZenPraxisTime(private val store: ZenKeyValueStore) {
 }
 
 /**
- * Which videos belong to the active practice playlists. A playlist's videos are only known once it
- * was loaded (practice tab, playlist page); each load replaces that playlist's set (at most
- * [MAX_PER_PLAYLIST]). Entries of playlists that are no longer active are ignored (removing a
- * playlist applies at once). Only extractor data of the playlist itself is registered, so
- * enqueueing another video into a practice queue does not make it practice.
+ * Which videos belong to the active practice playlists (D63: the content is frozen). A playlist's
+ * videos are only known once it was loaded (practice tab, playlist page). What is known before the
+ * playlist becomes active (loads while it is pending, the page it was marked on, first-time setup)
+ * and what older versions stored is the frozen base and counts at once. A video that shows up in a
+ * load of an already ACTIVE playlist is new: it is remembered with the observed device uptime
+ * ([ZenUptime]) and only counts after [NEW_ITEM_WAIT_MS] of uptime (fail-closed like the other
+ * locks; it does not start or need the settings lock). Loads only add (at most [MAX_PER_PLAYLIST]
+ * per playlist), so a refilled playlist never replaces its base. Entries of playlists that are no
+ * longer active are ignored (removing a playlist applies at once). Only extractor data of the
+ * playlist itself is registered, so enqueueing another video into a practice queue does not make
+ * it practice.
+ *
+ * Stored in `px_pl_items`, one line per video: `playlistKey<TAB>streamKey` (base, also the format
+ * of older versions) or `playlistKey<TAB>streamKey<TAB>seenAtUptimeMs` (new, waiting).
  */
-class ZenPraxisPlaylistItems(private val store: ZenKeyValueStore) {
+class ZenPraxisPlaylistItems(
+    private val store: ZenKeyValueStore,
+    /** Running device uptime ([ZenUptime.totalMs]). */
+    private val uptime: () -> Long
+) {
+    private data class Entry(val playlist: String, val stream: String, val seenAt: Long) {
+        val base get() = seenAt < 0
+    }
+
+    /**
+     * A load of [playlistKey] delivered [streams]. Unknown videos are added: as frozen base if
+     * [base] (the playlist is not active yet, or first-time setup), otherwise as new videos that
+     * wait [NEW_ITEM_WAIT_MS]. With [base] a waiting video of the playlist joins the base.
+     */
     @Synchronized
-    fun register(playlistKey: String, streams: List<Pair<Int, String>>) {
-        val keep = read().filter { it.first != playlistKey }
-        val add = streams.take(MAX_PER_PLAYLIST).map { playlistKey to ZenPraxisChannel.keyOf(it.first, it.second) }.distinct()
-        val all = keep + add
-        store.put(KEY to if (all.isEmpty()) null else all.joinToString("\n") { "${it.first}\t${it.second}" })
+    fun register(playlistKey: String, streams: List<Pair<Int, String>>, base: Boolean) {
+        val all = read().toMutableList()
+        val known = all.withIndex().filter { it.value.playlist == playlistKey }.associate { it.value.stream to it.index }
+        var count = known.size
+        var changed = false
+        var now = -1L
+        for (key in streams.map { ZenPraxisChannel.keyOf(it.first, it.second) }.distinct()) {
+            val i = known[key]
+            if (i != null) {
+                if (base && !all[i].base) {
+                    all[i] = all[i].copy(seenAt = -1)
+                    changed = true
+                }
+                continue
+            }
+            if (count >= MAX_PER_PLAYLIST) continue
+            if (!base && now < 0) now = uptime()
+            all.add(Entry(playlistKey, key, if (base) -1 else now))
+            count++
+            changed = true
+        }
+        if (changed) write(all)
     }
 
     @Synchronized
     fun contains(serviceId: Int, streamUrl: String?, activePlaylistKeys: Set<String>): Boolean {
         if (streamUrl.isNullOrEmpty() || activePlaylistKeys.isEmpty()) return false
         val key = ZenPraxisChannel.keyOf(serviceId, streamUrl)
-        return read().any { it.second == key && it.first in activePlaylistKeys }
+        val matches = read().filter { it.stream == key && it.playlist in activePlaylistKeys }
+        if (matches.any { it.base }) return true
+        if (matches.isEmpty()) return false
+        val now = uptime()
+        return matches.any { ready(it, now) }
     }
 
+    /** Stream keys of the videos that count as practice (base or waited long enough). */
     @Synchronized
-    fun streamKeys(activePlaylistKeys: Set<String>): Set<String> = read().filter { it.first in activePlaylistKeys }.map { it.second }.toHashSet()
+    fun streamKeys(activePlaylistKeys: Set<String>): Set<String> {
+        val active = read().filter { it.playlist in activePlaylistKeys }
+        val now = if (active.all { it.base }) 0 else uptime()
+        return active.filter { ready(it, now) }.map { it.stream }.toHashSet()
+    }
+
+    /** New videos of active playlists that still wait. */
+    data class Waiting(val count: Int, val nextReadyMs: Long, val streamKeys: Set<String>)
+
+    /** Waiting new videos of [activePlaylistKeys]; null if there are none. */
+    @Synchronized
+    fun waiting(activePlaylistKeys: Set<String>): Waiting? {
+        val candidates = read().filter { it.playlist in activePlaylistKeys && !it.base }
+        if (candidates.isEmpty()) return null
+        val now = uptime()
+        val left = candidates.filter { !ready(it, now) }
+        if (left.isEmpty()) return null
+        return Waiting(
+            left.map { it.stream }.distinct().size,
+            left.minOf { NEW_ITEM_WAIT_MS - (now - it.seenAt) },
+            left.map { it.stream }.toHashSet()
+        )
+    }
 
     /** Drops the sets of playlists that are no longer active or pending. */
     @Synchronized
     fun prune(knownPlaylistKeys: Set<String>) {
         val all = read()
-        val kept = all.filter { it.first in knownPlaylistKeys }
-        if (kept.size != all.size) store.put(KEY to if (kept.isEmpty()) null else kept.joinToString("\n") { "${it.first}\t${it.second}" })
+        val kept = all.filter { it.playlist in knownPlaylistKeys }
+        if (kept.size != all.size) write(kept)
     }
 
-    private fun read(): List<Pair<String, String>> = (store.getString(KEY, "") ?: "").split('\n').filter { it.isNotEmpty() }.mapNotNull {
-        val p = it.split('\t', limit = 2)
-        if (p.size == 2) p[0] to p[1] else null
+    private fun ready(e: Entry, now: Long) = e.base || now - e.seenAt >= NEW_ITEM_WAIT_MS
+
+    private fun write(all: List<Entry>) {
+        store.put(KEY to if (all.isEmpty()) null else all.joinToString("\n") { "${it.playlist}\t${it.stream}" + if (it.base) "" else "\t${it.seenAt}" })
+    }
+
+    private fun read(): List<Entry> = (store.getString(KEY, "") ?: "").split('\n').filter { it.isNotEmpty() }.mapNotNull {
+        val p = it.split('\t', limit = 3)
+        when {
+            p.size < 2 -> null
+
+            // older versions: no third field = frozen base; an unreadable time is strict (waits from 0)
+            p.size == 2 -> Entry(p[0], p[1], -1)
+
+            else -> Entry(p[0], p[1], p[2].toLongOrNull()?.coerceAtLeast(0) ?: 0)
+        }
     }
 
     companion object {
         const val MAX_PER_PLAYLIST = 200
+
+        /** A video that appears in an active practice playlist counts after this much device uptime. */
+        const val NEW_ITEM_WAIT_MS = 24 * 60 * 60 * 1000L
         private const val KEY = "px_pl_items"
     }
 }
@@ -149,7 +231,12 @@ object ZenPraxis {
 
     @JvmStatic
     fun playlistItems(context: Context): ZenPraxisPlaylistItems = items ?: synchronized(this) {
-        items ?: ZenPraxisPlaylistItems(Zen.store(context)).also { items = it }
+        items ?: run {
+            val app = context.applicationContext
+            val store = Zen.store(app)
+            val uptime = ZenUptime(store, "praxis", bootId = { Zen.bootCount(app) })
+            ZenPraxisPlaylistItems(store) { uptime.totalMs() }
+        }.also { items = it }
     }
 
     /** For tests: use [i] (null = no playlist items known). Set up by [ZenSettings.init] in the app. */
@@ -170,16 +257,40 @@ object ZenPraxis {
     @JvmStatic
     fun activePlaylistStreamKeys(): Set<String> = items?.streamKeys(activePlaylistKeys()) ?: emptySet()
 
-    /** A practice playlist (page or practice tab) was loaded: remember which videos belong to it. */
+    /** Keys of the PENDING practice playlists (their loads are the frozen base). */
     @JvmStatic
-    fun registerPlaylistStreams(context: Context, serviceId: Int, playlistUrl: String, streams: List<Pair<Int, String>>) {
+    fun pendingPlaylistKeys(): Set<String> = ZenSettings.lock()?.pendingPraxis()?.filter { it.playlist }?.map { it.key }?.toHashSet() ?: emptySet()
+
+    /** New videos of active practice playlists that do not count yet (D63), null if none. */
+    @JvmStatic
+    fun waitingPlaylistItems(): ZenPraxisPlaylistItems.Waiting? = items?.waiting(activePlaylistKeys())
+
+    /**
+     * A practice playlist (page or practice tab) was loaded: remember which videos belong to it.
+     * While the playlist is pending (or during first-time setup) the videos are its frozen base;
+     * a video that is new in an ACTIVE playlist counts only after 24 h of device uptime (D63).
+     */
+    @JvmStatic
+    fun registerPlaylistStreams(context: Context, serviceId: Int, playlistUrl: String, streams: List<Pair<Int, String>>) = registerInto(playlistItems(context), serviceId, playlistUrl, streams)
+
+    /** [registerPlaylistStreams] into [target]: base or new is decided by the playlist's state. */
+    @JvmStatic
+    fun registerInto(target: ZenPraxisPlaylistItems, serviceId: Int, playlistUrl: String, streams: List<Pair<Int, String>>) {
         val key = ZenPraxisChannel.keyOf(serviceId, playlistUrl)
-        if (key !in activePlaylistKeys()) return
-        playlistItems(context).register(key, streams)
+        val base = when (key) {
+            in activePlaylistKeys() -> ZenSettings.lock()?.isSetupMode() == true
+            in pendingPlaylistKeys() -> true
+            else -> return
+        }
+        target.register(key, streams, base)
     }
 
-    /** Java helper for [registerPlaylistStreams] with extractor items. */
+    /**
+     * Java helper for [registerPlaylistStreams] with extractor items ([append] = a further page;
+     * loads only ever add, so it makes no difference any more).
+     */
     @JvmStatic
+    @Suppress("UNUSED_PARAMETER")
     fun registerPlaylistItems(
         context: Context,
         serviceId: Int,
@@ -187,17 +298,8 @@ object ZenPraxis {
         items: List<org.schabi.newpipe.extractor.InfoItem>,
         append: Boolean
     ) {
-        val key = ZenPraxisChannel.keyOf(serviceId, playlistUrl)
-        if (key !in activePlaylistKeys()) return
-        val store = playlistItems(context)
-        val new = items.filterIsInstance<org.schabi.newpipe.extractor.stream.StreamInfoItem>().map { it.serviceId to it.url }
-        if (append) {
-            // keep what is known, add the next page
-            val known = store.streamKeys(setOf(key))
-            store.register(key, known.map { k -> serviceId to k.substringAfter(':') } + new)
-        } else {
-            store.register(key, new)
-        }
+        val streams = items.filterIsInstance<org.schabi.newpipe.extractor.stream.StreamInfoItem>().map { it.serviceId to it.url }
+        registerPlaylistStreams(context, serviceId, playlistUrl, streams)
     }
 
     @JvmStatic

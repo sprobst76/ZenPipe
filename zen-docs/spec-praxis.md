@@ -14,10 +14,25 @@ Anforderung (Nutzer, 2026-10-13): Eine Kategorie „Praxis“ für Inhalte, die 
 - **Playlists** (umgesetzt 2026-10-13, nur Online-Playlists, keine lokalen): gleiche Liste und gleiche Sperre wie Kanäle
   (`ZenPraxisChannel.playlist`, gespeichert mit Flag `p`). Praxis sind die Videos, die **aus der Playlist selbst geladen**
   wurden (`ZenPraxisPlaylistItems`, `px_pl_items`): der Praxis-Tab lädt die erste Seite (bei YouTube bis 100) und registriert
-  sie, die Playlist-Seite registriert ihre geladenen Seiten; max. 200 je Playlist, jedes Laden ersetzt die Menge. Gezählt wird
+  sie, die Playlist-Seite registriert ihre geladenen Seiten; max. 200 je Playlist. [überholt 2026-10-20: „jedes Laden ersetzt die
+  Menge“ – seit D63 wird nur noch ergänzt, siehe „Eingefroren“] Gezählt wird
   nur, solange die Playlist aktiv ist (Entfernen wirkt sofort). Bewusst **nicht** über den Warteschlangen-Kontext: in eine
   Praxis-Warteschlange eingereihte fremde Videos würden sonst Praxis. Grenze: Videos jenseits der geladenen Seiten einer sehr
   langen Playlist zählen erst, wenn die Seite geladen wurde.
+- **Eingefroren (D63, umgesetzt 2026-10-20):** Der Inhalt einer Praxis-Playlist wird beim Aktivieren eingefroren, damit eine
+  eigene YouTube-Playlist kein Freifahrschein wird (Analyse 2026-10, A1.2). **Basis** (zählt sofort ab Aktivierung) sind die
+  Videos, die geladen wurden, **bevor** die Playlist aktiv war: die Playlist-Seite, auf der sie markiert wurde, jedes Öffnen der
+  Seite während der 24 h „ausstehend“ und der Praxis-Tab, der ausstehende Playlists dafür im Hintergrund lädt (nicht anzeigt);
+  in der Ersteinrichtung zählt jedes Laden als Basis. Ein Video, das erst in einer **aktiven** Playlist auftaucht, ist **neu**:
+  es wird mit der beobachteten Gerätelaufzeit vermerkt (`ZenUptime` „praxis“, `ut_praxis_*`) und zählt erst nach **24 h
+  Gerätelaufzeit** (Wanduhr egal, Ausschaltzeit zählt nicht, Neustart fail-closed; startet und braucht keine Einstellungs-Sperre).
+  Bis dahin ist es ein normales Video (Pflichtpause, während einer Pause gesperrt, kein Teil einer Praxis-Kette), der Praxis-Tab
+  zeigt es nicht und nennt in der Kopfzeile „N neue Playlist-Videos zählen … (das nächste ab …)“. Laden ergänzt nur, ersetzt
+  nie: ein Video, das auf YouTube aus der Playlist entfernt wurde, bleibt Praxis (harmlos), die Grenze 200 je Playlist bleibt
+  (darüber hinaus wird nichts mehr aufgenommen). Wird eine Playlist nie vor der Aktivierung geladen (z. B. per langem Druck
+  markiert und der Praxis-Tab nie geöffnet), gilt ihr ganzer Inhalt als neu (streng). Migration: Zeilen älterer Versionen
+  (`playlist<TAB>video`) bleiben unverändert und sind Basis; neue Videos stehen als `playlist<TAB>video<TAB>gesehenBeiLaufzeitMs`
+  in derselben Liste, eine unlesbare Zeit wartet von vorn.
 
 ## Markieren / Entfernen (24-h-Sperre)
 - Kanalseite > Überlaufmenü: „Als Praxis-Kanal markieren“ / „Ausstehenden Praxis-Kanal abbrechen“ / „Aus Praxis-Kanälen

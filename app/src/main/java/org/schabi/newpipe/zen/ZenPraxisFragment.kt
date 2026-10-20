@@ -101,9 +101,21 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
         val ctx = context ?: return
         val minutes = (ZenPraxis.todayMs(ctx) / 60_000L).toInt()
         val pending = Zen.settingsLock(ctx).pendingPraxis().size
+        val waiting = ZenPraxis.waitingPlaylistItems()
         h.text = buildString {
             append(ctx.getString(R.string.zen_praxis_today, minutes))
             if (pending > 0) append('\n').append(ctx.getString(R.string.zen_praxis_pending_count, pending))
+            // D63: videos that are new in an active practice playlist count after 24 h
+            if (waiting != null) {
+                append('\n').append(
+                    ctx.resources.getQuantityString(
+                        R.plurals.zen_praxis_waiting_items,
+                        waiting.count,
+                        waiting.count,
+                        ZenPraxisUi.fmtTime(waiting.nextReadyMs)
+                    )
+                )
+            }
         }
     }
 
@@ -115,10 +127,19 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
         loadedSignature = all.map { it.key }.sorted().joinToString("|")
         ZenPraxis.playlistItems(requireContext()).prune((all + lock.pendingPraxis()).map { it.key }.toHashSet())
         val ctx = requireContext().applicationContext
-        disposable = Observable.fromIterable(all)
-            .concatMapSingle { ch -> if (ch.playlist) playlistOf(ctx, ch, forceLoad) else newestOf(ch, forceLoad) }
+        // pending playlists are loaded only to remember their content (frozen base, D63), not shown
+        val pendingLists = lock.pendingPraxis().filter { it.playlist }
+        disposable = Observable.fromIterable(all + pendingLists)
+            .concatMapSingle { ch ->
+                when {
+                    ch in pendingLists -> playlistOf(ctx, ch, forceLoad).map { ChannelItems(emptyList(), true, HIDDEN) }
+                    ch.playlist -> playlistOf(ctx, ch, forceLoad)
+                    else -> newestOf(ch, forceLoad)
+                }
+            }
             .toList()
-            .map { perEntry ->
+            .map { loaded ->
+                val perEntry = loaded.filter { it.head !== HIDDEN }
                 val channelItems = perEntry.filter { it.head == null }.flatMap { it.items }
                     .sortedByDescending { it.uploadDate?.offsetDateTime()?.toInstant()?.toEpochMilli() ?: Long.MIN_VALUE }
                 val playlistItems = perEntry.filter { it.head != null }.flatMap { listOf(it.head!!) + it.items }
@@ -164,10 +185,13 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
                 uploaderName = info.uploaderName
                 streamCount = info.streamCount
             }
+            // new videos that do not count yet (D63) are not offered as practice
+            val waiting = ZenPraxis.waitingPlaylistItems()?.streamKeys.orEmpty()
             val items = info.relatedItems.filterIsInstance<StreamInfoItem>()
                 .filter {
                     !it.isShortFormContent && it.streamType != StreamType.LIVE_STREAM &&
-                        it.streamType != StreamType.AUDIO_LIVE_STREAM
+                        it.streamType != StreamType.AUDIO_LIVE_STREAM &&
+                        ZenPraxisChannel.keyOf(it.serviceId, it.url) !in waiting
                 }
                 .take(ZenPraxis.MAX_PER_CHANNEL)
             ChannelItems(items, true, head)
@@ -207,6 +231,9 @@ class ZenPraxisFragment : BaseListFragment<ZenPraxisFragment.Loaded, Void>() {
     override fun hasMoreItems(): Boolean = false
 
     private companion object {
+        /** Marker head of a pending playlist that was only loaded to register its content. */
+        val HIDDEN: InfoItem = PlaylistInfoItem(-1, "", "")
+
         /** Empty-state text like the other empty pages (`list_empty_view`: default size, 16 dp sides). */
         const val EMPTY_TEXT_SP = 16f
         const val EMPTY_SIDE_DP = 24

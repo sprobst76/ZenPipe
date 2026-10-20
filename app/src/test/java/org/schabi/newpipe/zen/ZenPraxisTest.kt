@@ -40,6 +40,10 @@ class ZenPraxisTest {
             wall += ms
         }
 
+        val uptime = ZenUptime(store, "praxis", { mono }, { boot })
+
+        fun playlistItems() = ZenPraxisPlaylistItems(store) { uptime.totalMs() }
+
         fun watch(e: ZenPauseEngine, url: String, durationMs: Long, ms: Long, kind: ZenKind?) {
             e.onItem(url, durationMs)
             e.onPlaying(true, 0)
@@ -411,24 +415,24 @@ class ZenPraxisTest {
     @Test
     fun `videos of an active practice playlist are practice, only while it is active`() {
         val (env, l) = ready()
-        val items = ZenPraxisPlaylistItems(env.store)
+        val items = env.playlistItems()
         ZenSettings.install(l)
         ZenPraxis.installPlaylistItems(items)
         try {
             val v1 = "https://www.youtube.com/watch?v=one"
             val other = "https://www.youtube.com/watch?v=other"
             env.store.put("zs_praxis" to ZenPraxisChannel.encodeList(listOf(yogaList)))
-            items.register(yogaList.key, listOf(0 to v1))
+            items.register(yogaList.key, listOf(0 to v1), base = true)
             assertTrue(ZenPraxis.isPraxisStream(0, "https://m.youtube.com/watch?v=one", "https://www.youtube.com/channel/UCsomeone"))
             // something enqueued next to it (not loaded from the playlist) is no practice
             assertFalse(ZenPraxis.isPraxisStream(0, other, "https://www.youtube.com/channel/UCsomeone"))
             assertEquals(setOf(ZenPraxisChannel.keyOf(0, v1)), ZenPraxis.activePlaylistStreamKeys())
 
-            // a reload replaces the set; the limit holds
-            items.register(yogaList.key, (1..300).map { 0 to "https://www.youtube.com/watch?v=n$it" })
-            assertFalse(ZenPraxis.isPraxisStream(0, v1, null))
-            assertTrue(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n200", null))
-            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n201", null))
+            // a reload only adds (the frozen base stays); the limit holds
+            items.register(yogaList.key, (1..300).map { 0 to "https://www.youtube.com/watch?v=n$it" }, base = true)
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null))
+            assertTrue(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n199", null))
+            assertFalse(ZenPraxis.isPraxisStream(0, "https://www.youtube.com/watch?v=n200", null))
 
             // removing the playlist applies at once
             l.removePraxis(yogaList.key)
@@ -438,6 +442,122 @@ class ZenPraxisTest {
         } finally {
             ZenSettings.install(null)
             ZenPraxis.installPlaylistItems(null)
+        }
+    }
+
+    // ------------------------------------------------------------------ frozen playlists (D63)
+
+    private val v1 = "https://www.youtube.com/watch?v=one"
+    private val v2 = "https://www.youtube.com/watch?v=two"
+
+    /** Runs [block] with [l] and the playlist items of [env] installed process-wide. */
+    private fun withPraxis(env: Env, l: ZenSettingsLock, block: (ZenPraxisPlaylistItems) -> Unit) {
+        val items = env.playlistItems()
+        ZenSettings.install(l)
+        ZenPraxis.installPlaylistItems(items)
+        try {
+            block(items)
+        } finally {
+            ZenSettings.install(null)
+            ZenPraxis.installPlaylistItems(null)
+        }
+    }
+
+    @Test
+    fun `a playlist is frozen at activation, new videos count after 24 h of uptime`() {
+        val (env, l) = ready()
+        withPraxis(env, l) { items ->
+            assertTrue(l.addPraxis(yogaList) is ZenSettingsLock.Result.Applied)
+            // loaded while pending (the page it was marked on, the practice tab): frozen base
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v1))
+            assertFalse(ZenPraxis.isPraxisStream(0, v1, null)) // not active yet
+            env.mono += 24 * h
+            assertEquals(listOf(yogaList), l.praxisChannels())
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null)) // base counts at activation
+
+            // the user puts another video into the playlist: new, it waits
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v1, 0 to v2))
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+            assertEquals(setOf(ZenPraxisChannel.keyOf(0, v1)), ZenPraxis.activePlaylistStreamKeys())
+            val w = ZenPraxis.waitingPlaylistItems()!!
+            assertEquals(1, w.count)
+            assertEquals(24 * h, w.nextReadyMs)
+            assertEquals(setOf(ZenPraxisChannel.keyOf(0, v2)), w.streamKeys)
+
+            // the wall clock does not help, a reload does not restart the wait
+            env.wall += 48 * h
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+            env.mono += 12 * h
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v2))
+            assertEquals(12 * h, ZenPraxis.waitingPlaylistItems()!!.nextReadyMs)
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+            env.mono += 12 * h
+            assertTrue(ZenPraxis.isPraxisStream(0, v2, null))
+            assertNull(ZenPraxis.waitingPlaylistItems())
+            // v1 left the playlist on YouTube: the frozen base keeps it
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null))
+        }
+    }
+
+    @Test
+    fun `the wait for new playlist videos ignores the time the device was off`() {
+        val (env, l) = ready()
+        withPraxis(env, l) { items ->
+            env.store.put("zs_praxis" to ZenPraxisChannel.encodeList(listOf(yogaList)))
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v2)) // active: new
+            env.mono += 20 * h
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+            // power off for 3 days, reboot: uptime restarts, only the new boot counts
+            env.boot++
+            env.mono = 3 * h
+            env.wall += 72 * h
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null)) // 20 h + 3 h
+            env.mono += 1 * h
+            assertTrue(ZenPraxis.isPraxisStream(0, v2, null))
+        }
+    }
+
+    @Test
+    fun `stored playlist videos of older versions stay practice, without data loss`() {
+        val (env, l) = ready()
+        withPraxis(env, l) { items ->
+            env.store.put("zs_praxis" to ZenPraxisChannel.encodeList(listOf(yogaList)))
+            val k1 = ZenPraxisChannel.keyOf(0, v1)
+            env.store.put("px_pl_items" to "${yogaList.key}\t$k1")
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null))
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v2))
+            val raw = env.store.getString("px_pl_items", "")!!
+            assertTrue(raw.startsWith("${yogaList.key}\t$k1\n")) // the old line is kept as it was
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null))
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+            // an unreadable time waits (strict)
+            env.store.put("px_pl_items" to "${yogaList.key}\t$k1\tx")
+            assertFalse(ZenPraxis.isPraxisStream(0, v1, null))
+        }
+    }
+
+    @Test
+    fun `during first-time setup the playlist content counts at once`() {
+        val env = Env()
+        val l = env.lock()
+        withPraxis(env, l) { items ->
+            assertTrue(l.isSetupMode())
+            l.addPraxis(yogaList)
+            assertEquals(listOf(yogaList), l.praxisChannels())
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v1))
+            assertTrue(ZenPraxis.isPraxisStream(0, v1, null))
+            l.completeSetup()
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v2))
+            assertFalse(ZenPraxis.isPraxisStream(0, v2, null))
+        }
+    }
+
+    @Test
+    fun `loads of a playlist that is neither active nor pending are ignored`() {
+        val (env, l) = ready()
+        withPraxis(env, l) { items ->
+            ZenPraxis.registerInto(items, 0, yogaList.url, listOf(0 to v1))
+            assertNull(env.store.getString("px_pl_items", null))
         }
     }
 

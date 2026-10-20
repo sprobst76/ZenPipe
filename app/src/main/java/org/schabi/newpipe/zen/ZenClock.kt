@@ -138,3 +138,40 @@ class ZenCountdown(
 
     fun isRunning() = remainingMs() > 0
 }
+
+/**
+ * Device uptime observed by the app as a running total that never decreases (the counterpart of
+ * [ZenCountdown] for per-item waiting times: "known since X of uptime"). Within one boot it grows
+ * with the monotonic clock; after a reboot only the uptime of the new boot is added, so the time
+ * the device was off (and the rest of the previous boot after the last look) does not count
+ * (fail-closed). The wall clock plays no role, setting it forward never shortens a wait.
+ */
+class ZenUptime(
+    private val store: ZenKeyValueStore,
+    name: String,
+    private val monotonic: () -> Long = SystemClock::elapsedRealtime,
+    private val bootId: () -> Int = { -1 }
+) {
+    private val kTotal = "ut_${name}_tot"
+    private val kMono = "ut_${name}_mono"
+    private val kBoot = "ut_${name}_boot"
+
+    /** The running total in milliseconds (0 at the first look); also persists the progress. */
+    @Synchronized
+    fun totalMs(): Long {
+        val mono = monotonic()
+        val boot = bootId()
+        val total = store.getLong(kTotal, -1)
+        if (total < 0) {
+            store.put(kTotal to 0L, kMono to mono, kBoot to boot)
+            return 0
+        }
+        val refMono = store.getLong(kMono, 0)
+        val refBoot = store.getInt(kBoot, -1)
+        val sameBoot = if (boot >= 0 && refBoot >= 0) boot == refBoot else mono >= refMono
+        val elapsed = if (sameBoot) mono - refMono else mono
+        val now = total + maxOf(0L, elapsed)
+        store.put(kTotal to now, kMono to mono, kBoot to boot)
+        return now
+    }
+}
