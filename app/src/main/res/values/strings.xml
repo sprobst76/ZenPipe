@@ -937,6 +937,8 @@
     <string name="zen_pause_back">Back</string>
     <string name="zen_pause_ok">OK</string>
     <string name="zen_pause_toast">Pause after an aborted video is still running</string>
+    <string name="zen_pause_short_message">After a short video comes a one-minute pause. Then you can start the next one. Browsing and search stay available.</string>
+    <string name="zen_pause_short_toast">The short pause after a short video is still running</string>
     <string name="zen_pause_a11y_left">%1$s of pause left</string>
     <string name="zen_later_resume_action">Resume later</string>
     <string name="zen_later_resume_saved">Position saved, no pause. %1$d \"resume later\" left today.</string>
@@ -953,7 +955,7 @@
     <string name="zen_settings_title">Zen</string>
     <string name="zen_set_feed_budget">Videos per feed edition</string>
     <string name="zen_set_daily_cap">Daily limit (distinct videos in the feed)</string>
-    <string name="zen_set_min_length">Minimum video length in the feed</string>
+    <string name="zen_set_min_length">Short-video limit in the feed (shorter ones come last)</string>
     <string name="zen_set_pause_enabled">Mandatory pause after an aborted video</string>
     <string name="zen_set_pause_percent">Pause length (share of the watched time)</string>
     <string name="zen_set_pause_min">Shortest pause</string>

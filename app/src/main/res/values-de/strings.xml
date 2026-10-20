@@ -902,6 +902,8 @@
     <string name="zen_pause_back">Zurück</string>
     <string name="zen_pause_ok">OK</string>
     <string name="zen_pause_toast">Die Pause nach einem abgebrochenen Video läuft noch</string>
+    <string name="zen_pause_short_message">Nach einem kurzen Video folgt eine Minute Pause. Danach kannst du das nächste starten. Stöbern und Suchen bleiben möglich.</string>
+    <string name="zen_pause_short_toast">Die kurze Pause nach einem kurzen Video läuft noch</string>
     <string name="zen_pause_a11y_left">Noch %1$s Pause</string>
     <string name="zen_later_resume_action">Später fortsetzen</string>
     <string name="zen_later_resume_saved">Position gemerkt, keine Pause. Heute noch %1$d x „Später fortsetzen“.</string>
@@ -918,7 +920,7 @@
     <string name="zen_settings_title">Zen</string>
     <string name="zen_set_feed_budget">Videos pro Feed-Ausgabe</string>
     <string name="zen_set_daily_cap">Tages-Deckel (verschiedene Videos im Feed)</string>
-    <string name="zen_set_min_length">Mindestlänge von Videos im Feed</string>
+    <string name="zen_set_min_length">Kurzvideo-Grenze im Feed (kürzere kommen zuletzt)</string>
     <string name="zen_set_pause_enabled">Pflichtpause nach abgebrochenem Video</string>
     <string name="zen_set_pause_percent">Pausenlänge (Anteil der Schauzeit)</string>
     <string name="zen_set_pause_min">Kürzeste Pause</string>

@@ -703,4 +703,91 @@ class ZenPauseTest {
         assertEquals(1, ZenPauseRules.spokenMinutesLeft(1000))
         assertEquals(0, ZenPauseRules.spokenMinutesLeft(0))
     }
+
+    // ------------------------------------------------------------------ short videos (D62)
+
+    @Test
+    fun `short means a known duration below 5 minutes`() {
+        assertTrue(ZenPauseRules.isShortVideo(5 * min - 1000))
+        assertFalse(ZenPauseRules.isShortVideo(5 * min))
+        assertFalse(ZenPauseRules.isShortVideo(0)) // unknown
+        assertTrue(ZenPauseRules.shortPauseApplies(3 * min, 1000, ZenKind.VIDEO))
+        assertTrue(ZenPauseRules.shortPauseApplies(3 * min, 1000, ZenKind.PODCAST))
+        assertFalse(ZenPauseRules.shortPauseApplies(3 * min, 1000, ZenKind.MUSIC))
+        assertFalse(ZenPauseRules.shortPauseApplies(3 * min, 1000, ZenKind.PRAXIS))
+        assertFalse(ZenPauseRules.shortPauseApplies(3 * min, 0, ZenKind.VIDEO)) // never played
+    }
+
+    @Test
+    fun `a short video watched to the end is followed by a fixed 60 s pause`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "s1", 3 * min, 3 * min)
+        assertEquals(ZenPauseEngine.Outcome.ShortPaused(3 * min, 60_000), e.onCompleted())
+        assertTrue(e.isActive())
+        assertTrue(e.lastPauseShort())
+        assertEquals(60_000, e.remainingMs())
+        assertFalse(e.allowsStart(praxis = false))
+        assertTrue(e.allowsStart(praxis = true))
+        assertTrue(env.logged.any { it.startsWith("watch_end") })
+        assertTrue(env.logged.any { it.startsWith("pause_start") && it.contains("short=1") })
+        env.advance(60_000)
+        assertFalse(e.isActive())
+    }
+
+    @Test
+    fun `closing or switching a short video also pauses 60 s, without the close dialog`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "s1", 4 * min, 30_000)
+        assertEquals(null, e.previewClose()) // no "resume later" question
+        assertTrue(e.onClosed(30_000, 4 * min) is ZenPauseEngine.Outcome.ShortPaused)
+        env.advance(60_000)
+        assertFalse(e.isActive())
+
+        env.watch(e, "s2", 4 * min, 30_000)
+        assertTrue(e.abandonForNewStart("v3")) // the caller stops the player and shows the screen
+        assertTrue(e.isActive())
+    }
+
+    @Test
+    fun `a short video that never played, music and practice give no short pause`() {
+        val env = Env()
+        val e = env.engine()
+        e.onItem("s0", 3 * min)
+        assertTrue(e.onClosed(0, 3 * min) is ZenPauseEngine.Outcome.Short)
+        assertFalse(e.isActive())
+        env.watch(e, "m", 3 * min, 3 * min)
+        e.setKind(ZenKind.MUSIC)
+        assertEquals(ZenPauseEngine.Outcome.Finished, e.onCompleted())
+        env.watch(e, "p", 3 * min, min)
+        e.setKind(ZenKind.PRAXIS)
+        assertTrue(e.onClosed(min, 3 * min) is ZenPauseEngine.Outcome.Exempt)
+        assertFalse(e.isActive())
+    }
+
+    @Test
+    fun `the short pause never shortens a running pause and a normal pause stays normal`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "v1", 60 * min, 20 * min)
+        e.onClosed(20 * min, 60 * min) // 4 min pause
+        assertFalse(e.lastPauseShort())
+        env.watch(e, "s1", 3 * min, 30_000) // e.g. practice queue reached a short non-practice item
+        e.onClosed(30_000, 3 * min)
+        assertTrue(e.remainingMs() > 3 * min)
+        // a 5:20 video is no short video
+        env.advance(10 * min)
+        env.watch(e, "v2", 5 * min + 20_000, 5 * min + 5_000)
+        assertEquals(ZenPauseEngine.Outcome.Finished, e.onClosed(5 * min + 5_000, 5 * min + 20_000))
+        assertFalse(e.isActive())
+    }
+
+    @Test
+    fun `a kill during a short video pauses at the next start`() {
+        val env = Env()
+        val e = env.engine()
+        env.watch(e, "s1", 3 * min, 20_000)
+        assertTrue(env.engine().recover() is ZenPauseEngine.Outcome.ShortPaused)
+    }
 }

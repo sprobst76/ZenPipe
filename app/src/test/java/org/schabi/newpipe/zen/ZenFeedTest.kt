@@ -32,10 +32,13 @@ class ZenFeedTest {
     private fun state(store: ZenKeyValueStore = MemoryZenStore()) = ZenFeedState(store, null, zone)
 
     @Test
-    fun `short, live and old videos are not eligible`() {
-        assertFalse(ZenFeedPlanner.isEligible(c(1, sec = 4L * min + 59), now))
+    fun `unknown length, live and old videos are not eligible, short ones are (D62)`() {
+        assertTrue(ZenFeedPlanner.isEligible(c(1, sec = 4L * min + 59), now))
+        assertTrue(ZenFeedPlanner.isShort(c(1, sec = 4L * min + 59)))
         assertTrue(ZenFeedPlanner.isEligible(c(1, sec = 5L * min), now))
+        assertFalse(ZenFeedPlanner.isShort(c(1, sec = 5L * min)))
         assertFalse(ZenFeedPlanner.isEligible(c(1, sec = -1), now))
+        assertFalse(ZenFeedPlanner.isEligible(c(1, sec = 0), now))
         assertFalse(ZenFeedPlanner.isEligible(c(1, live = true), now))
         assertFalse(ZenFeedPlanner.isEligible(c(1, ageH = 24 * 7 + 1), now))
         assertTrue(ZenFeedPlanner.isEligible(c(1, ageH = 24 * 7 - 1), now))
@@ -302,5 +305,34 @@ class ZenFeedTest {
         assertEquals(v1.open[0], v2.open[0])
         // an older edition is never touched
         assertEquals(0, state(store).updateWhy(at - 1, mapOf("https://y/v1" to newWhy)))
+    }
+
+    // ------------------------------------------------------------------ short videos (D62)
+
+    @Test
+    fun `short videos have a much lower score and never come before a longer one`() {
+        val short = c(1, sec = 3L * min, rank = 0, ageH = 0) // best group, newest
+        val long = c(2, sec = 6L * min, ageH = 24 * 6) // no group, old
+        assertTrue(ZenFeedPlanner.weightedScore(short, now, false) < ZenFeedPlanner.score(short, now) * 0.3)
+        val sel = ZenFeedPlanner.select(listOf(short, long, c(3, sec = 2L * min)), now, 3)
+        assertEquals(listOf("https://y/v2", "https://y/v1", "https://y/v3"), sel.picks.map { it.url })
+        assertEquals(3, sel.eligibleCount)
+        // they only fill places the longer videos leave free
+        val full = ZenFeedPlanner.select(listOf(short) + (10L..24L).map { c(it) }, now, 15)
+        assertFalse(full.picks.any { it.url == "https://y/v1" })
+    }
+
+    @Test
+    fun `a longer heavy video waiting for its place never follows a short one`() {
+        val rules = ZenFeedPlanner.ContentRules(weighting = false, heavyLimit = true)
+        val longs = (1L..8L).map { c(it) }
+        val heavyLong = c(20).copy(zenCats = mapOf("bildung" to 0.9), tone = "belastend")
+        val shorts = (30L..40L).map { c(it, sec = 2L * min) }
+        val sel = ZenFeedPlanner.select(longs + heavyLong + shorts, now, 15, rules = rules)
+        val urls = sel.picks.map { it.url }
+        val firstShort = urls.indexOfFirst { it.removePrefix("https://y/v").toLong() >= 30 }
+        assertEquals(8, firstShort) // all 8 plain long ones first
+        assertFalse("https://y/v20" in urls) // the heavy one would need place 10: leftover
+        assertTrue(urls.drop(firstShort).all { it.removePrefix("https://y/v").toLong() >= 30 })
     }
 }

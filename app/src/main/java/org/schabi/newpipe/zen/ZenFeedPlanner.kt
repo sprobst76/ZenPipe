@@ -11,10 +11,13 @@ import org.schabi.newpipe.zen.classify.ZenRules
  *    reorder dialog) is the priority: first group = highest. A subscription in several groups
  *    uses its best group. No group = no priority points.
  *  - Length bonus (smaller than a group step): long videos are preferred on purpose.
+ *  - Short videos (shorter than the Zen setting `min_length_min`, default 5 min, D62) are allowed
+ *    but with low priority: their score is multiplied by [SHORT_WEIGHT] and they only take the
+ *    places after all longer videos of an edition (never before a longer one).
  */
 object ZenFeedPlanner {
-    // Budget per edition, daily cap (distinct videos per Zen day) and minimum length (live streams
-    // and unknown length never enter an edition) are Zen settings, see ZenSettings.
+    // Budget per edition, daily cap (distinct videos per Zen day) and the short-video limit (live
+    // streams and unknown length never enter an edition) are Zen settings, see ZenSettings.
     /** Minimum time between two editions (measured from the last one, not the clock hour). */
     const val EDITION_INTERVAL_MS = 60 * 60 * 1000L
     const val MAX_AGE_DAYS = 7
@@ -106,10 +109,18 @@ object ZenFeedPlanner {
         // a language that is not allowed in the feed (only clear detections, see ZenLangFilter)
         if (c.langHidden) return false
         if (isMusic(c)) return false
-        if (c.isLive || c.durationSec < ZenSettings.minLengthSec()) return false
+        // unknown length never enters; short videos do, with low priority (D62, see isShort)
+        if (c.isLive || c.durationSec <= 0) return false
         val age = nowMillis - c.uploadMillis
         return age <= MAX_AGE_DAYS * DAY_MS
     }
+
+    /** Score factor of a short video (low priority, D62). */
+    const val SHORT_WEIGHT = 0.25
+
+    /** Shorter than the Zen setting `min_length_min` (default 5 min): low priority, placed last. */
+    @JvmStatic
+    fun isShort(c: Candidate): Boolean = c.durationSec < ZenSettings.minLengthSec()
 
     @JvmStatic
     fun score(c: Candidate, nowMillis: Long): Int {
@@ -168,9 +179,12 @@ object ZenFeedPlanner {
     @JvmStatic
     fun isHeavy(c: Candidate): Boolean = !c.classExempt && c.zenCats != null && c.tone == ZenRules.TONE_HEAVY
 
-    /** Score of the edition order: [score] times [contentWeight] while weighting is on. */
+    /**
+     * Score of the edition order: [score] times [contentWeight] while weighting is on, times
+     * [SHORT_WEIGHT] for a short video.
+     */
     @JvmStatic
-    fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * if (weighting) contentWeight(c) else 1.0
+    fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * (if (weighting) contentWeight(c) else 1.0) * (if (isShort(c)) SHORT_WEIGHT else 1.0)
 
     /**
      * Compact, stored "why" of a pick: `level|tone|weight|cat=p,cat=p` and, without a category,
@@ -224,8 +238,10 @@ object ZenFeedPlanner {
         rules: ContentRules = ContentRules.OFF
     ): Selection {
         val eligible = candidates.filter { isEligible(it, nowMillis) }
+        // short videos after all longer ones (D62), each part by its weighted score
         val sorted = eligible.sortedWith(
-            compareByDescending<Candidate> { weightedScore(it, nowMillis, rules.weighting) }
+            compareBy<Candidate> { isShort(it) }
+                .thenByDescending { weightedScore(it, nowMillis, rules.weighting) }
                 .thenByDescending { it.uploadMillis }
                 .thenBy { it.url }
         )
@@ -234,15 +250,18 @@ object ZenFeedPlanner {
         var newUsed = 0
         var heavyUsed = 0
         var lastHeavy = false
+        var shortUsed = false
         val remaining = ArrayList(sorted)
         // Fill place by place with the best candidate allowed there. Without the heavy rule this is
         // the plain order (cap and channel limits only grow, a skipped video never fits later);
         // a heavy video that does not fit yet waits for a later place (from place 10, not twice
-        // in a row, at most HEAVY_MAX_SHARE of the places) or stays leftover.
+        // in a row, at most HEAVY_MAX_SHARE of the places) or stays leftover. Once a short video
+        // has a place, no longer video follows it (a waiting one stays leftover).
         while (picks.size < count) {
             val place = picks.size + 1
             val i = remaining.indexOfFirst { c ->
-                (c.url in counted || newUsed < newAllowed) &&
+                (!shortUsed || isShort(c)) &&
+                    (c.url in counted || newUsed < newAllowed) &&
                     perChannel.getOrDefault(c.channel, 0) < MAX_PER_CHANNEL &&
                     (!rules.heavyLimit || !isHeavy(c) || heavyAllowed(place, heavyUsed, lastHeavy, count))
             }
@@ -253,6 +272,7 @@ object ZenFeedPlanner {
             val heavy = rules.heavyLimit && isHeavy(c)
             if (heavy) heavyUsed++
             lastHeavy = heavy
+            if (isShort(c)) shortUsed = true
             picks.add(Pick(c.url, (c.durationSec / 60).toInt(), c.groupName, whyOf(c, rules)))
         }
         return Selection(picks, eligible.size)

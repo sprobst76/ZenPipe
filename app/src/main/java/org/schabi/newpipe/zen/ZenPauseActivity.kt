@@ -17,8 +17,8 @@ import org.schabi.newpipe.R
 import org.schabi.newpipe.util.ThemeHelper
 
 /**
- * Shown instead of starting a video while the mandatory pause runs: explains why, counts down and
- * offers no way to skip. Browsing and search stay available (this screen just closes).
+ * Shown instead of starting a video while the mandatory pause (or the short pause after a short
+ * video, D62) runs: explains why, counts down and offers no way to skip. Browsing and search stay available (this screen just closes).
  */
 class ZenPauseActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
@@ -173,8 +173,12 @@ class ZenPauseActivity : AppCompatActivity() {
             back.setText(R.string.zen_pause_ok)
             return
         }
-        val minutes = (ZenPause.playedMs(this) / 60_000L).toInt()
-        setMessage(getString(R.string.zen_pause_message, minutes))
+        if (ZenPause.isShortPause(this)) {
+            setMessage(getString(R.string.zen_pause_short_message))
+        } else {
+            val minutes = (ZenPause.playedMs(this) / 60_000L).toInt()
+            setMessage(getString(R.string.zen_pause_message, minutes))
+        }
         val secs = (left + 999) / 1000
         countdown.text = String.format(java.util.Locale.ROOT, "%d:%02d", secs / 60, secs % 60)
         val spoken = ZenPauseRules.spokenMinutesLeft(left)

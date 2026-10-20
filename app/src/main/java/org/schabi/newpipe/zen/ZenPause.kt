@@ -35,6 +35,22 @@ object ZenPauseRules {
     const val FINISHED_FRACTION = 0.90
     const val FINISHED_REMAINING_MS = 60 * 1000L
 
+    /**
+     * Short video (D62): known duration below this. After EVERY session of a short video that
+     * really played (watched to the end or not) a fixed [SHORT_PAUSE_MS] pause follows; music and
+     * practice are exempt like for the mandatory pause. It does not depend on `pause_enabled`
+     * (a fixed rule, no setting) and gets no rest-time credit.
+     */
+    const val SHORT_VIDEO_MS = 5 * 60 * 1000L
+    const val SHORT_PAUSE_MS = 60 * 1000L
+
+    @JvmStatic
+    fun isShortVideo(durationMs: Long): Boolean = durationMs in 1 until SHORT_VIDEO_MS
+
+    /** Does the end of a session of [kind] with [playedMs] of a [durationMs] video start the short pause? */
+    @JvmStatic
+    fun shortPauseApplies(durationMs: Long, playedMs: Long, kind: ZenKind): Boolean = isShortVideo(durationMs) && playedMs > 0 && !kind.pauseExempt
+
     /** "Resume later" (no pause) allowed this many times per Zen day. */
     const val LATER_PER_DAY = 2
 
@@ -169,6 +185,9 @@ class ZenPauseEngine(
 
         /** An abort that would have paused, but the rest time since the last play covered the pause. */
         data class Rested(val playedMs: Long, val lengthMs: Long, val restMs: Long) : Outcome()
+
+        /** The session of a short video ended (finished or not): the fixed short pause started (D62). */
+        data class ShortPaused(val playedMs: Long, val lengthMs: Long) : Outcome()
     }
 
     private var open = false
@@ -322,10 +341,13 @@ class ZenPauseEngine(
     fun abandonForNewStart(newUrl: String): Boolean {
         if (!open || newUrl == url) return false
         accumulate()
-        if (!ZenPauseRules.qualifies(played, kind ?: ZenKind.VIDEO) || endReached(pos, dur)) {
+        val k = kind ?: ZenKind.VIDEO
+        val short = ZenPauseRules.shortPauseApplies(dur, played, k)
+        if (!short && (!ZenPauseRules.qualifies(played, k) || endReached(pos, dur))) {
             return false // harmless: the normal switch handling decides when the new item arrives
         }
-        return finish(Reason.SWITCHED, pos, dur) is Outcome.Paused
+        val out = finish(Reason.SWITCHED, pos, dur)
+        return out is Outcome.Paused || out is Outcome.ShortPaused
     }
 
     /**
@@ -467,6 +489,10 @@ class ZenPauseEngine(
     @Synchronized
     fun lastPausePlayedMs() = store.getLong(K_PAUSE_PLAYED, 0)
 
+    /** The current (or last) pause is the short pause after a short video (D62). */
+    @Synchronized
+    fun lastPauseShort() = store.getInt(K_PAUSE_SHORT, 0) == 1
+
     /** Counts started pauses (identifies "this pause", e.g. for its quote). */
     @Synchronized
     fun pauseSeq() = store.getLong(K_PAUSE_SEQ, 0)
@@ -545,6 +571,23 @@ class ZenPauseEngine(
 
     private fun finish(reason: Reason, endPos: Long, endDur: Long): Outcome {
         accumulate()
+        val k = kind ?: ZenKind.VIDEO
+        val playedMs = played
+        val u = url
+        val short = ZenPauseRules.shortPauseApplies(endDur, playedMs, k)
+        val out = finishSession(reason, endPos, endDur)
+        if (!short || out is Outcome.Paused) return out
+        // D62: after every short video a fixed short pause (a longer running pause is kept)
+        val running = countdown.remainingMs()
+        countdown.start(maxOf(ZenPauseRules.SHORT_PAUSE_MS, running))
+        store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs, K_PAUSE_SEQ to pauseSeq() + 1, K_PAUSE_SHORT to 1)
+        log("pause_start", "url=$u reason=$reason kind=$k short=1 playedMs=$playedMs durMs=$endDur lengthMs=${ZenPauseRules.SHORT_PAUSE_MS}")
+        return Outcome.ShortPaused(playedMs, ZenPauseRules.SHORT_PAUSE_MS)
+    }
+
+    /** Ends the session: finished, exempt, short, rested or the mandatory pause (without D62). */
+    private fun finishSession(reason: Reason, endPos: Long, endDur: Long): Outcome {
+        accumulate()
         val playedMs = played
         val k = kind ?: ZenKind.VIDEO
         // "completed" (the player reached the end) only counts if the end was reached by playing
@@ -578,7 +621,7 @@ class ZenPauseEngine(
         if (length == 0L) return Outcome.Rested(playedMs, full, rest)
         val running = countdown.remainingMs()
         countdown.start(maxOf(length, running))
-        store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs, K_PAUSE_SEQ to pauseSeq() + 1)
+        store.put(K_PAUSE_ON to 1, K_PAUSE_PLAYED to playedMs, K_PAUSE_SEQ to pauseSeq() + 1, K_PAUSE_SHORT to 0)
         log("pause_start", "$detail lengthMs=$length" + if (rest > 0) " fullMs=$full restMs=$rest" else "")
         return Outcome.Paused(playedMs, length)
     }
@@ -597,6 +640,7 @@ class ZenPauseEngine(
         private const val K_PAUSE_ON = "pause_on"
         private const val K_PAUSE_PLAYED = "pause_played"
         private const val K_PAUSE_SEQ = "pause_seq"
+        private const val K_PAUSE_SHORT = "pause_short"
         private const val K_LATER_DAY = "later_day"
         private const val K_LATER_COUNT = "later_count"
     }
@@ -727,6 +771,10 @@ object ZenPause {
     @JvmStatic
     fun playedMs(context: Context) = engine(context).lastPausePlayedMs()
 
+    /** The current (or last) pause is the short pause after a short video (D62). */
+    @JvmStatic
+    fun isShortPause(context: Context) = engine(context).lastPauseShort()
+
     /** Identifies the current (or last) pause. */
     @JvmStatic
     fun pauseSeq(context: Context) = engine(context).pauseSeq()
@@ -796,7 +844,7 @@ object ZenPause {
             // background activity start can be denied; the caller still blocks the playback
             android.widget.Toast.makeText(
                 context.applicationContext,
-                context.getString(org.schabi.newpipe.R.string.zen_pause_toast),
+                context.getString(if (isShortPause(context)) org.schabi.newpipe.R.string.zen_pause_short_toast else org.schabi.newpipe.R.string.zen_pause_toast),
                 android.widget.Toast.LENGTH_LONG
             ).show()
         }
