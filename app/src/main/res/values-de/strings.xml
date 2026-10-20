@@ -978,6 +978,14 @@
     </plurals>
     <string name="zen_praxis_empty">Noch keine Praxis-Kanäle oder -Playlists. Markiere sie über das Menü ihrer Seite oder per langem Druck in einer Liste.</string>
     <string name="zen_praxis_failed">%1$d Kanal/Kanäle bzw. Playlist(s) konnten nicht geladen werden</string>
+    <string name="zen_praxis_chip_all">Alle</string>
+    <string name="zen_praxis_chip_more">Weitere</string>
+    <string name="zen_praxis_theme_fitness">Fitness</string>
+    <string name="zen_praxis_theme_yoga">Yoga</string>
+    <string name="zen_praxis_theme_sleep">Schlaf</string>
+    <string name="zen_praxis_theme_meditation">Meditation</string>
+    <string name="zen_praxis_theme_breath">Atemarbeit</string>
+    <string name="zen_praxis_theme_empty">Zu diesem Thema gerade keine Videos.</string>
     <string name="zen_praxis_mark">Als Praxis-Kanal markieren</string>
     <string name="zen_praxis_unmark">Aus Praxis-Kanälen entfernen</string>
     <string name="zen_praxis_cancel_pending">Ausstehenden Praxis-Kanal abbrechen</string>

@@ -1013,6 +1013,14 @@
     </plurals>
     <string name="zen_praxis_empty">No practice channels or playlists yet. Mark one via the menu of its page or by long-pressing it in a list.</string>
     <string name="zen_praxis_failed">%1$d channel(s)/playlist(s) could not be loaded</string>
+    <string name="zen_praxis_chip_all">All</string>
+    <string name="zen_praxis_chip_more">More</string>
+    <string name="zen_praxis_theme_fitness">Fitness</string>
+    <string name="zen_praxis_theme_yoga">Yoga</string>
+    <string name="zen_praxis_theme_sleep">Sleep</string>
+    <string name="zen_praxis_theme_meditation">Meditation</string>
+    <string name="zen_praxis_theme_breath">Breathwork</string>
+    <string name="zen_praxis_theme_empty">No videos on this theme right now.</string>
     <string name="zen_praxis_mark">Mark as practice channel</string>
     <string name="zen_praxis_unmark">Remove from practice channels</string>
     <string name="zen_praxis_cancel_pending">Cancel pending practice channel</string>
