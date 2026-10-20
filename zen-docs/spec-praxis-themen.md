@@ -11,6 +11,11 @@ Jedes Video kann eigene Zuordnungen haben, auch mehrere (ein Yoga-Kanal liefert 
 - Unterthemen sind **reine Gliederung und Anzeige**: Sperren, Limits und Pausen ändern sich nicht (kein Etikett braucht eine 24-h-Sperre).
 - Einzelne Videos als Praxis (ohne Deckel, früher zugesagt) kommen im selben Paket.
 
+- **Weicher Praxis-Tagesdeckel** (Stefan, 2026-10-20, Empfehlung angenommen): kein harter Stopp, aber nach einer Schwelle Praxis-Zeit pro Tag (Vorschlag 90 min, Wert offen) eine ruhige Rückfrage "Noch Praxis oder schon Schauen?". Das weicht von "kein Deckel" für Einzelvideos ab und ist die Antwort auf die Hintertür-Frage. Schwelle zu erhöhen/abzuschalten = Lockerung (24 h). Keine Streaks, keine Beschämung.
+- **Einzelne Praxis-Videos: 24-h-Sperre wie bei Kanälen** (kein Sofort-Markieren, auch nicht bei Klassifikator-Übereinstimmung).
+- **Erkennung streng**: nur klare Treffer bekommen ein Thema, Zweifel landen unter "Weitere".
+- **Reihenfolge**: erst zen.5-Härtung, dann dieses Paket.
+
 ## 2. Datenmodell
 - Themenschlüssel: `fitness`, `yoga`, `sleep`, `meditation`, `breath` (Anzeige DE: Fitness, Yoga, Schlaf, Meditation, Atemarbeit).
 - Tabelle `praxis_theme` in der eigenen SQLite (`ZenClassCache`-Umfeld, noBackupFilesDir): `video_key`, `themes` (Bitmaske), `src` (`U` Nutzer, `R` Regeln), `ts`.
@@ -43,6 +48,7 @@ Praxis bleibt eine Einheit: kein Tageslimit, keine Pflichtpause, Start in laufen
 Regelwörterbuch-Tests mit Titelbeispielen DE/EN, Quellen-Reihenfolge (U vor R vor Standard), Bitmasken, Chip-Filter, Sperrlogik für Einzelvideos (Lockerung/Verschärfung), Migration ohne Themen-Daten.
 
 ## 8. Offene Punkte
+- Schwelle des weichen Praxis-Deckels (Vorschlag 90 min) und Wortlaut der Rückfrage (am Gerät abstimmen).
 - Wörterbuch-Inhalt und Schwellen (am Gerät/Eval kalibrieren).
 - Wo „Schlaf“ an den Sleep-Timer anknüpft (derzeit nicht verknüpft).
 - Reihenfolge der Chips (fest oder nach Nutzung).
