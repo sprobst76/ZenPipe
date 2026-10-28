@@ -15,7 +15,7 @@ import org.schabi.newpipe.zen.classify.ZenFeedDetails
 
 /** Bridges the NewPipe feed database and the Zen edition logic ([ZenFeedState]). */
 class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
-    private val state = ZenFeedState(Zen.store(context), Zen.log(context))
+    private val state = ZenFeedState(Zen.store(context), Zen.log(context), rhythm = Zen.countdown(context, "feed_edition"))
     private val appContext = context.applicationContext
     private val clock = Zen.clock(context)
 

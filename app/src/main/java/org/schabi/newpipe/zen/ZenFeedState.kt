@@ -15,7 +15,13 @@ import java.time.ZoneId
 class ZenFeedState(
     private val store: ZenKeyValueStore,
     private val log: ZenLog? = null,
-    private val zone: ZoneId = ZenZone.fixed(store)
+    private val zone: ZoneId = ZenZone.fixed(store),
+    /**
+     * Shrinks only with device uptime. The hourly interval is over only when the wall clock AND
+     * this countdown say so, so setting the clock forward (plus a restart) does not bring the next
+     * edition earlier. Null = wall clock only (tests, read-only uses).
+     */
+    private val rhythm: ZenCountdown? = null
 ) {
     data class Edition(
         val createdAt: Long,
@@ -59,6 +65,7 @@ class ZenFeedState(
             val previous = edition
             edition = createEdition(nowMillis, at, day, edition, rules, candidates)
             created = edition !== previous
+            if (created && edition != null) startRhythm(edition.createdAt, nowMillis)
         }
         val handled = handled()
         val open = edition?.picks?.filter { it.url !in handled } ?: emptyList()
@@ -66,7 +73,7 @@ class ZenFeedState(
         val next = when {
             edition == null -> null
             capNow -> ZenDay.nextDayStart(nowMillis, zone)
-            else -> maxOf(nowMillis, edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS)
+            else -> maxOf(nowMillis, edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS, nowMillis + rhythmRemaining(edition, nowMillis))
         }
         return View(edition, open, capNow, next, created)
     }
@@ -79,7 +86,29 @@ class ZenFeedState(
         if (edition.day != day) return true
         val counted = if (store.getString(KEY_DAY, null) == day) counted() else emptySet()
         val capReached = counted.size >= ZenSettings.dailyCap()
-        return !capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS
+        // look at the countdown first so that it also starts at the first look after an update
+        val uptimeLeft = rhythmRemaining(edition, nowMillis)
+        return !capReached && nowMillis >= edition.createdAt + ZenFeedPlanner.EDITION_INTERVAL_MS && uptimeLeft == 0L
+    }
+
+    /** Starts the uptime countdown for the edition created at [createdAt] (minus the time already passed). */
+    private fun startRhythm(createdAt: Long, nowMillis: Long) {
+        val cd = rhythm ?: return
+        cd.start(maxOf(0L, ZenFeedPlanner.EDITION_INTERVAL_MS - maxOf(0L, nowMillis - createdAt)))
+        store.put(KEY_RHYTHM_FOR to createdAt)
+    }
+
+    /**
+     * Uptime still to wait for [edition]. A missing countdown (state from before the countdown
+     * existed, or lost) is started once with the remaining wall-clock interval (fail-closed: it can
+     * never be shorter than that).
+     */
+    private fun rhythmRemaining(edition: Edition, nowMillis: Long): Long {
+        val cd = rhythm ?: return 0L
+        if (store.getLong(KEY_RHYTHM_FOR, -1) != edition.createdAt) {
+            startRhythm(edition.createdAt, nowMillis)
+        }
+        return cd.remainingMs()
     }
 
     private fun createEdition(
@@ -204,6 +233,7 @@ class ZenFeedState(
         private const val KEY_LEFTOVER = "feed_edition_leftover"
         private const val KEY_PICKS = "feed_edition_picks"
         private const val KEY_HANDLED = "feed_handled"
+        private const val KEY_RHYTHM_FOR = "feed_rhythm_for"
     }
 }
 

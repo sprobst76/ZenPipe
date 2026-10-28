@@ -107,6 +107,56 @@ class ZenFeedTest {
         assertEquals(now + 2 * h + 1000, v2.nextEditionMillis)
     }
 
+    private class Uptime(var mono: Long = 1000L, var boot: Int = 1)
+
+    private fun rhythmState(store: ZenKeyValueStore, up: Uptime) = ZenFeedState(
+        store,
+        null,
+        zone,
+        ZenCountdown(store, "feed_edition", { up.mono }, { up.boot })
+    )
+
+    @Test
+    fun `clock set forward plus restart does not bring the next edition earlier`() {
+        val store = MemoryZenStore()
+        val up = Uptime()
+        rhythmState(store, up).view(now, true) { many(40) }
+        // clock +30 min, but only 5 min of uptime in the new boot
+        up.boot = 2
+        up.mono = 5 * 60_000L
+        val s = rhythmState(store, up)
+        assertFalse(s.isDue(now + 2 * h))
+        assertEquals(now + 2 * h + 55 * 60_000L, s.view(now + 2 * h, true) { many(40) }.nextEditionMillis)
+        up.mono = 61 * 60_000L
+        assertTrue(s.isDue(now + 2 * h))
+    }
+
+    @Test
+    fun `normal 60 minutes make a new edition due`() {
+        val store = MemoryZenStore()
+        val up = Uptime()
+        val s = rhythmState(store, up)
+        s.view(now, true) { many(40) }
+        up.mono += 59 * 60_000L
+        assertFalse(s.isDue(now + 59 * 60_000L))
+        up.mono += 61_000L
+        assertFalse(s.isDue(now + 59 * 60_000L)) // wall clock not yet over
+        assertTrue(s.isDue(now + h + 1000))
+    }
+
+    @Test
+    fun `state without a countdown starts one with the wall clock rest`() {
+        val store = MemoryZenStore()
+        val up = Uptime()
+        state(store).view(now, true) { many(40) } // old version: no countdown
+        val s = rhythmState(store, up)
+        assertFalse(s.isDue(now + 20 * 60_000L)) // starts with 40 min rest here
+        up.mono += 39 * 60_000L
+        assertFalse(s.isDue(now + h + 1000)) // wall over, uptime not
+        up.mono += 2 * 60_000L
+        assertTrue(s.isDue(now + h + 1000))
+    }
+
     @Test
     fun `cap counts distinct videos, re-offered videos are free`() {
         val s = state()
