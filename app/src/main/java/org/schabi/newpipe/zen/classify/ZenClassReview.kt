@@ -52,6 +52,7 @@ class ZenClassReview(private val activity: Activity) {
 
     fun show() {
         Thread {
+            ZenClassExport.deleteStale(File(app.cacheDir, EXPORT_DIR), System.currentTimeMillis())
             val entries = cache.recent(REVIEW_LIMIT)
             val langs = languages(entries.map { it.key })
             langResults = langs

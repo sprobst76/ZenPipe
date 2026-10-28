@@ -25,6 +25,15 @@ object ZenClassExport {
     const val FORMAT = "zenpipe-classifications"
     const val FORMAT_VERSION = 1
 
+    /** Exports stay in the cache only this long (they contain real titles). */
+    const val MAX_FILE_AGE_MS = 60 * 60 * 1000L
+
+    /** Deletes files in [dir] that are older than [maxAgeMs]; returns how many were deleted. */
+    @JvmStatic
+    fun deleteStale(dir: java.io.File, nowMillis: Long, maxAgeMs: Long = MAX_FILE_AGE_MS): Int = dir.listFiles()?.count { f ->
+        f.isFile && nowMillis - f.lastModified() > maxAgeMs && f.delete()
+    } ?: 0
+
     /** Every key an exported video may have. */
     val VIDEO_FIELDS = setOf(
         "key", "service_id", "url", "title", "channel", "channel_url", "duration_s", "classified_at", "level", "model",

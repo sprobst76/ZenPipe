@@ -142,4 +142,31 @@ class ZenClassExportTest {
         assertEquals("x", ZenClassCache.previousTFor(entry("k", "D", prevT = "x"), "D", "e5s-1"))
         assertNull(ClassEntry.decodeSnapshot("broken"))
     }
+
+    @Test
+    fun `stale export files are deleted after one hour only`() {
+        val dir = java.nio.file.Files.createTempDirectory("zen_export").toFile()
+        try {
+            val now = 10_000_000_000L
+            val old = java.io.File(dir, "old.json").apply {
+                writeText("x")
+                setLastModified(now - ZenClassExport.MAX_FILE_AGE_MS - 1000)
+            }
+            val edge = java.io.File(dir, "edge.csv").apply {
+                writeText("x")
+                setLastModified(now - ZenClassExport.MAX_FILE_AGE_MS)
+            }
+            val fresh = java.io.File(dir, "fresh.json").apply {
+                writeText("x")
+                setLastModified(now - 60_000)
+            }
+            assertEquals(1, ZenClassExport.deleteStale(dir, now))
+            assertFalse(old.exists())
+            assertTrue(edge.exists())
+            assertTrue(fresh.exists())
+            assertEquals(0, ZenClassExport.deleteStale(java.io.File(dir, "missing"), now))
+        } finally {
+            dir.deleteRecursively()
+        }
+    }
 }
