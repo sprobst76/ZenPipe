@@ -79,6 +79,6 @@ Regelwörterbuch-Tests mit Titelbeispielen DE/EN, Quellen-Reihenfolge (U vor R v
 - [entschieden 2026-10-20, D67] Anzahl pro Thema 5: die ersten 4 in Tab-Reihenfolge + höchstens ein beliebtes (Verhältnis > 1, sonst leer).
 - [Standard 90 min umgesetzt, D69] Schwelle des weichen Praxis-Deckels; **Wortlaut der Rückfrage am Gerät mit Stefan abstimmen**.
 - [erste Fassung 2026-10-20, D66] Wörterbuch-Inhalt und Schwellen; nachkalibrieren mit Stefans Korrekturen aus dem Debug-Export.
-- Einzelvideos im Praxis-Tab nur mit Titel (kein Vorschaubild, kein Abruf); Standardthema in der Ersteinrichtung und im Kanal-Blatt nur nachträglich.
+- Einzelvideos im Praxis-Tab nur mit Titel (kein Vorschaubild, kein Abruf); Standardthema im Kanal-Blatt als Kästchen (dieselbe Komponente wie im Bestätigungsdialog, zen.6; Sperrlogik unverändert), in der Ersteinrichtung sofort, sonst nachträglich.
 - Wo „Schlaf“ an den Sleep-Timer anknüpft (derzeit nicht verknüpft).
 - Reihenfolge der Chips (fest oder nach Nutzung).
