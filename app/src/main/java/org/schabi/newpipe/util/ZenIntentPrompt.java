@@ -1,6 +1,7 @@
 package org.schabi.newpipe.util;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
@@ -8,6 +9,10 @@ import android.os.SystemClock;
 import androidx.appcompat.app.AlertDialog;
 
 import org.schabi.newpipe.R;
+import org.schabi.newpipe.zen.Zen;
+import org.schabi.newpipe.zen.ZenIntentGate;
+import org.schabi.newpipe.zen.ZenIntentResult;
+import org.schabi.newpipe.zen.ZenIntentStats;
 import org.schabi.newpipe.zen.ZenPlayback;
 import org.schabi.newpipe.zen.ZenSettings;
 
@@ -20,23 +25,21 @@ import org.schabi.newpipe.zen.ZenSettings;
  * Background/popup playback started from a shared link goes through {@link #gate}.
  */
 public final class ZenIntentPrompt {
-    private static final long MIN_INTERVAL_MS = 5 * 60 * 1000L;
-
-    // elapsedRealtime of the last CONFIRMED prompt, -1 if the latest prompt was not confirmed
-    private static long lastAskedAt = -1;
+    // confirmed state + 5 min cooldown (elapsedRealtime of the last CONFIRMED prompt)
+    private static final ZenIntentGate GATE = new ZenIntentGate(SystemClock::elapsedRealtime);
     private static long backgroundedAt = -1;
     private static AlertDialog currentDialog = null;
+    private static CountDownTimer countdown = null;
     private static Activity dialogActivity = null;
-    // ZenPipe: true once the user confirmed the latest prompt of this process. The feed edition
-    // is only built then, so "Close app" never uses up any of the daily cap.
-    private static boolean confirmed = false;
+    // The feed edition is only built once the user confirmed the latest prompt of this process
+    // (GATE.getConfirmed()), so "Close app" never uses up any of the daily cap.
     private static Runnable onConfirmedListener = null;
     // a shared-link playback that arrived while a prompt was already open waits for its answer
     private static Runnable pendingProceed = null;
     private static Runnable pendingDeclined = null;
 
     public static boolean isConfirmed() {
-        return confirmed && !isDialogShowing();
+        return GATE.getConfirmed() && !isDialogShowing();
     }
 
     // The dialog counts as showing only while its activity is alive (a recreated activity, e.g.
@@ -57,7 +60,7 @@ public final class ZenIntentPrompt {
     // App start: ask until the user has confirmed once in this process. A restart after
     // "Close app" (process still alive) asks again because nothing was confirmed.
     public static void showIfNeeded(final Activity activity) {
-        if (!confirmed && !isDialogShowing()) {
+        if (!GATE.getConfirmed() && !isDialogShowing()) {
             show(activity, activity::finishAffinity, null);
         }
     }
@@ -105,8 +108,7 @@ public final class ZenIntentPrompt {
         if (ZenPlayback.isPlaying()) {
             return true; // never interrupt ZenPipe's own running playback
         }
-        return confirmed && lastAskedAt >= 0
-                && SystemClock.elapsedRealtime() - lastAskedAt < MIN_INTERVAL_MS;
+        return GATE.isSkippable(false);
     }
 
     private static void showIfAllowed(final Activity activity) {
@@ -121,20 +123,19 @@ public final class ZenIntentPrompt {
 
     private static void show(final Activity activity, final Runnable onDeclined,
                              final Runnable onProceed) {
-        confirmed = false;
-        lastAskedAt = -1;
+        GATE.onAsked();
 
         final AlertDialog dialog = new AlertDialog.Builder(activity)
                 .setTitle(R.string.zen_intent_title)
                 .setMessage(R.string.zen_intent_message)
                 .setCancelable(false)
                 .setPositiveButton(R.string.zen_intent_continue, (d, which) -> {
-                    confirmed = true;
-                    lastAskedAt = SystemClock.elapsedRealtime();
+                    GATE.decide();
+                    record(activity, ZenIntentResult.CONTINUE, null);
                 })
                 .setNegativeButton(R.string.zen_intent_not_now, (d, which) -> {
-                    confirmed = false;
-                    lastAskedAt = -1;
+                    GATE.decline();
+                    record(activity, ZenIntentResult.NOT_NOW, null);
                     onDeclined.run();
                     if (pendingDeclined != null) {
                         final Runnable declined = pendingDeclined;
@@ -145,8 +146,11 @@ public final class ZenIntentPrompt {
                 })
                 .create();
         dialog.setOnDismissListener(d -> {
-            if (confirmed) {
-                lastAskedAt = SystemClock.elapsedRealtime();
+            if (countdown != null) {
+                countdown.cancel();
+            }
+            if (GATE.getConfirmed()) {
+                GATE.decide();
                 if (onProceed != null) {
                     onProceed.run();
                 }
@@ -168,7 +172,7 @@ public final class ZenIntentPrompt {
         final android.widget.Button continueButton =
                 dialog.getButton(DialogInterface.BUTTON_POSITIVE);
         continueButton.setEnabled(false);
-        new CountDownTimer(ZenSettings.intentWaitSeconds() * 1000L, 1000L) {
+        countdown = new CountDownTimer(ZenSettings.intentWaitSeconds() * 1000L, 1000L) {
             @Override
             public void onTick(final long millisUntilFinished) {
                 continueButton.setText(activity.getString(R.string.zen_intent_continue_wait,
@@ -181,5 +185,34 @@ public final class ZenIntentPrompt {
                 continueButton.setEnabled(true);
             }
         }.start();
+    }
+
+    // Counts the outcome per Zen day and logs it ("intent_prompt result=...").
+    private static void record(final Context context, final ZenIntentResult result,
+                               final String reason) {
+        try {
+            final Context app = context.getApplicationContext();
+            new ZenIntentStats(Zen.store(app), java.time.ZoneId.systemDefault())
+                    .record(result, System.currentTimeMillis());
+            Zen.log(app).add("intent_prompt", "result=" + result.getKey()
+                    + (reason != null ? " reason=" + reason : ""));
+        } catch (final RuntimeException e) {
+            android.util.Log.w("ZenIntentPrompt", "record", e);
+        }
+    }
+
+    /**
+     * A conscious decision made elsewhere (channel sheet "Just view") counts like "Continue":
+     * sets the cooldown and releases the feed edition, without a prompt of its own.
+     *
+     * @param context any context (used for the Zen state and log)
+     * @param reason  short origin tag for the log, e.g. {@code channel_sheet}
+     */
+    public static void acknowledge(final Context context, final String reason) {
+        GATE.decide();
+        record(context, ZenIntentResult.SHEET, reason);
+        if (onConfirmedListener != null) {
+            onConfirmedListener.run();
+        }
     }
 }
