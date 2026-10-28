@@ -1,0 +1,259 @@
+{
+  "repo": {
+    "timestamp": 1793168833000,
+    "version": 20002,
+    "name": "ZenPipe",
+    "icon": "zenpipe-icon.png",
+    "address": "https://sprobst76.github.io/ZenPipe/repo",
+    "description": "Official ZenPipe repository: a calm, mindful YouTube client for Android, a fork of NewPipe (not affiliated with TeamNewPipe). APKs are the signed builds from https://github.com/sprobst76/ZenPipe/releases."
+  },
+  "requests": {
+    "install": [],
+    "uninstall": []
+  },
+  "apps": [
+    {
+      "allowedAPKSigningKeys": [
+        "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518"
+      ],
+      "antiFeatures": [
+        "NonFreeNet"
+      ],
+      "authorName": "Stefan Probst-Schendzielorz",
+      "categories": [
+        "Multimedia",
+        "Internet"
+      ],
+      "changelog": "https://github.com/sprobst76/ZenPipe/releases",
+      "suggestedVersionCode": "1015006",
+      "issueTracker": "https://github.com/sprobst76/ZenPipe/issues",
+      "license": "GPL-3.0-or-later",
+      "sourceCode": "https://github.com/sprobst76/ZenPipe/tree/zen",
+      "webSite": "https://github.com/sprobst76/ZenPipe#readme",
+      "added": 1791872282000,
+      "packageName": "io.github.sprobst76.zenpipe",
+      "lastUpdated": 1793168756000,
+      "localized": {
+        "de-DE": {
+          "description": "ZenPipe ist ein ruhiger, datenschutzfreundlicher YouTube-Client f\u00fcr Android: Schau, was du dir vorgenommen hast, und h\u00f6re dann auf. Es ist ein Fork von NewPipe mit anderem Ziel: bewusstes Schauen statt endlosem Feed.\n\n<b>Was anders ist als bei NewPipe</b>\n\u2022 Ein Feed mit Ende: pro Ausgabe nur eine begrenzte Zahl ungesehener Videos deiner Abos, ein Tages-Deckel, kein endloses Scrollen.\n\u2022 Kein Autoplay, keine automatische Warteschlange, keine \u00e4hnlichen Videos, keine Kommentare, keine Shorts.\n\u2022 Eine Absichtsabfrage vor dem Schauen: ein kurzer Moment, um zu entscheiden, was du schauen willst und wann du fertig bist.\n\u2022 Eine Pflichtpause nach einem fr\u00fchen Abbruch, damit Herumspringen nicht zur Gewohnheit wird.\n\u2022 Zen-Einstellungen mit 24-Stunden-Sperre: Lockern der Regeln dauert einen Tag, Versch\u00e4rfen gilt sofort.\n\u2022 Alles bleibt auf deinem Ger\u00e4t: kein Konto, keine Analyse, keine automatisch gesendeten Absturzberichte.\n\n<b>Was von NewPipe bleibt</b>\n\u2022 Keine Google-Dienste und keine YouTube-API: Die App liest die Webseite aus und funktioniert daher ohne Google Play Services.\n\u2022 Abos ohne Konto, lokale Playlists, Hintergrund- und Popup-Wiedergabe, Downloads.\n\u2022 Freie Software unter der GPLv3.\n\n<b>Keine Verbindung zu NewPipe</b>\nZenPipe ist ein unabh\u00e4ngiger Fork von NewPipe (https://newpipe.net) und steht in keiner Verbindung zu TeamNewPipe und wird von diesem nicht unterst\u00fctzt. ZenPipe l\u00e4sst sich neben NewPipe installieren und nutzt weder dessen Update- noch dessen Absturzbericht-Server.\n\nQuellcode und Fehlermeldungen: https://github.com/sprobst76/ZenPipe\n",
+          "icon": "icon_MLjyrxBsOady_9KO_aFmq4SPRtD5wUnod994kXO9RSY=.png",
+          "name": "ZenPipe",
+          "summary": "Bewusst YouTube schauen: Feed mit Ende, kein Autoplay. Ein Fork von NewPipe.",
+          "whatsNew": "Sechste ZenPipe-Entwicklungsversion: Feinschliff.\n\u2022 Kanal teilen: Themen-K\u00e4stchen (Standardthema) beim Markieren als Praxis\n\u2022 Die t\u00e4gliche Praxis-R\u00fcckfrage zeigt ihren Titel nur noch einmal\n\u2022 Einheitlicher Wortlaut zum Markieren eines Praxis-Videos\n\u2022 Der Media-Browser (Android Auto, Assistent) ist abgeschaltet\n\u2022 Verlauf und Abos geh\u00f6ren nicht mehr zur Google-Cloud-Sicherung (Android 12+; die \u00dcbertragung von Ger\u00e4t zu Ger\u00e4t bleibt)\n"
+        },
+        "en-US": {
+          "description": "ZenPipe is a calm, privacy-friendly YouTube client for Android: watch what you decided to watch, then stop. It is a fork of NewPipe with a different goal: mindful viewing instead of an endless feed.\n\n<b>What is different from NewPipe</b>\n\u2022 A feed with an end: a limited number of unseen videos from your subscriptions per edition, a daily cap, no infinite scrolling.\n\u2022 No autoplay, no auto-queue, no related videos, no comments, no Shorts.\n\u2022 An intention check before you start watching: a short pause to decide what you want to watch and when you are done.\n\u2022 A mandatory break after you abort a video early, so skipping around does not become a habit.\n\u2022 Zen settings that are protected by a 24-hour lock: loosening the rules takes a day, tightening them is immediate.\n\u2022 Everything stays on your device: no account, no analytics, no crash reports sent automatically.\n\n<b>What you keep from NewPipe</b>\n\u2022 No Google services and no YouTube API: the app parses the website, so it works without Google Play Services.\n\u2022 Subscriptions without an account, local playlists, background and popup playback, downloads.\n\u2022 Free software under the GPLv3.\n\n<b>Not affiliated</b>\nZenPipe is an independent fork of NewPipe (https://newpipe.net) and is not affiliated with or endorsed by TeamNewPipe. ZenPipe installs next to NewPipe and does not use NewPipe's update or crash-report servers.\n\nSource code and issues: https://github.com/sprobst76/ZenPipe\n",
+          "icon": "icon_MLjyrxBsOady_9KO_aFmq4SPRtD5wUnod994kXO9RSY=.png",
+          "name": "ZenPipe",
+          "summary": "Mindful YouTube viewing: a feed with an end, no autoplay. A fork of NewPipe.",
+          "whatsNew": "Sixth ZenPipe development release: polish.\n\u2022 Share a channel: theme checkboxes (default theme) when marking it as practice\n\u2022 The daily practice question shows its title only once\n\u2022 One wording for marking a practice video\n\u2022 The media browser (Android Auto, Assistant) is switched off\n\u2022 Viewing history and subscriptions are no longer part of the Google cloud backup (Android 12+; device-to-device transfer stays)\n"
+        }
+      }
+    }
+  ],
+  "packages": {
+    "io.github.sprobst76.zenpipe": [
+      {
+        "added": 1793168756000,
+        "apkName": "ZenPipe_v0.1.0-zen.6.apk",
+        "hash": "ee7e2cc9a49226702aa90c30cec06479426db67bb1d1c096ffd8586696aa25de",
+        "hashType": "sha256",
+        "minSdkVersion": 23,
+        "nativecode": [
+          "arm64-v8a"
+        ],
+        "packageName": "io.github.sprobst76.zenpipe",
+        "sig": "1d853d17c454285de5ed2ff7e23ad60c",
+        "signer": "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518",
+        "size": 20142722,
+        "targetSdkVersion": 35,
+        "uses-permission": [
+          [
+            "android.permission.INTERNET",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            null
+          ]
+        ],
+        "versionCode": 1015006,
+        "versionName": "0.1.0-zen.6"
+      },
+      {
+        "added": 1793163982000,
+        "apkName": "ZenPipe_v0.1.0-zen.5.apk",
+        "hash": "e0b31b472a41dd25e28463ba2353fb6d0832091b871aff017c5d1cdc53501119",
+        "hashType": "sha256",
+        "minSdkVersion": 23,
+        "nativecode": [
+          "arm64-v8a"
+        ],
+        "packageName": "io.github.sprobst76.zenpipe",
+        "sig": "1d853d17c454285de5ed2ff7e23ad60c",
+        "signer": "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518",
+        "size": 20141864,
+        "targetSdkVersion": 35,
+        "uses-permission": [
+          [
+            "android.permission.INTERNET",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            null
+          ]
+        ],
+        "versionCode": 1015005,
+        "versionName": "0.1.0-zen.5"
+      },
+      {
+        "added": 1791957193000,
+        "apkName": "ZenPipe_v0.1.0-zen.4.apk",
+        "hash": "981c1a89322f45c826ef85c96e79b80baa5b692c1c7347c0ef7c5a275fba2e50",
+        "hashType": "sha256",
+        "minSdkVersion": 23,
+        "nativecode": [
+          "arm64-v8a"
+        ],
+        "packageName": "io.github.sprobst76.zenpipe",
+        "sig": "1d853d17c454285de5ed2ff7e23ad60c",
+        "signer": "6e25f0faa57bd9f57ad44e564d7eabd4fdb292c3f04165c33a394e0ac6089518",
+        "size": 20110172,
+        "targetSdkVersion": 35,
+        "uses-permission": [
+          [
+            "android.permission.INTERNET",
+            null
+          ],
+          [
+            "android.permission.WAKE_LOCK",
+            null
+          ],
+          [
+            "android.permission.ACCESS_NETWORK_STATE",
+            null
+          ],
+          [
+            "android.permission.WRITE_EXTERNAL_STORAGE",
+            null
+          ],
+          [
+            "android.permission.SYSTEM_ALERT_WINDOW",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+            null
+          ],
+          [
+            "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            null
+          ],
+          [
+            "android.permission.POST_NOTIFICATIONS",
+            null
+          ],
+          [
+            "android.permission.RECEIVE_BOOT_COMPLETED",
+            null
+          ],
+          [
+            "io.github.sprobst76.zenpipe.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION",
+            null
+          ],
+          [
+            "android.permission.READ_EXTERNAL_STORAGE",
+            null
+          ]
+        ],
+        "versionCode": 1015004,
+        "versionName": "0.1.0-zen.4"
+      }
+    ]
+  }
+}
