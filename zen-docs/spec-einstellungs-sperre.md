@@ -58,7 +58,7 @@ werden. Entscheidungen F7-F9 (2026-10-12) sind eingearbeitet. **Status: umgesetz
 - Die Restdauer läuft über `ZenCountdown` (nur mit Gerätelaufzeit, wanduhrunabhängig). Uhr vor-/zurückstellen und Neustart ändern
   sie nicht (fail-closed; Ausschaltzeit zählt nicht).
 - Realistische Grenzen: Wer App-Daten löscht oder neu installiert, setzt den Zustand zurück (Ein-Personen-Fork, vgl.
-  `research-achtsamer-konsum.md`); das wird nicht verhindert. **Das Zen-Protokoll ist nicht Teil des Exports** (der Export-Ausschluss
+  `research-achtsamer-konsum.md`); das wird nicht verhindert. [überholt 2026-10-28, D71: „Daten löschen/Neuinstallation + Wiederherstellung der NewPipe-Daten“ wird erkannt (Daten beim ersten Start, Import in der Einrichtung, fremder Install-Marker) und beendet die Ersteinrichtung mit 24-h-Sperre; nur der Neuanfang ohne Import bleibt frei.] **Das Zen-Protokoll ist nicht Teil des Exports** (der Export-Ausschluss
   von `zen_state` ist Absicht, sonst wäre der Import ein Bypass). Einen „Zen wurde zurückgesetzt“-Hinweis gibt es nur, wenn eine
   Datenbank mit Zen-Markern **importiert** wird, nicht nach dem Löschen aller App-Daten (dann ist auch der Marker weg).
 - Debug-Builds sind per `run-as` editierbar (Entwicklerumweg, akzeptiert).

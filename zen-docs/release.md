@@ -196,6 +196,17 @@ AppVerifier or `apksigner verify --print-certs`); afterwards Android refuses upd
   all channels share one signature. Needs build-tools 34 apksigner, no `baseline.prof`
   differences, builds from a clean tag (see `research-name-und-offene-fragen.md` §3).
 
+## Merging upstream
+
+After `git checkout zen && git rebase dev` always run, from the repository root:
+
+    zen-docs/tools/check-upstream-hooks.sh        # "OK n/n", or one line per missing hook (exit 1)
+    zen-docs/tools/check-upstream-hooks.sh --list # show the hook table
+
+Hooks live in `zen-docs/tools/upstream-hooks.tsv` (file, fixed grep string, description). A new Zen hook in an upstream file
+means a new TSV line (decision D76). The script also warns about upstream files with a "ZenPipe:" comment that have no TSV
+entry; Zen-owned files outside `zen/` (not named `Zen*`/`zen_*`) are exempted with a line `#own<TAB>path`.
+
 ## Release checklist
 
 1. Bump `ZENPIPE_BUILD` / `ZENPIPE_VERSION_NAME`, add changelogs (en-US, de-DE).

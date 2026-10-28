@@ -1,5 +1,7 @@
 # Spec (Entwurf): Absichtsabfrage, die zum Nicht-Schauen einlädt
 
+> **Stand 2026-10-28:** AP 0 (Ergebniszähler + Log) und AP 1 (Kanal-Blatt „Nur ansehen“ zählt als Bestätigung) sind umgesetzt (D72, rules.md „Absichtsabfrage“); AP 2–8 offen.
+
 **Worum geht es:** Neugestaltung der Absichtsabfrage („Was willst du schauen?“), damit sie klar ist und ruhig, ehrlich und ohne
 Schuldgefühl dazu anregt, ZenPipe gerade **nicht** zu nutzen: eigene Tageszahlen, eine Praxis-Alternative, wechselnde Fragen,
 gewichtete Knöpfe (Schritt 1); eigene Gegenmittel und Kontextton (Schritt 2).
@@ -440,8 +442,8 @@ Keine Upstream-Datei außer den bestehenden Hook-Stellen (`MainActivity`, `Route
 ### Arbeitspakete (klein, je ein Commit)
 | AP | Inhalt | Aufwand |
 |---|---|---|
-| 0 | Ergebniszähler + Log (`ia_day_*`, `intent_prompt`) am **heutigen** Dialog, damit ein Ausgangswert entsteht | S |
-| 1 | Kanal-Blatt: `acknowledge` + `zen_intent_decided` | S |
+| 0 | Ergebniszähler + Log (`ia_day_*`, `intent_prompt`) am **heutigen** Dialog, damit ein Ausgangswert entsteht | S – **umgesetzt 2026-10-28** (`f6f4ab375`, D72) |
+| 1 | Kanal-Blatt: `acknowledge` + `zen_intent_decided` | S – **umgesetzt 2026-10-28** (`8b328afe0`, D72; Gerätetest offen) |
 | 2 | Neues Layout, feste Texte, Knopfgewichtung, Barrierefreiheit | S–M |
 | 3 | Fragen-Tabelle, Generator, Rotation (`ZenIntentContent`) | S |
 | 4 | Zahlenzeile + Zähler `ia_in_*`, `ia_recent`, `ia_vid_*` | S–M |

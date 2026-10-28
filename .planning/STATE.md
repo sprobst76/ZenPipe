@@ -198,3 +198,28 @@ Vorgehen: Praxis-Playlist „One-Minute Meditations with NYU …“ per Long-Pre
 - Verifiziert: `assembleDebug runCheckstyle testDebugUnitTest` grün (432 Tests). **Nicht am Gerät geprüft**: auf dem Defy lag die ganze Sitzung die System-Abfrage „USB-Debugging zulassen?“ (`UsbDebuggingActivity`) im Vordergrund; sie wurde bewusst nicht bedient, die Debug-App wurde nicht installiert, keine App-Daten angefasst.
 - Gerät-TODO (nach Freigabe): Migration `zen_class_cache.db` (alte Datei öffnen, `pxt`/`praxis_theme` angelegt, Prüfansicht unverändert), Chips hell/dunkel DE/EN, Themen an Beispielen (Yoga-/Atem-/Schlaf-Kanal), Bestätigungsdialog mit Themen-Kästchen, Einstellungen-Eintrag „Thema: …“, Einzelvideo per Long-Press und Titel-Long-Press (ausstehend → nach `cd_settings_lock_rem` verkürzt aktiv, Start in Pflichtpause), Rückfrage des Deckels (Schwelle per `run-as` auf 30 und `wt_<Tag>` Praxis-Minuten erhöhen; Hintergrund-Start-Verhalten), Export mit `practice_*`.
 - Offen (Stefan): Wortlaut der Rückfrage; Standardthema auch in Ersteinrichtung/Kanal-Blatt im selben Schritt?; Vorschaubild für Einzelvideos (bräuchte einen Abruf); Wörterbuch nachkalibrieren mit Korrekturen.
+
+## Stand 2026-10-28: vier Pakete integriert auf Branch `zen-integration` (7 Commits `zen:` seit `c332e9ad6`, Entscheidungen D71–D78)
+- **P1 Reset-Schutz** (`6b5d10964`, D71): Wiederherstellung beendet die freie Ersteinrichtung (`ZenRestoreGuard`/`ZenRestore`, Hook `BackupRestoreSettingsFragment.finishImport`).
+- **P2a Absichtsabfrage AP 0/1** (`f6f4ab375`, `8b328afe0`, D72): Ergebniszähler `ia_*`, Kanal-Blatt „Nur ansehen“ = Bestätigung.
+- **P5 Restlücken** (`dc2844c4f`, `1dbcd95e5`, `eef969838`, D73–D75): Feed-Takt an Gerätelaufzeit, Media-Browser ohne Verlauf/Shorts (`mediaBrowserEnabled`), Export-Dateien höchstens 1 h.
+- **P7 Hook-Prüfung** (`d06c3bec3`, D76): `zen-docs/tools/check-upstream-hooks.sh` nach jedem `git rebase dev`; TSV um den Hook `BackupRestoreSettingsFragment.java` ergänzt.
+- Verifiziert: nur Doku-Zusammenführung in diesem Schritt (Hook-Skript lief); Build/Tests liefen in den Paketen. **Nicht am Gerät geprüft.**
+- **Gerätetests offen (TODO, Debug-Build Defy; Zen-Zustand vorher zurücksetzen: `zr_*`, `ia_*`, `cd_feed_edition_*`, `feed_rhythm_for`, zusätzlich `zs_*`, `zp_*`, `cd_settings_*`, `px_time`, ggf. `zen_install_marker` in den Default-Prefs):**
+  1. Reset-Schutz frisch: `pm clear io.github.sprobst76.zenpipe.debug`, App starten, Einstellungen > Zen: Ersteinrichtung frei, kein Hinweis.
+  2. Reset-Schutz Import in der Einrichtung: „Pause aus“ übernehmen, dann Einstellungen > Sichern > Importieren (NewPipe-ZIP mit Abos) -> nach Neustart keine Ersteinrichtung, Hinweis „Wiederherstellung erkannt“, Sperre aktiv, „Pause aus“ als ausstehend gelistet; Log `settings_restore_detected reason=import`.
+  3. Reset-Schutz DB: `pm clear`, `newpipe.db` mit Abos per `run-as … sh -c 'cat > databases/newpipe.db'` einspielen (App vorher nicht gestartet), App starten -> nach ~1 s keine Einrichtung, `reason=data`.
+  4. Reset-Schutz Abonnieren: `pm clear`, starten, Kanal abonnieren, App neu starten -> Einrichtung bleibt frei.
+  5. Reset-Schutz Einstellungs-Import (JSON-Prefs) aus anderer Installation nach `pm clear` -> `reason=import` (beim Neustart kein zweiter Eintrag).
+  6. Absichtsabfrage Kanal-Link, KALTER Prozess (`am force-stop`): Blatt -> „Nur ansehen“ -> Kanal ohne Abfrage; Feed danach mit Ausgabe.
+  7. Dasselbe bei WARMEM Prozess (< 5 min bzw. > 5 min im Hintergrund): keine Abfrage; nach > 5 min ohne Wiedergabe beim nächsten Einstieg wieder Abfrage.
+  8. Blatt -> „Doch nicht“/Zurück: keine Bestätigung, nächster App-Start fragt wie bisher.
+  9. `run-as … cat shared_prefs/zen_state.xml`: `ia_day_<Tag>` und `ia_days` zählen mit; Log `intent_prompt result=continue|not_now|sheet reason=channel_sheet`.
+  10. Abfrage offen lassen/schließen: kein Absturz durch abgebrochenen Countdown.
+  11. Feed-Takt: Ausgabe erzeugen; Uhr +2 h stellen (Auto-Zeit aus), Neustart -> weiterhin keine neue Ausgabe, „nächste Ausgabe“ nicht verkürzt; nach ~60 min Laufzeit (oder `cd_feed_edition_rem` per `run-as` verkürzen, App vorher `am force-stop`) neue Ausgabe.
+  12. Update-Pfad: `cd_feed_edition_*` und `feed_rhythm_for` entfernen -> Countdown startet mit dem Wanduhr-Rest.
+  13. Media-Browser (nur falls Android-Auto/Test-Client verfügbar): Wurzel zeigt nur Lesezeichen, Suche liefert keine Shorts.
+  14. Export: Prüfansicht exportieren, Datei in `cache/zen_export` per `run-as` mit `touch -d` altern, Prüfansicht öffnen -> Datei weg.
+- **Offen (Stefan):** D77 Media-Browser ganz abschalten (Empfehlung: abschalten, sobald Android Auto/Assistant nicht genutzt wird); D78 `newpipe.db` aus dem Google-Cloud-Backup ausnehmen (Entwurf in `decisions.md`, Empfehlung: nur `zen_data_extraction_rules.xml` ab Android 12 ändern; Wirkung auf D71 beachten); D71/D72 als Annahmen bestätigen (Reset-Schutz-Restrisiko Neuanfang ohne Import; Kanal-Weg ohne 5-s-Wartezeit).
+- **Restlücken (nicht gebaut):** Zen-Tag-Wechsel/Date-Header-Vergleich und Deckel/„Später“ hängen an der Wanduhr; `MediaBrowserPlaybackPreparer` kennt die History-Media-ID noch; eigener `<cache-path>` für `zen_export/` ungeprüft.
+- Nächste Absichtsabfrage-Pakete: AP 2–8 (`zen-docs/spec-absichtsabfrage-motivation.md`).

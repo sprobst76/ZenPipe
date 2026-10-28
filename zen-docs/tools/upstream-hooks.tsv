@@ -154,3 +154,4 @@ app/src/main/res/values/colors.xml	name="light_settings_accent_color">#3E6A5E	ca
 app/src/main/res/values/colors.xml	name="dark_settings_accent_color">#9DBFB2	calm palette (dark accent)
 app/src/main/res/values/colors.xml	name="ic_launcher_background">#2E4A45	launcher background
 app/src/main/res/drawable/splash_foreground.xml	ZenPipe: open ring (enso)	splash ring
+app/src/main/java/org/schabi/newpipe/settings/BackupRestoreSettingsFragment.java	ZenRestore.onImportFinished(	import ends the free first-time setup (reset protection)

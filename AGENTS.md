@@ -36,3 +36,4 @@ Neue Nutzerentscheidungen als Eintrag in `zen-docs/decisions.md`; überholte Spe
 ## Git-Workflow
 - Fork von `TeamNewPipe/NewPipe`; Remote `upstream`. Branch `dev` folgt Upstream unverändert, `zen` trägt unsere Patches (ein klarer Commit pro Änderung, Präfix `zen:`).
 - Upstream einspielen: `git fetch upstream && git checkout dev && git merge --ff-only upstream/dev`, dann `git checkout zen && git rebase dev`.
+- Nach jedem `git rebase dev` `zen-docs/tools/check-upstream-hooks.sh` laufen lassen ("OK n/n", sonst fehlt ein Hook); neuer Hook in einer Upstream-Datei = neue Zeile in `zen-docs/tools/upstream-hooks.tsv` (Details `zen-docs/release.md`).

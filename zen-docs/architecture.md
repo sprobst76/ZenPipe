@@ -35,6 +35,7 @@ Pfade relativ zu `app/src/main/java/org/schabi/newpipe/` (kurz `zen/` = Paket `o
 | `zen/ZenClock.kt` | `ZenClock` (Vertrauenszeit: Wanduhr gegen `elapsedRealtime`, Toleranz 2 min, Boot-Zähler) und `ZenCountdown` (Fristen nur auf Gerätelaufzeit), `ZenUptime` (aufsteigender Laufzeit-Zähler für Wartezeiten je Eintrag, z. B. neue Praxis-Playlist-Videos) |
 | `zen/ZenDay.kt` | Zen-Tag, Wechsel 04:00 (`ROLLOVER_HOUR`); `ZenZone` (feste Zeitzone) liegt in `zen/ZenFeedState.kt` |
 | `zen/ZenLog.kt` | Zen-Protokoll (Ereignisse wie `pause_start`, `settings_change`), nicht im Export |
+| `zen/ZenRestoreGuard.kt` | `ZenRestoreGuard` (reine Logik, Schlüssel `zr_install_id`, `zr_probe`, `zr_notice`) und `ZenRestore` (Android-Seite: Install-Marker `zen_install_marker` in den Default-Prefs, DB-Probe im Hintergrund beim ersten Start, `onAppStart`, `onImportFinished`) – Reset-Schutz D71; dazu `ZenSettingsLock.endSetupByRestore/isSetupUntouched`, `ZenKeyValueStore.flush` (leeres commit vor dem ProcessPhoenix-Neustart) |
 | `zen/ZenPlayback.kt` | „läuft gerade eigene Wiedergabe?“ (für Absichtsabfrage, Thread-Zahl des Klassifikators, Ende der Ersteinrichtung) |
 
 **Invarianten:** Zen-Zustand nur in der Prefs-Datei `zen_state` (ausgeschlossen von Export/Import/Reset/Auto-Backup über
@@ -47,6 +48,8 @@ Countdowns sinken nur mit Gerätelaufzeit (fail-closed über Neustart). Regeln: 
 (`showIfNeeded`), `onStart/onStop` (Rückkehr aus dem Hintergrund), `handleIntent` (externe Links) und
 `RouterActivity` (`gate(...)` vor Wiedergabe). Die Feed-Ausgabe wartet auf die Bestätigung (`FeedFragment` →
 `setOnConfirmedListener`). Regeln: rules.md „Absichtsabfrage“.
+
+`zen/ZenIntentStats.kt`: `ZenIntentStats` (Ergebniszähler `ia_day_<Tag>`/`ia_days` über `ZenKeyValueStore`), `ZenIntentGate` (confirmed + Cooldown, injizierbare Uhr), `ZenIntentResult`. `ZenIntentPrompt` hält das Gate und hat `acknowledge(Context, reason)` und `record(...)`; der CountDownTimer wird beim Schließen abgebrochen. `ZenChannelImport.onView` ruft `acknowledge("channel_sheet")` und setzt das Intent-Extra `zen_intent_decided`, das `MainActivity.showIfNeeded` (onCreate) und `onExternalLink` (Case CHANNEL) prüfen (je 1 Bedingung).
 
 ## Feed als Ausgabe
 
@@ -158,9 +161,16 @@ der Prüfansicht ändern nichts an Feed/Gewicht/Sperre. Regeln: rules.md „Inha
 
 | Datei | Zweck |
 |---|---|
-| `zen/ZenFeatures.kt` | Schalter `downloadsEnabled`, `popupPlayerEnabled`, `minimizeOnExitEnabled`, `upstreamAnnouncementsEnabled` (alle `false`), `effectiveOpenAction`. Tabelle aller Einstiege: rules.md „Funktionen“ |
+| `zen/ZenFeatures.kt` | Schalter `downloadsEnabled`, `popupPlayerEnabled`, `minimizeOnExitEnabled`, `upstreamAnnouncementsEnabled` (alle `false`), `mediaBrowserEnabled` (`true`, D74/D77), `effectiveOpenAction`. Tabelle aller Einstiege: rules.md „Funktionen“ |
+| `zen/ZenMediaBrowser.kt` | `withoutShorts` für Media-Browser-Suchergebnisse; Hook in `MediaBrowserImpl.onSearch/onGetRoot` (`ZenFeatures.mediaBrowserEnabled`), Verlauf-Zweig entfernt |
 | `zen/ZenDesign.kt` | Einmalige Migration ruhiger Defaults (Benachrichtigung nicht eingefärbt, `design_prefs_version`) |
 | `res/values/zen_colors.xml`, `res/color/zen_text_*` | Palette „Salbei“ (Werte: rules.md „Darstellung“, [spec-design.md](spec-design.md)) |
+
+**Feed-Takt:** `ZenFeedState(rhythm: ZenCountdown?)`; `ZenFeedProvider` übergibt `Zen.countdown(ctx, "feed_edition")` (D73). **Export:** `ZenClassExport.deleteStale`, Aufruf in `ZenClassReview.show()` (D75).
+
+**zen_state-Schlüssel (neu 2026-10-28):** `zr_install_id` (String, Spiegel in Default-Prefs `zen_install_marker`), `zr_probe` (Int 1, DB-Probe steht aus), `zr_notice` (Int 1, Hinweis „Wiederherstellung erkannt“); `ia_day_<yyyy-MM-dd>` (String `continue=2,not_now=1,sheet=1`), `ia_days` (Tagesliste, max. 30); `feed_rhythm_for` (Long, `createdAt` der Ausgabe, für die der Countdown läuft), `cd_feed_edition_rem/_mono/_boot`. Zurücksetzen bei Gerätetests: `zr_*`, `ia_*`, `cd_feed_edition_*`, `feed_rhythm_for` (und ggf. `zen_install_marker` in den Default-Prefs). **Log-Typen:** `settings_restore_detected`, `settings_restore_pending`, `intent_prompt result=…`.
+
+**Hook-Prüfung:** `zen-docs/tools/check-upstream-hooks.sh` gegen `upstream-hooks.tsv` (D76).
 
 Weitere Zen-Anpassungen ohne eigene Datei: Shorts/Live-Filter (`InfoListAdapter.addInfoItemList`, `ChannelTabHelper`,
 `SearchFragment.zenWithoutShorts`, RSS-Schnellmodus aus in `FeedLoadManager`), Autoplay/Auto-Queue (`PlayerHelper`), Related/Kommentare
@@ -171,8 +181,8 @@ und reduzierte Details (`VideoDetailFragment`), Drawer (`MainActivity`), Kiosk-T
 
 | Upstream-Datei | Zen-Hook |
 |---|---|
-| `App.kt` (`onCreate`) | `ZenSettings.init`, `ZenPause.recover`, `ZenDesign.migrate`, `ZenClassifyWorker.enqueueIfInstalled` |
-| `MainActivity.java` | `ZenIntentPrompt.showIfNeeded/onActivityStarted/onActivityStopped/onExternalLink`, Drawer (Praxis, Suche), `ZenFeatures.upstreamAnnouncementsEnabled` |
+| `App.kt` (`onCreate`) | `ZenSettings.init` (ruft `ZenRestore.onAppStart`), `ZenPause.recover`, `ZenDesign.migrate`, `ZenClassifyWorker.enqueueIfInstalled` |
+| `MainActivity.java` | `ZenIntentPrompt.showIfNeeded/onActivityStarted/onActivityStopped/onExternalLink` (prüfen `zen_intent_decided`), Drawer (Praxis, Suche), `ZenFeatures.upstreamAnnouncementsEnabled` |
 | `RouterActivity.java` | `ZenChannelImport.handles/show` (Kanal-Links), `ZenFeatures` (Auswahl ohne Pop-up/Download, `effectiveOpenAction`), `ZenIntentPrompt.gate`, Shorts-Links blockiert |
 | `player/Player.java` | `initPlayer` (`setPauseAtEndOfMediaItems`), `zenOnItemEnd`, `ZenPause.onPlaying/setAudio/onProgress/onStreamInfo/onClosed/onItem/onCompleted`, `ZenPlayback.setPlaying`, `ZenSleep.bind` |
 | `player/PlayerService.java` | Sicherheitsnetz `ZenPause.blockForService` (`ZenPauseRules.intentStartsPlayback`), verwirft POPUP-Intents |
@@ -186,6 +196,8 @@ und reduzierte Details (`VideoDetailFragment`), Drawer (`MainActivity`), Kiosk-T
 | `info_list/InfoListAdapter.java`, `fragments/list/search/SearchFragment.java` | Listenende (15 Einträge / 2 Seiten), Shorts-Filter |
 | `info_list/dialog/InfoItemDialog.java`, `QueueItemMenuUtil.java`, `util/PlayButtonHelper.kt`, `settings/*`, `download/*` | `ZenFeatures`-Prüfungen; `InfoItemDialog.addDefaultEndEntries` + `StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO` („Praxis-Video…“) |
 | `AndroidManifest.xml` | `ZenPauseActivity`, `ZenPraxisCapActivity` (Dialog-Theme), Telemetrie-Provider entfernt |
+| `settings/BackupRestoreSettingsFragment.java` (`finishImport`) | `ZenRestore.onImportFinished` (1 Zeile): Import beendet die Ersteinrichtung |
+| `player/mediabrowser/MediaBrowserImpl.kt` | `ZenFeatures.mediaBrowserEnabled`, `ZenMediaBrowser.withoutShorts`, Verlauf-Zweig entfernt |
 | `database/feed/dao/FeedGroupDAO.kt` | `getZenGroupRanks` |
 
 ## Release, CI, F-Droid
