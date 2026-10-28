@@ -32,6 +32,7 @@ import org.schabi.newpipe.local.subscription.SubscriptionManager
 import org.schabi.newpipe.util.ExtractorHelper
 import org.schabi.newpipe.util.NavigationHelper
 import org.schabi.newpipe.util.ThemeHelper
+import org.schabi.newpipe.util.ZenIntentPrompt
 import org.schabi.newpipe.util.image.CoilHelper
 import org.schabi.newpipe.zen.classify.ZenChannelProfile
 import org.schabi.newpipe.zen.classify.ZenClassWhy
@@ -529,7 +530,11 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
                 null
             }
             activity.runOnUiThread {
-                if (intent != null && !activity.isFinishing) activity.startActivity(intent)
+                if (intent != null && !activity.isFinishing) {
+                    // "Just view" is a conscious decision: no second prompt right after it
+                    ZenIntentPrompt.acknowledge(activity, "channel_sheet")
+                    activity.startActivity(intent.putExtra(EXTRA_INTENT_DECIDED, true))
+                }
                 if (isAdded) dismissAllowingStateLoss()
             }
         }.start()
@@ -537,6 +542,7 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
 
     companion object {
         const val FRAGMENT_TAG = "zen_channel_import"
+        const val EXTRA_INTENT_DECIDED = "zen_intent_decided"
         private const val WAIT_TICK_MS = 250L
     }
 }

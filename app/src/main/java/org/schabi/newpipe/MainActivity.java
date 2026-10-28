@@ -210,7 +210,9 @@ public class MainActivity extends AppCompatActivity {
         MigrationManager.showUserInfoIfPresent(this);
 
         // ZenPipe: ask for the intention once per app start
-        org.schabi.newpipe.util.ZenIntentPrompt.showIfNeeded(this);
+        if (!getIntent().getBooleanExtra("zen_intent_decided", false)) {
+            org.schabi.newpipe.util.ZenIntentPrompt.showIfNeeded(this);
+        }
     }
 
     @Override
@@ -826,7 +828,9 @@ public class MainActivity extends AppCompatActivity {
                                 serviceId, url, title, playQueue, switchingPlayers);
                         break;
                     case CHANNEL:
-                        org.schabi.newpipe.util.ZenIntentPrompt.onExternalLink(this);
+                        if (!intent.getBooleanExtra("zen_intent_decided", false)) {
+                            org.schabi.newpipe.util.ZenIntentPrompt.onExternalLink(this);
+                        }
                         NavigationHelper.openChannelFragment(getSupportFragmentManager(),
                                 serviceId, url, title);
                         break;
