@@ -1,0 +1,156 @@
+app/src/main/AndroidManifest.xml	android:name=".zen.ZenPauseActivity"	mandatory pause screen activity
+app/src/main/AndroidManifest.xml	android:name=".zen.ZenPraxisCapActivity"	daily practice cap dialog activity
+app/src/main/AndroidManifest.xml	ai.onnxruntime.TelemetryInitializer	ONNX telemetry provider removed
+app/src/main/AndroidManifest.xml	android:dataExtractionRules="@xml/zen_data_extraction_rules"	backup rules (Android 12+)
+app/src/main/AndroidManifest.xml	android:fullBackupContent="@xml/zen_backup_rules"	backup rules (legacy)
+app/src/main/AndroidManifest.xml	tools:overrideLibrary="ai.onnxruntime"	ONNX Runtime below minSdk
+app/src/main/java/org/schabi/newpipe/App.kt	ZenSettings.init(this)	settings init at app start
+app/src/main/java/org/schabi/newpipe/App.kt	ZenPause.recover(this)	aborted playback session recovery
+app/src/main/java/org/schabi/newpipe/App.kt	ZenDesign.migrate(this)	calm defaults migration
+app/src/main/java/org/schabi/newpipe/App.kt	ZenClassifyWorker.enqueueIfInstalled(this)	classifier worker at start
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ZenFeatures.upstreamAnnouncementsEnabled()	no upstream announcements
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ZenIntentPrompt.showIfNeeded(this)	intent prompt once per start
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ZenIntentPrompt.onActivityStarted(this)	intent prompt lifecycle (start)
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ZenIntentPrompt.onActivityStopped()	intent prompt lifecycle (stop)
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ZenIntentPrompt.onExternalLink(this)	external link asks for intention
+app/src/main/java/org/schabi/newpipe/MainActivity.java	ITEM_ID_PRAXIS	drawer entry practice
+app/src/main/java/org/schabi/newpipe/MainActivity.java	R.string.zen_praxis_title	drawer entry practice title
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenChannelImport.handles(	channel link takeover sheet
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenChannelImport.show(	channel link takeover sheet
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenFeatures.popupPlayerEnabled()	no popup choice
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenFeatures.downloadsEnabled()	no download choice
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenFeatures.effectiveOpenAction(	disabled open actions mapped
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	ZenIntentPrompt.gate(this	playback from shared link gated
+app/src/main/java/org/schabi/newpipe/RouterActivity.java	R.string.zen_shorts_blocked	Shorts links blocked
+app/src/main/java/org/schabi/newpipe/NewVersionWorker.kt	if (!ReleaseVersionUtil.isReleaseApk) return	no update check
+app/src/main/java/org/schabi/newpipe/util/ReleaseVersionUtil.kt	val isReleaseApk: Boolean = false	never an official release
+app/src/main/java/org/schabi/newpipe/QueueItemMenuUtil.java	ZenFeatures.downloadsEnabled()	no download entry in queue menu
+app/src/main/java/org/schabi/newpipe/database/feed/dao/FeedGroupDAO.kt	getZenGroupRanks()	feed group ranks for edition priority
+app/src/main/java/org/schabi/newpipe/download/DownloadActivity.java	ZenFeatures.downloadsEnabled()	downloads off
+app/src/main/java/org/schabi/newpipe/download/DownloadDialog.java	ZenFeatures.downloadsEnabled()	downloads off
+app/src/main/java/us/shandian/giga/service/DownloadManagerService.java	ZenFeatures.downloadsEnabled()	download service off
+app/src/main/java/org/schabi/newpipe/error/ErrorActivity.kt	ERROR_GITHUB_ISSUE_URL = "https://github.com/sprobst76/ZenPipe/issues"	crash reports to ZenPipe GitHub
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	zenReduced = org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()	reduced video details
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPause.confirmClose(	closing video asks before pause
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPraxisUi.showVideoLongPress(	title long press marks practice video
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	zenBlockStart(	pause gate before start
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPause.blockStart(context, url)	pause gate by url
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenClassifier.onStreamInfo(	classify opened video
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenFeatures.popupPlayerEnabled()	popup button off
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenFeatures.downloadsEnabled()	download button off
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	EmptyFragment.newInstance(!zenReduced)	no empty message when reduced
+app/src/main/java/org/schabi/newpipe/fragments/list/BaseListFragment.java	ZenPraxisUi.showLongPress(	long press channel/playlist marks practice
+app/src/main/java/org/schabi/newpipe/fragments/list/channel/ChannelFragment.java	R.id.menu_item_zen_praxis	channel menu practice item
+app/src/main/java/org/schabi/newpipe/fragments/list/channel/ChannelFragment.java	ZenPraxisUi.onMenu(	channel menu practice action
+app/src/main/java/org/schabi/newpipe/fragments/list/channel/ChannelFragment.java	menuNotifyButton.setVisible(false)	no new-video notifications
+app/src/main/java/org/schabi/newpipe/fragments/list/channel/ChannelTabFragment.java	infoListAdapter.setZenLimit(ZEN_MAX_ITEMS	channel tab item limit
+app/src/main/java/org/schabi/newpipe/fragments/list/channel/ChannelTabFragment.java	infoListAdapter.isZenEnded()	channel tab stops loading
+app/src/main/java/org/schabi/newpipe/fragments/list/playlist/PlaylistFragment.java	R.id.menu_item_zen_praxis	playlist menu practice item
+app/src/main/java/org/schabi/newpipe/fragments/list/playlist/PlaylistFragment.java	ZenPraxisUi.onMenu(	playlist menu practice action
+app/src/main/java/org/schabi/newpipe/fragments/list/playlist/PlaylistFragment.java	ZenPraxis.registerPlaylistItems(	playlist items count as practice
+app/src/main/java/org/schabi/newpipe/fragments/list/search/SearchFragment.java	zenWithoutShorts(	Shorts filter in search
+app/src/main/java/org/schabi/newpipe/fragments/list/search/SearchFragment.java	zenPagesLoaded < ZEN_MAX_PAGES	search page limit
+app/src/main/java/org/schabi/newpipe/fragments/list/search/SearchFragment.java	R.string.zen_search_refine	search end hint
+app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	public void setZenLimit(	list limit API
+app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	public void setZenEnded(	list end API
+app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	public boolean isZenEnded()	list end query
+app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	R.id.zenFooterHint	list end hint view
+app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	zenShowsEndHint()	list end hint logic
+app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO	stream dialog practice video entry
+app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	ZenFeatures.downloadsEnabled()	no download entry
+app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	ZenFeatures.popupPlayerEnabled()	no popup entry
+app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZEN_PRAXIS_VIDEO(	practice video entry definition
+app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZenPraxisUi.onVideoMenu(	practice video entry action
+app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	R.string.zen_copy_link	open in browser replaced by copy link
+app/src/main/java/org/schabi/newpipe/info_list/holder/ChannelMiniInfoItemHolder.java	ZenSettings.reducedVideoDetails()	no subscriber counts when reduced
+app/src/main/java/org/schabi/newpipe/info_list/holder/StreamInfoItemHolder.java	ZenSettings.reducedVideoDetails()	no view counts when reduced
+app/src/main/java/org/schabi/newpipe/local/feed/FeedFragment.kt	ZenIntentPrompt.setOnConfirmedListener	edition built after intention
+app/src/main/java/org/schabi/newpipe/local/feed/FeedFragment.kt	viewModel.zenRefresh()	edition refresh
+app/src/main/java/org/schabi/newpipe/local/feed/FeedFragment.kt	showZenActions(item)	triage actions on feed item
+app/src/main/java/org/schabi/newpipe/local/feed/FeedFragment.kt	ZenWatchLater.add(	watch later triage
+app/src/main/java/org/schabi/newpipe/local/feed/FeedFragment.kt	ZenEndCardItem(it)	edition end card
+app/src/main/java/org/schabi/newpipe/local/feed/FeedState.kt	val zenEnd:	edition end info in state
+app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	ZenFeedProvider(application, feedDatabaseManager)	feed edition provider
+app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	zenFeed.compute(groupId)	feed edition computed
+app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	fun zenHandled(	triage handled marker
+app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	ZenEditionPrep.shared.addListener	edition prep progress
+app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	ZenFeedDetails.shared.addListener	feed details progress
+app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	var zenPick:	why line data
+app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	ZenClassWhy.feedLine(	classifier why line
+app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	ZenSettings.reducedVideoDetails()	no view counts when reduced
+app/src/main/java/org/schabi/newpipe/local/feed/service/FeedLoadManager.kt	ZenClassifyWorker.enqueueIfInstalled(context)	classify new feed videos
+app/src/main/java/org/schabi/newpipe/local/feed/service/FeedLoadManager.kt	RSS "fast mode" cannot filter	fast mode permanently off
+app/src/main/java/org/schabi/newpipe/local/subscription/SubscriptionFragment.kt	ZenPraxisUi.menuTitle(	subscription long press practice
+app/src/main/java/org/schabi/newpipe/local/subscription/SubscriptionFragment.kt	ZenPraxisUi.onMenu(	subscription long press practice action
+app/src/main/java/org/schabi/newpipe/local/subscription/SubscriptionFragment.kt	ZenClassExemptUi.addChannel(	classifier exception for channel
+app/src/main/java/org/schabi/newpipe/player/PlayQueueActivity.java	R.id.action_zen_sleep	sleep timer menu item
+app/src/main/java/org/schabi/newpipe/player/PlayQueueActivity.java	ZenSleepUi.showDialog(this)	sleep timer dialog
+app/src/main/java/org/schabi/newpipe/player/PlayQueueActivity.java	ZenFeatures.popupPlayerEnabled()	no popup switch
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenSleep.bind(context, zenSleepTarget)	sleep timer bound to player
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenSleep.unbind(zenSleepTarget)	sleep timer unbound
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.setAudio(context	play time split picture/sound
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onClosed(context	closing early is an abort
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onProgress(context	watch progress
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onStreamInfo(context	stream info pause rules
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.showPauseScreen(context)	pause screen
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onCompleted(context)	video completed
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onPlaying(context	playing state for pause timer
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onItem(context	current item for pause rules
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.mayChain(context	practice chains may continue
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPause.onSleepTimerEnd(context)	sleep timer end
+app/src/main/java/org/schabi/newpipe/player/Player.java	ZenPlayback.setPlaying(	own playback state
+app/src/main/java/org/schabi/newpipe/player/Player.java	zenOnItemEnd()	stop at end of every item
+app/src/main/java/org/schabi/newpipe/player/Player.java	setPauseAtEndOfMediaItems	no autoplay of next item
+app/src/main/java/org/schabi/newpipe/player/PlayerService.java	ZenPause.blockForService(	safety net for pause
+app/src/main/java/org/schabi/newpipe/player/PlayerService.java	ZenPauseRules.intentStartsPlayback(	safety net rule
+app/src/main/java/org/schabi/newpipe/player/PlayerService.java	ZenFeatures.popupPlayerEnabled()	popup intents dropped
+app/src/main/java/org/schabi/newpipe/player/helper/PlayerHelper.java	return AUTOPLAY_TYPE_NEVER;	autoplay permanently off
+app/src/main/java/org/schabi/newpipe/player/helper/PlayerHelper.java	ZenFeatures.minimizeOnExitEnabled()	leaving app pauses video
+app/src/main/java/org/schabi/newpipe/player/helper/PlayerHelper.java	ZenPipe: auto-queueing of related streams is permanently disabled	auto-queue permanently off
+app/src/main/java/org/schabi/newpipe/player/ui/VideoPlayerUi.java	zenSeekColor()	sage seek bar
+app/src/main/java/org/schabi/newpipe/player/ui/VideoPlayerUi.java	binding.zenSleepButton	sleep button in player
+app/src/main/java/org/schabi/newpipe/player/ui/VideoPlayerUi.java	ZenSleepUi.showMenu(	sleep button menu
+app/src/main/java/org/schabi/newpipe/player/ui/VideoPlayerUi.java	ZenSleep.addListener(zenSleepListener)	sleep countdown listener
+app/src/main/java/org/schabi/newpipe/settings/MainSettingsFragment.java	R.string.zen_download_pref_screen_key	downloads settings hidden
+app/src/main/java/org/schabi/newpipe/settings/NewPipeSettings.java	remote suggestions (YouTube autocomplete) are permanently off	no remote suggestions
+app/src/main/java/org/schabi/newpipe/settings/SettingsActivity.java	zenHiddenPreferenceKeys(	search hides disabled prefs
+app/src/main/java/org/schabi/newpipe/settings/SettingsActivity.java	ZenFeatures.downloadsEnabled()	downloads settings hidden
+app/src/main/java/org/schabi/newpipe/settings/VideoAudioSettingsFragment.java	zenRemoveDisabledOpenActions()	open actions list trimmed
+app/src/main/java/org/schabi/newpipe/settings/VideoAudioSettingsFragment.java	zenRemoveHiddenPreferences()	popup/minimize prefs hidden
+app/src/main/java/org/schabi/newpipe/settings/VideoAudioSettingsFragment.java	public static List<String> zenHiddenPreferenceKeys(	hidden pref keys
+app/src/main/java/org/schabi/newpipe/settings/tabs/Tab.java	PRAXIS(new PraxisTab())	practice tab type
+app/src/main/java/org/schabi/newpipe/settings/tabs/Tab.java	new org.schabi.newpipe.zen.ZenPraxisFragment()	practice tab fragment
+app/src/main/java/org/schabi/newpipe/settings/tabs/Tab.java	context.getString(R.string.app_name)	app name instead of NewPipe
+app/src/main/java/org/schabi/newpipe/settings/tabs/TabsManager.java	zenWithPraxis(	practice tab always present
+app/src/main/java/org/schabi/newpipe/settings/tabs/TabsManager.java	kiosk (trending/live/...) and blank tabs are never shown	no kiosk tabs
+app/src/main/java/org/schabi/newpipe/util/ChannelTabHelper.java	ChannelTabs.LIVESTREAMS.equals(tab)	no shorts/live channel tabs
+app/src/main/java/org/schabi/newpipe/util/ChannelTabHelper.java	ChannelTabs.LIVESTREAMS.equals(contentFilters.get(0))	no shorts/live filters
+app/src/main/java/org/schabi/newpipe/util/NavigationHelper.java	ZenPause.blockStart(context, queue)	pause gate before player start
+app/src/main/java/org/schabi/newpipe/util/NavigationHelper.java	ZenFeatures.popupPlayerEnabled()	popup no-op
+app/src/main/java/org/schabi/newpipe/util/NavigationHelper.java	ZenFeatures.downloadsEnabled()	downloads no-op
+app/src/main/java/org/schabi/newpipe/util/NavigationHelper.java	new org.schabi.newpipe.zen.ZenPraxisFragment()	practice page
+app/src/main/java/org/schabi/newpipe/util/PlayButtonHelper.kt	ZenFeatures.popupPlayerEnabled()	no popup control
+app/src/main/java/org/schabi/newpipe/util/external_communication/ShareUtils.java	isYoutubeUrl(url)	YouTube links copied/in-app, never browser
+app/src/main/java/org/schabi/newpipe/util/text/HashtagLongPressClickableSpan.java	ShareUtils.copyToClipboard(context, parsedHashtag)	hashtag copied, no search
+app/src/main/res/layout/pignate_footer.xml	android:id="@+id/zenFooterHint"	list end hint view
+app/src/main/res/layout/pignate_footer.xml	android:id="@+id/zenFooterProgress"	list end progress view
+app/src/main/res/layout/player.xml	android:id="@+id/zenSleepButton"	sleep button
+app/src/main/res/layout/player.xml	@style/ZenPlayerSeekBar	sage seek bar theme
+app/src/main/res/layout/fragment_video_detail.xml	@string/zen_copy_link	copy link instead of browser
+app/src/main/res/layout-large-land/fragment_video_detail.xml	@string/zen_copy_link	copy link instead of browser
+app/src/main/res/layout/error_panel.xml	@string/zen_copy_link	copy link instead of browser
+app/src/main/res/menu/menu_channel.xml	@+id/menu_item_zen_praxis	channel practice menu item
+app/src/main/res/menu/menu_playlist.xml	@+id/menu_item_zen_praxis	playlist practice menu item
+app/src/main/res/menu/menu_play_queue.xml	@+id/action_zen_sleep	sleep timer menu item
+app/src/main/res/menu/menu_feed_fragment.xml	android:visible="false"	feed menu item hidden
+app/src/main/res/xml/main_settings.xml	org.schabi.newpipe.zen.ZenSettingsFragment	Zen settings screen
+app/src/main/res/xml/main_settings.xml	@string/zen_download_pref_screen_key	downloads screen key hidden
+app/src/main/res/values/settings_keys.xml	zen_download_pref_screen_key	downloads screen key
+app/src/main/res/values/donottranslate.xml	https://github.com/sprobst76/ZenPipe	project URL
+app/src/main/res/values/styles.xml	@color/zen_text_primary_dark	calm text color (dark)
+app/src/main/res/values/styles.xml	@color/zen_text_primary_light	calm text color (light)
+app/src/main/res/values/styles.xml	@color/zen_black_primary_color	black theme primary
+app/src/main/res/values/colors.xml	name="light_settings_accent_color">#3E6A5E	calm palette (light accent)
+app/src/main/res/values/colors.xml	name="dark_settings_accent_color">#9DBFB2	calm palette (dark accent)
+app/src/main/res/values/colors.xml	name="ic_launcher_background">#2E4A45	launcher background
+app/src/main/res/drawable/splash_foreground.xml	ZenPipe: open ring (enso)	splash ring
