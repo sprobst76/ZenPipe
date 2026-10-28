@@ -1,0 +1,6 @@
+Sechste ZenPipe-Entwicklungsversion: Feinschliff.
+• Kanal teilen: Themen-Kästchen (Standardthema) beim Markieren als Praxis
+• Die tägliche Praxis-Rückfrage zeigt ihren Titel nur noch einmal
+• Einheitlicher Wortlaut zum Markieren eines Praxis-Videos
+• Der Media-Browser (Android Auto, Assistent) ist abgeschaltet
+• Verlauf und Abos gehören nicht mehr zur Google-Cloud-Sicherung (Android 12+; die Übertragung von Gerät zu Gerät bleibt)

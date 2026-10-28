@@ -1,0 +1,6 @@
+Sixth ZenPipe development release: polish.
+• Share a channel: theme checkboxes (default theme) when marking it as practice
+• The daily practice question shows its title only once
+• One wording for marking a practice video
+• The media browser (Android Auto, Assistant) is switched off
+• Viewing history and subscriptions are no longer part of the Google cloud backup (Android 12+; device-to-device transfer stays)
