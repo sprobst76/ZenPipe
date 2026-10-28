@@ -1,7 +1,13 @@
-Fünfte ZenPipe-Entwicklungsversion: Härtung.
+Fünfte ZenPipe-Entwicklungsversion: Härtung und Praxis-Themen.
 • Ans Ende spulen überspringt die Pflichtpause nicht mehr (mindestens die Hälfte der Strecke muss wirklich gespielt werden)
 • Praxis-Playlists werden beim Aktivieren eingefroren; neue Videos zählen nach 24 h als Praxis
 • Videos unter 5 Minuten: niedrige Priorität im Feed und nach jedem eine feste Pause von 60 s
 • Feed: die „Warum“-Zeile ist eine kurze Wendung statt Zahlen (Zahlen bleiben in der Prüfansicht)
 • TalkBack: Pausen-Countdown wird einmal pro Minute angesagt, +/− sind benannt
 • „Fertig“ in der Ersteinrichtung fragt vor dem Verwerfen offener Entwürfe nach; „Doch nicht“ heißt jetzt „App schließen“
+• Praxis-Themen pro Video (Fitness, Yoga, Schlaf, Meditation, Atemarbeit) mit Chips im Praxis-Tab; Standardthema pro Kanal/Playlist und Korrektur in der Prüfansicht
+• Einzelne Videos lassen sich als Praxis markieren (24-h-Sperre wie bei Kanälen)
+• Eine ruhige Rückfrage einmal pro Tag, wenn die Praxis-Zeit lang wird (Schwelle in den Zen-Einstellungen)
+• Eine wiederhergestellte NewPipe-Sicherung beendet die freie Ersteinrichtung (deine Regeln starten streng)
+• Feed-Ausgaben folgen auch der Gerätelaufzeit; der Media-Browser (Android Auto) zeigt keinen Verlauf und keine Shorts mehr
+• Alte Export-Dateien im Cache werden nach einer Stunde gelöscht

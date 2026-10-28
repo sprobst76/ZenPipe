@@ -1,7 +1,13 @@
-Fifth ZenPipe development release: hardening.
+Fifth ZenPipe development release: hardening and practice themes.
 • Seeking to the end no longer skips the mandatory break (at least half of the way must really be played)
 • Practice playlists are frozen when activated; new videos count as practice after 24 h
 • Videos under 5 minutes: low priority in the feed and a fixed 60 s break after each
 • Feed: the "why" line is a short phrase instead of numbers (numbers stay in the review view)
 • TalkBack: the break countdown is announced once a minute, +/- buttons are named
 • "Done" in the first-time setup asks before it discards open drafts; "Never mind" now says "Close app"
+• Practice themes per video (fitness, yoga, sleep, meditation, breathing) with chips in the Practice tab; default theme per channel/playlist and corrections in the review view
+• Single videos can be marked as practice (24 h lock like channels)
+• A calm question once a day when practice time gets long (threshold in the Zen settings)
+• A restored NewPipe backup ends the free first-time setup (your rules start strict)
+• Feed editions also follow the device uptime; the media browser (Android Auto) no longer lists history or Shorts
+• Old export files in the cache are deleted after an hour
