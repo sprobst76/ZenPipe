@@ -4,6 +4,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.schabi.newpipe.extractor.channel.ChannelInfoItem
+import org.schabi.newpipe.extractor.stream.StreamInfoItem
+import org.schabi.newpipe.extractor.stream.StreamType
 
 class ZenFeaturesTest {
     private val download = "download"
@@ -20,6 +23,19 @@ class ZenFeaturesTest {
         assertFalse(ZenFeatures.minimizeOnExitEnabled())
         assertFalse(ZenFeatures.downloadsEnabled())
         assertFalse(ZenFeatures.upstreamAnnouncementsEnabled())
+    }
+
+    @Test
+    fun mediaBrowserSwitchIsPreparedButStillOn() {
+        assertTrue(ZenFeatures.mediaBrowserEnabled())
+    }
+
+    @Test
+    fun mediaBrowserSearchDropsShortsOnly() {
+        fun stream(name: String, short: Boolean) = StreamInfoItem(0, "https://y/$name", name, StreamType.VIDEO_STREAM).also { it.isShortFormContent = short }
+        val channel = ChannelInfoItem(0, "https://y/c", "chan")
+        val items = listOf(stream("a", false), stream("s", true), channel, stream("b", false))
+        assertEquals(listOf("a", "chan", "b"), ZenMediaBrowser.withoutShorts(items).map { it.name })
     }
 
     @Test

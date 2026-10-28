@@ -21,7 +21,6 @@ import java.util.function.Consumer
 import org.schabi.newpipe.MainActivity.DEBUG
 import org.schabi.newpipe.NewPipeDatabase
 import org.schabi.newpipe.R
-import org.schabi.newpipe.database.history.model.StreamHistoryEntry
 import org.schabi.newpipe.database.playlist.PlaylistLocalItem
 import org.schabi.newpipe.database.playlist.PlaylistStreamEntry
 import org.schabi.newpipe.database.playlist.model.PlaylistRemoteEntity
@@ -38,6 +37,8 @@ import org.schabi.newpipe.local.playlist.RemotePlaylistManager
 import org.schabi.newpipe.util.ExtractorHelper
 import org.schabi.newpipe.util.ServiceHelper
 import org.schabi.newpipe.util.image.ImageStrategy
+import org.schabi.newpipe.zen.ZenFeatures
+import org.schabi.newpipe.zen.ZenMediaBrowser
 
 /**
  * This class is used to cleanly separate the Service implementation (in
@@ -80,6 +81,10 @@ class MediaBrowserImpl(
         if (!packageValidator.isKnownCaller(clientPackageName, clientUid)) {
             // this is a caller we can't trust (see PackageValidator's rules taken from uamp)
             return null
+        }
+
+        if (!ZenFeatures.mediaBrowserEnabled()) {
+            return null // zen: external browsers (Android Auto etc.) can be switched off centrally
         }
 
         if (rootHints?.getBoolean(EXTRA_RECENT, false) == true) {
@@ -129,11 +134,6 @@ class MediaBrowserImpl(
                             ID_BOOKMARKS,
                             context.resources.getString(R.string.tab_bookmarks_short),
                             R.drawable.ic_bookmark_white
-                        ),
-                        createRootMediaItem(
-                            ID_HISTORY,
-                            context.resources.getString(R.string.action_history),
-                            R.drawable.ic_history_white
                         )
                     )
                 )
@@ -156,8 +156,6 @@ class MediaBrowserImpl(
                     Log.w(TAG, "Unknown playlist URI: $parentId")
                     throw parseError(parentId)
                 }
-
-                ID_HISTORY -> return populateHistory()
 
                 else -> throw parseError(parentId)
             }
@@ -316,30 +314,6 @@ class MediaBrowserImpl(
         return buildInfoItemMediaId(item).build().toString()
     }
 
-    private fun populateHistory(): Single<List<MediaBrowserCompat.MediaItem>> {
-        val history = database.streamHistoryDAO().history.firstOrError()
-        return history.map { items ->
-            items.map { this.createHistoryMediaItem(it) }
-        }
-    }
-
-    private fun createHistoryMediaItem(streamHistoryEntry: StreamHistoryEntry): MediaBrowserCompat.MediaItem {
-        val builder = MediaDescriptionCompat.Builder()
-        val mediaId = buildMediaId()
-            .appendPath(ID_HISTORY)
-            .appendPath(streamHistoryEntry.streamId.toString())
-            .build().toString()
-        builder.setMediaId(mediaId)
-            .setTitle(streamHistoryEntry.streamEntity.title)
-            .setSubtitle(streamHistoryEntry.streamEntity.uploader)
-            .setIconUri(imageUriOrNullIfDisabled(streamHistoryEntry.streamEntity.thumbnailUrl))
-
-        return MediaBrowserCompat.MediaItem(
-            builder.build(),
-            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
-        )
-    }
-
     private fun getMergedPlaylists(): Flowable<MutableList<PlaylistLocalItem>> {
         return MergedPlaylistManager.getMergedOrderedPlaylists(
             LocalPlaylistManager(database),
@@ -390,7 +364,7 @@ class MediaBrowserImpl(
             searchMusicBySongTitle(query)
                 // ignore it.errors, i.e. ignore errors about specific items, since there would
                 // be no way to show the error properly in Android Auto anyway
-                .map { it.relatedItems.mapNotNull(this::createInfoItemMediaItem) }
+                .map { ZenMediaBrowser.withoutShorts(it.relatedItems).mapNotNull(this::createInfoItemMediaItem) }
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     { result.sendResult(it) },
