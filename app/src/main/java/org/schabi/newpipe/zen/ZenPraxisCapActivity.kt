@@ -3,6 +3,7 @@ package org.schabi.newpipe.zen
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
+import android.view.Window
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -18,6 +19,8 @@ import org.schabi.newpipe.player.notification.NotificationConstants
  */
 class ZenPraxisCapActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // the dialog window would repeat the title above the content title (and cut it off)
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
         val minutes = ZenPraxisCap.markShown(this)
         val d = resources.displayMetrics.density
