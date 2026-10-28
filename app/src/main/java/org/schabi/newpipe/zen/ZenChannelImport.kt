@@ -117,6 +117,10 @@ class ZenChannelImportModel(app: Application) : AndroidViewModel(app) {
     /** The last action chosen in the sheet (for the close log). */
     var action: String? = null
 
+    /** Default theme(s) ticked for marking as practice (mask, survives rotation). */
+    @Volatile
+    var themes: Int = 0
+
     // the newest state (postValue delivers later; updates must build on this one)
     private var latest = ZenChannelImportState()
 
@@ -257,6 +261,8 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
         b.zenImportSubscribe.setOnClickListener { onSubscribe() }
         b.zenImportPraxis.setOnClickListener { onPraxis() }
         b.zenImportBoth.setOnClickListener { confirmPraxis(true) }
+        // the same default-theme checkboxes as the practice dialog (D61); only grouping, the lock is unchanged
+        ZenPraxisUi.addThemeChecks(b.zenImportThemes, ctx.getString(R.string.zen_praxis_theme_default_caption), model.themes) { model.themes = it }
         b.zenImportVideos.setOnClickListener {
             val checked = model.live.value?.sample?.checked
             val a = activity
@@ -376,6 +382,7 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
         b.zenImportPraxisInfo.visibility = View.GONE
         b.zenImportBoth.visibility = View.GONE
         b.zenImportVideos.visibility = View.GONE
+        b.zenImportThemes.visibility = View.GONE
         b.zenImportPraxis.isEnabled = true
         if (info == null) {
             b.zenImportPraxis.visibility = View.GONE
@@ -402,6 +409,7 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
                 val failed = s.sample?.let { ZenPlausibilityCheck.failedNote(ctx, it) }
                 val check = (a.warning ?: a.note).let { t -> failed?.let { t.replace("\n\n$it", "").replace("\n$it", "") } ?: t }
                 b.zenImportPraxisInfo.text = listOf(check, ZenPraxisUi.addText(ctx, channel, plan)).joinToString("\n\n")
+                if (plan != ZenPraxisUi.AddPlan.LOCKED) b.zenImportThemes.visibility = View.VISIBLE
                 if (!s.sample?.checked.isNullOrEmpty()) b.zenImportVideos.visibility = View.VISIBLE
                 val warned = a.warning != null
                 val markLabel = if (warned) ctx.getString(R.string.zen_import_praxis_anyway) else ctx.getString(R.string.zen_praxis_mark)
@@ -511,7 +519,7 @@ class ZenChannelImportDialog : AppCompatDialogFragment() {
         if (subscribe) onSubscribe()
         model.action = if (subscribe) "subscribe_praxis" else "praxis"
         ZenChannelImport.log(ctx, "channel_import", "action=${model.action} url=${info.url} inline=true")
-        ZenPraxisUi.commitAdd(ctx, channel)?.let {
+        ZenPraxisUi.commitAdd(ctx, channel.copy(themes = model.themes))?.let {
             Toast.makeText(ctx.applicationContext, it + "\n" + a.note, Toast.LENGTH_LONG).show()
         }
         rerender()

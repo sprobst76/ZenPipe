@@ -269,30 +269,47 @@ object ZenPraxisUi {
             setPadding(pad, (12 * d).toInt(), pad, 0)
         }
         if (message.isNotEmpty()) box.addView(android.widget.TextView(activity).apply { text = message })
+        val current = addThemeChecks(box, caption, initial)
+        val scroll = android.widget.ScrollView(activity).apply { addView(box) }
+        return ThemeBoxes(scroll, current)
+    }
+
+    /**
+     * Adds the caption and the five theme checkboxes (at most [ZenPraxisThemes.MAX] can be ticked)
+     * to [box] and returns the reader of the ticked mask; [onChange] gets the mask after each tick.
+     * Shared by the practice dialogs and the channel import sheet.
+     */
+    @JvmStatic
+    @JvmOverloads
+    fun addThemeChecks(box: android.widget.LinearLayout, caption: String, initial: Int, onChange: ((Int) -> Unit)? = null): () -> Int {
+        val context = box.context
+        val d = context.resources.displayMetrics.density
         box.addView(
-            android.widget.TextView(activity).apply {
+            android.widget.TextView(context).apply {
                 text = caption
                 setPadding(0, (12 * d).toInt(), 0, (4 * d).toInt())
                 setTypeface(typeface, android.graphics.Typeface.BOLD)
             }
         )
         val checks = ZenPraxisTheme.entries.map { t ->
-            android.widget.CheckBox(activity).apply {
-                text = themeName(activity, t)
+            android.widget.CheckBox(context).apply {
+                text = themeName(context, t)
                 isChecked = ZenPraxisThemes.has(initial, t)
             }
         }
+        val mask = { ZenPraxisThemes.mask(ZenPraxisTheme.entries.filterIndexed { i, _ -> checks[i].isChecked }) }
         checks.forEach { c ->
             c.setOnCheckedChangeListener { b, on ->
                 if (on && checks.count { it.isChecked } > ZenPraxisThemes.MAX) {
                     b.isChecked = false
-                    toast(activity, activity.getString(R.string.zen_praxis_theme_max, ZenPraxisThemes.MAX))
+                    toast(context, context.getString(R.string.zen_praxis_theme_max, ZenPraxisThemes.MAX))
+                } else {
+                    onChange?.invoke(mask())
                 }
             }
             box.addView(c)
         }
-        val scroll = android.widget.ScrollView(activity).apply { addView(box) }
-        return ThemeBoxes(scroll) { ZenPraxisThemes.mask(ZenPraxisTheme.entries.filterIndexed { i, _ -> checks[i].isChecked }) }
+        return mask
     }
 
     /**
