@@ -9,6 +9,9 @@ interface ZenKeyValueStore {
     fun getLong(key: String, default: Long): Long
     fun getInt(key: String, default: Int): Int
     fun put(vararg entries: Pair<String, Any?>)
+
+    /** Writes everything put so far to disk before returning (e.g. right before a process restart). */
+    fun flush() {}
 }
 
 /** In-memory implementation (tests). */
@@ -44,6 +47,11 @@ class SharedPrefsZenStore(private val prefs: SharedPreferences) : ZenKeyValueSto
             }
         }
         e.apply()
+    }
+
+    // an empty commit waits for the earlier apply() writes, so they survive an immediate process kill
+    override fun flush() {
+        prefs.edit().commit()
     }
 }
 

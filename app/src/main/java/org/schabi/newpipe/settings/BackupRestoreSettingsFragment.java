@@ -286,6 +286,8 @@ public class BackupRestoreSettingsFragment extends BasePreferenceFragment {
     private void finishImport(final Uri importDataUri) {
         // save import path only on success
         saveLastImportExportDataUri(importDataUri);
+        // ZenPipe: an import during the first-time setup ends it (no free setup after a reset)
+        org.schabi.newpipe.zen.ZenRestore.onImportFinished(requireContext());
         // restart app to properly load db
         NavigationHelper.restartApp(requireActivity());
     }

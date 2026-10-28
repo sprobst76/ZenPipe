@@ -155,6 +155,60 @@ class ZenSettingsLock(
         if (isSetupMode()) finishSetup("playback")
     }
 
+    /** Neither started nor finished: the very first start of the Zen settings (no side effects). */
+    @Synchronized
+    fun isSetupUntouched(): Boolean = store.getInt(K_SETUP_DONE, 0) != 1 && store.getInt(K_SETUP_STARTED, 0) == 0
+
+    /**
+     * A restore of NewPipe data was detected ([ZenRestoreGuard]): a running (or not yet started)
+     * first-time setup ends at once like "Done" (lock starts). Everything the free setup loosened
+     * relative to the defaults (settings, practice entries, exceptions) is not lost but becomes a
+     * pending loosening, i.e. it takes the normal 24 h way (cancellable); stricter values stay.
+     * False (nothing changed) when the setup is over already.
+     */
+    @Synchronized
+    fun endSetupByRestore(): Boolean {
+        if (store.getInt(K_SETUP_DONE, 0) == 1) return false
+        if (store.getInt(K_SETUP_STARTED, 0) == 1 && setupCd.remainingMs() <= 0) {
+            finishSetup("timeout")
+            return false
+        }
+        val eff = ZenSettingDefs.all.associate { it.key to readEff(it) }
+        val entries = ArrayList<Pair<String, Any?>>()
+        val pend = LinkedHashMap<String, Int>()
+        ZenSettingDefs.all.forEach { d ->
+            val v = eff.getValue(d.key)
+            if (v == d.default || d.isStricter(d.default, v)) return@forEach
+            // looser than the default: the stricter common part of a mask stays, the rest waits
+            val now = if (d.isMask && d.inRange(v and d.default)) v and d.default else d.default
+            entries.add(kEff(d.key) to now)
+            entries.add(kPend(d.key) to v)
+            pend[d.key] = v
+        }
+        val px = readPraxis(K_PX)
+        if (px.isNotEmpty()) {
+            val p = readPraxis(K_PX_PEND)
+            entries.add(praxisEntry(K_PX, emptyList()))
+            entries.add(praxisEntry(K_PX_PEND, p + px.filter { e -> p.none { it.key == e.key } }))
+        }
+        val ex = readExempt(K_EX)
+        if (ex.isNotEmpty()) {
+            val p = readExempt(K_EX_PEND)
+            entries.add(exemptEntry(K_EX, emptyList()))
+            entries.add(exemptEntry(K_EX_PEND, p + ex.filter { e -> p.none { it.key == e.key } }))
+        }
+        if (entries.isNotEmpty()) store.put(*entries.toTypedArray())
+        clearUndo()
+        finishSetup("restore")
+        if (pend.isNotEmpty() || px.isNotEmpty() || ex.isNotEmpty()) {
+            log?.invoke(
+                "settings_restore_pending",
+                "settings=${pend.entries.joinToString(",") { "${it.key}=${it.value}" }} praxis=${px.size} exempt=${ex.size}"
+            )
+        }
+        return true
+    }
+
     private fun finishSetup(reason: String) {
         store.put(K_SETUP_DONE to 1)
         setupCd.clear()

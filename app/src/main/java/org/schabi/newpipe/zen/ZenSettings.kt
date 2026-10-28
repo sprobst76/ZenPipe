@@ -125,6 +125,8 @@ object ZenSettings {
     @JvmStatic
     fun init(context: Context) {
         lock = Zen.settingsLock(context)
+        // before anything starts the first-time setup: a restored install must not get a free one
+        ZenRestore.onAppStart(context)
         ZenPraxis.playlistItems(context)
     }
 

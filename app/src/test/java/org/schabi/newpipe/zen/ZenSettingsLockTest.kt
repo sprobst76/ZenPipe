@@ -492,4 +492,31 @@ class ZenSettingsLockTest {
         e.mono += 25 * h
         assertEquals(deCa, l.effective(key))
     }
+
+    @Test
+    fun `restore ends an untouched setup with the lock and is a no-op afterwards`() {
+        val e = Env()
+        val l = e.lock()
+        assertTrue(l.isSetupUntouched())
+        assertTrue(l.endSetupByRestore())
+        assertFalse(l.isSetupMode())
+        assertTrue(l.isLocked())
+        assertTrue(e.events.contains("settings_setup_done reason=restore"))
+        assertFalse(l.isSetupUntouched())
+        assertFalse(l.endSetupByRestore())
+    }
+
+    @Test
+    fun `restore keeps stricter setup values immediate`() {
+        val e = Env()
+        val l = e.lock()
+        assertTrue(l.isSetupMode())
+        assertFalse(l.isSetupUntouched())
+        l.apply(mapOf(MIN_LENGTH_MIN to 20, PAUSE_MAX_MIN to 30))
+        assertTrue(l.endSetupByRestore())
+        assertEquals(20, l.effective(MIN_LENGTH_MIN))
+        assertEquals(30, l.effective(PAUSE_MAX_MIN))
+        assertTrue(l.pending().isEmpty())
+        assertFalse(e.events.any { it.startsWith("settings_restore_pending") })
+    }
 }

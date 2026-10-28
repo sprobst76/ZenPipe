@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: reset protection (restore detected). Separate file to keep upstream merges simple. -->
+<resources>
+    <string name="zen_restore_notice">Restore detected – your Zen rules start strict. Loosening works as usual via 24 hours.</string>
+</resources>

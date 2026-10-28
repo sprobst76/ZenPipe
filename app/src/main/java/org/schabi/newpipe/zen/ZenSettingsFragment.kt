@@ -139,6 +139,9 @@ class ZenSettingsFragment : Fragment() {
             else -> getString(R.string.zen_lock_free)
         }
         content.addView(status)
+        if (ZenRestore.guard(requireContext()).showNotice(snap.lockRemainingMs)) {
+            content.addView(text(getString(R.string.zen_restore_notice), 14f, true))
+        }
         if (snap.setupMode) {
             content.addView(
                 Button(requireContext()).apply {
