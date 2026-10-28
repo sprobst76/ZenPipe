@@ -997,7 +997,7 @@
     <string name="zen_review_praxis_user">Praxis-Themen (eigene): %1$s</string>
     <string name="zen_review_praxis_auto">Praxis-Themen: %1$s</string>
     <string name="zen_copy_title">Titel kopieren</string>
-    <string name="zen_praxis_video_menu">Praxis-Video…</string>
+    <string name="zen_praxis_video_menu">Als Praxis-Video markieren</string>
     <string name="zen_praxis_video_mark">Als Praxis-Video markieren</string>
     <string name="zen_praxis_video_unmark">Aus Praxis-Videos entfernen</string>
     <string name="zen_praxis_video_cancel_pending">Ausstehendes Praxis-Video abbrechen</string>

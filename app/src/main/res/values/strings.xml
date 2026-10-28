@@ -1032,7 +1032,7 @@
     <string name="zen_review_praxis_user">Practice themes (yours): %1$s</string>
     <string name="zen_review_praxis_auto">Practice themes: %1$s</string>
     <string name="zen_copy_title">Copy title</string>
-    <string name="zen_praxis_video_menu">Practice video…</string>
+    <string name="zen_praxis_video_menu">Mark as practice video</string>
     <string name="zen_praxis_video_mark">Mark as practice video</string>
     <string name="zen_praxis_video_unmark">Remove from practice videos</string>
     <string name="zen_praxis_video_cancel_pending">Cancel pending practice video</string>
