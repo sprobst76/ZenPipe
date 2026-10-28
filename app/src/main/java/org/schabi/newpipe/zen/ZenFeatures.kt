@@ -38,10 +38,10 @@ object ZenFeatures {
     private const val UPSTREAM_ANNOUNCEMENTS_ENABLED = false
 
     /**
-     * Media browser entry for external clients (Android Auto, Assistant): bookmarks and a search
-     * without Shorts. Still on, whether to switch it off is an open question.
+     * Media browser entry for external clients (Android Auto, Assistant). Off (D77): no entry
+     * point without the feed; the code stays so it can be switched on again in one place.
      */
-    private const val MEDIA_BROWSER_ENABLED = true
+    private const val MEDIA_BROWSER_ENABLED = false
 
     @JvmStatic
     fun mediaBrowserEnabled(): Boolean = MEDIA_BROWSER_ENABLED

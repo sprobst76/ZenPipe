@@ -3,6 +3,12 @@
 <data-extraction-rules>
     <cloud-backup>
         <exclude domain="sharedpref" path="zen_state.xml" />
+        <!-- D78: viewing history and subscriptions stay out of the Google cloud backup;
+             device-to-device transfer below keeps them. -->
+        <exclude domain="database" path="newpipe.db" />
+        <exclude domain="database" path="newpipe.db-wal" />
+        <exclude domain="database" path="newpipe.db-shm" />
+        <exclude domain="database" path="newpipe.db-journal" />
     </cloud-backup>
     <device-transfer>
         <exclude domain="sharedpref" path="zen_state.xml" />

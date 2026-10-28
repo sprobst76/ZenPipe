@@ -27,7 +27,7 @@ class ZenFeaturesTest {
 
     @Test
     fun mediaBrowserSwitchIsPreparedButStillOn() {
-        assertTrue(ZenFeatures.mediaBrowserEnabled())
+        assertFalse(ZenFeatures.mediaBrowserEnabled())
     }
 
     @Test
