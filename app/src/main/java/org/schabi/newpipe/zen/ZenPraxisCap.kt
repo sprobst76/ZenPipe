@@ -58,11 +58,12 @@ object ZenPraxisCap {
 
     /** The question was shown: remembered for this day and threshold. Returns the minutes of today. */
     @JvmStatic
-    fun markShown(context: Context): Int {
+    @JvmOverloads
+    fun markShown(context: Context, log: Boolean = true): Int {
         val (day, ms) = today(context)
         val cap = ZenSettings.praxisCapMin()
         Zen.store(context).put(K_ASKED to askedValue(day, cap))
-        Zen.log(context).add("praxis_cap_ask", "cap=$cap minutes=${ms / 60_000L}")
+        if (log) Zen.log(context).add("praxis_cap_ask", "cap=$cap minutes=${ms / 60_000L}")
         return (ms / 60_000L).toInt()
     }
 

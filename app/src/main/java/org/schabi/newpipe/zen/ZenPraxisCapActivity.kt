@@ -22,7 +22,7 @@ class ZenPraxisCapActivity : AppCompatActivity() {
         // the dialog window would repeat the title above the content title (and cut it off)
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE)
         super.onCreate(savedInstanceState)
-        val minutes = ZenPraxisCap.markShown(this)
+        val minutes = ZenPraxisCap.markShown(this, savedInstanceState == null)
         val d = resources.displayMetrics.density
         val pad = (24 * d).toInt()
         val box = LinearLayout(this).apply {
