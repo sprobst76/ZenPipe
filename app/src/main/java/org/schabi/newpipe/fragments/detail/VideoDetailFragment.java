@@ -567,10 +567,12 @@ public final class VideoDetailFragment
     }
 
     private void setOnLongClickListeners() {
-        // zen: long press on the title also offers "mark as practice video" (D61)
+        // zen: long press on the title also offers "mark as practice video" (D61) and
+        // "more/less of this" (D79)
         binding.detailTitleRootLayout.setOnLongClickListener(makeOnLongClickListener(info ->
                 org.schabi.newpipe.zen.ZenPraxisUi.showVideoLongPress(requireActivity(),
-                        info.getServiceId(), info.getUrl(), info.getName(), () ->
+                        info.getServiceId(), info.getUrl(), info.getName(),
+                        info.getUploaderUrl(), info.getUploaderName(), () ->
                         ShareUtils.copyToClipboard(requireContext(),
                                 binding.detailVideoTitleView.getText().toString()))));
         binding.detailUploaderRootLayout.setOnLongClickListener(makeOnLongClickListener(info -> {

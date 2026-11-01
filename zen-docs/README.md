@@ -48,6 +48,7 @@ bindend; **Archiv** = Momentaufnahme.
 | [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) | Wiedergabezeit Bild/Ton, Ruhezeit-Anrechnung (gebaut); Bildung, Tageslimit (nur Spec) | Spec |
 | [spec-klassifikator-integration.md](spec-klassifikator-integration.md) | Lokaler Inhalts-Klassifikator: Analyse, Vorschlag, Entscheidungen E1–E8 (Abschnitte 0–9) | Spec |
 | [klassifikator-umsetzungsprotokoll.md](klassifikator-umsetzungsprotokoll.md) | Klassifikator-Umsetzung je Etappe: Bausteine, Messwerte, Abweichungen, Offenes (Abschnitte 10–14) | Status (Protokoll) |
+| [spec-bewertung.md](spec-bewertung.md) | Lokale Bewertung „Mehr/Weniger davon“, Like-Liste | umgesetzt 2026-11-01 (Gerät offen) |
 | [spec-verwandte-kanaele.md](spec-verwandte-kanaele.md) | Entdecken verwandter Kanäle | Spec, nicht gebaut |
 | [sprueche.md](sprueche.md) | Pausensprüche DE/EN (Quelle für `gen_sprueche.py`) | verbindlich (Inhalt) |
 | [gen_sprueche.py](gen_sprueche.py) | erzeugt `res/values{,-de}/zen_quotes.xml` aus sprueche.md | Werkzeug |

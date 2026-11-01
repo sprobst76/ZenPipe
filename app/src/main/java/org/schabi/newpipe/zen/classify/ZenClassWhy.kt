@@ -216,4 +216,19 @@ object ZenClassWhy {
         val tone = if (f.heavy) context.getString(R.string.zen_tone_belastend) else null
         return listOfNotNull(main, tone).joinToString(" · ").ifEmpty { null }
     }
+
+    /**
+     * Feed entry line of a pick: the content phrase ([feedLine] of its "why") and, if the local
+     * rating moved it ([ZenFeedPlanner.Pick.rated]), "more of this" / "less of this". Works without
+     * the content recognition too; null = nothing to show.
+     */
+    @JvmStatic
+    fun feedLine(context: Context, pick: org.schabi.newpipe.zen.ZenFeedPlanner.Pick): String? {
+        val rated = when {
+            pick.rated > 0 -> context.getString(R.string.zen_rating_why_more)
+            pick.rated < 0 -> context.getString(R.string.zen_rating_why_less)
+            else -> null
+        }
+        return listOfNotNull(pick.why?.let { feedLine(context, it) }, rated).joinToString(" · ").ifEmpty { null }
+    }
 }

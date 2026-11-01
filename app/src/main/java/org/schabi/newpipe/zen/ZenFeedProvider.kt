@@ -58,7 +58,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
         var pool: List<ZenFeedPlanner.Candidate> = emptyList()
         val view = state.view(now, allowCreate, rules, createdAt) {
             ZenWatchLater.purgeExpired(appContext, now)
-            (if (rules.active) classified(candidates(now), now) else candidates(now)).also { pool = it }
+            rated((if (rules.active) classified(candidates(now), now) else candidates(now)), now).also { pool = it }
         }
         if (view.created && rules.active && view.edition != null) refineDetails(view.edition, pool, rules)
         if (view.created) logLanguages(pool)
@@ -152,6 +152,23 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
     }
 
     /**
+     * Adds the factor of the local rating "More/Less of this" ([ZenRatingWeights]) to the eligible
+     * candidates: channel always, theme only if classified above the model threshold.
+     */
+    private fun rated(list: List<ZenFeedPlanner.Candidate>, now: Long): List<ZenFeedPlanner.Candidate> {
+        val weights = ZenRatings(Zen.store(appContext)).weights()
+        if (weights.isEmpty()) return list
+        return list.map { c ->
+            if (!ZenFeedPlanner.isEligible(c, now)) return@map c
+            val theme = c.classTheme?.takeIf { !ZenClassWhy.belowThreshold(it.second) }?.first
+            c.copy(rating = weights.factor(channelKeys[c.url], theme))
+        }
+    }
+
+    // channel key ([ZenPraxisChannel.keyOf] of the uploader URL) per video URL of the last query
+    private val channelKeys = HashMap<String, String>()
+
+    /**
      * Feed candidates for the content classifier (same eligibility as an edition), newest first,
      * as (cache key, title + channel). Only data the feed already has; no network.
      */
@@ -203,6 +220,7 @@ class ZenFeedProvider(context: Context, private val db: FeedDatabaseManager) {
                 val s = it.stream
                 val upload = s.uploadDate?.toInstant()?.toEpochMilli() ?: return@mapNotNull null
                 val rank = ranks[s.uid]
+                s.uploaderUrl?.let { u -> channelKeys[s.url] = ZenPraxisChannel.keyOf(s.serviceId, u) }
                 s.serviceId to ZenFeedPlanner.Candidate(
                     url = s.url,
                     channel = s.uploaderUrl ?: s.uploader,

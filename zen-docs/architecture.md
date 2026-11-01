@@ -56,6 +56,7 @@ Countdowns sinken nur mit Gerätelaufzeit (fail-closed über Neustart). Regeln: 
 ```
 FeedLoadManager (DB füllen, Pull-to-refresh)  ──►  ZenClassifyWorker (T-Einordnung im Hintergrund)
 FeedViewModel ──► ZenFeedProvider.compute()
+                    ├─ rated(): Bewertungsfaktor je Kandidat (ZenRatingWeights, Kanal + Thema)
                     ├─ Kandidaten aus der Feed-DB (+ FeedGroupDAO.getZenGroupRanks, ZenGroupRank)
                     ├─ ZenFeedLanguages (Sprachfilter) · ZenPraxis (Praxis raus) · ZenClassExempt
                     ├─ Ausgabe fällig? (ZenFeedState.isDue) ─► ZenEditionPrep (bis 20 s einordnen, Karte „wird vorbereitet“)
@@ -71,6 +72,7 @@ FeedFragment ──► StreamItem (Zeile „N min · Gruppe“ + Warum-Zeile) ·
 | `zen/ZenFeedPlanner.kt` | Reine Logik: Eignung, Scoring, Inhaltsgewicht, Belastend-Regel, Warum-Kodierung (`whyOf/parseWhy`), Musik-Heuristik |
 | `zen/ZenFeedState.kt` | Persistenz der laufenden Ausgabe, Tages-Deckel (verschiedene angebotene Videos), Takt; `ZenZone` |
 | `zen/ZenEditionPrep.kt` | Vorbereitung einer fälligen Ausgabe (Einordnung bis `LIMIT_MS` 20 s, Startzeit = Erstellzeit) |
+| `zen/ZenRatings.kt`, `zen/ZenRatingUi.kt` | Lokale Bewertung „Mehr/Weniger davon“ und Like-Liste (`ZenRatings` in `zen_state`, `ZenRatingWeights` = Faktor je Kanal/Thema, rein; UI: Dialog mit Symbolen, Listen in Einstellungen > Zen, `openOutside`); Spec [spec-bewertung.md](spec-bewertung.md) |
 | `zen/ZenWatchLater.kt` | Später-Liste (lokale Playlist, max. 10, Ablauf 30 Tage) |
 | `zen/ZenGroupRank.kt` | Datensatz Feed-Gruppen-Rang (Priorität = Sortierreihenfolge der Feed-Gruppen) |
 | `zen/ZenFeedLanguages.kt`, `zen/ZenLanguage.kt` | Feed-Sprachfilter (Einstellung `feed_langs`): lokale Spracherkennung `ZenLangDetect`, Signal-Hierarchie `ZenLangDetect.combine` (Feld/Originalton hart, ASR nur bestätigend, `866a87d43`), Kanal-Mehrheit `ZenLangFilter` (`3bdcfd2a6`); Regeln: rules.md „Sprachen im Feed“ |
@@ -187,14 +189,14 @@ und reduzierte Details (`VideoDetailFragment`), Drawer (`MainActivity`), Kiosk-T
 | `player/Player.java` | `initPlayer` (`setPauseAtEndOfMediaItems`), `zenOnItemEnd`, `ZenPause.onPlaying/setAudio/onProgress/onStreamInfo/onClosed/onItem/onCompleted`, `ZenPlayback.setPlaying`, `ZenSleep.bind` |
 | `player/PlayerService.java` | Sicherheitsnetz `ZenPause.blockForService` (`ZenPauseRules.intentStartsPlayback`), verwirft POPUP-Intents |
 | `player/PlayQueueActivity.java`, `player/ui/VideoPlayerUi.java` | Sleep-Timer-Menü (Hintergrund) bzw. Mond-Knopf (`zenSleepButton`), kein Pop-up; Suchleiste Salbei (`zenSeekColor`) |
-| `fragments/detail/VideoDetailFragment.java` | Related/Kommentare aus, `zenReduced`, `ZenPause.blockStart/confirmClose`, `ZenClassifier.onStreamInfo`, kein Download/Pop-up, langer Druck auf den Titel: `ZenPraxisUi.showVideoLongPress` |
+| `fragments/detail/VideoDetailFragment.java` | Related/Kommentare aus, `zenReduced`, `ZenPause.blockStart/confirmClose`, `ZenClassifier.onStreamInfo`, kein Download/Pop-up, langer Druck auf den Titel: `ZenPraxisUi.showVideoLongPress` (mit Kanal-URL/-Name für die Bewertung) |
 | `local/feed/FeedViewModel.kt`, `FeedFragment.kt`, `item/StreamItem.kt` | `ZenFeedProvider`, Vorbereitungs-/Detail-Listener, Triage, Warum-Zeile |
 | `local/subscription/SubscriptionFragment.kt` | Long-Press: Praxis markieren, Ausnahme |
 | `fragments/list/BaseListFragment.java` | Long-Press auf Kanal/Playlist: `ZenPraxisUi.showLongPress` |
 | `fragments/list/channel/ChannelFragment.java`, `fragments/list/playlist/PlaylistFragment.java` | Menü „Als Praxis markieren“, `ZenPraxis.registerPlaylistItems` |
 | `util/NavigationHelper.java` | `ZenPause.blockStart` vor jedem Start, Pop-up/Downloads no-op, Praxis-Seite |
 | `info_list/InfoListAdapter.java`, `fragments/list/search/SearchFragment.java` | Listenende (15 Einträge / 2 Seiten), Shorts-Filter |
-| `info_list/dialog/InfoItemDialog.java`, `QueueItemMenuUtil.java`, `util/PlayButtonHelper.kt`, `settings/*`, `download/*` | `ZenFeatures`-Prüfungen; `InfoItemDialog.addDefaultEndEntries` + `StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO` („Praxis-Video…“) |
+| `info_list/dialog/InfoItemDialog.java`, `QueueItemMenuUtil.java`, `util/PlayButtonHelper.kt`, `settings/*`, `download/*` | `ZenFeatures`-Prüfungen; `InfoItemDialog.addDefaultEndEntries` + `StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO` („Praxis-Video…“), `ZEN_RATING` („Mehr oder weniger davon…“, `ZenRatingUi.onVideoMenu`) |
 | `AndroidManifest.xml` | `ZenPauseActivity`, `ZenPraxisCapActivity` (Dialog-Theme), Telemetrie-Provider entfernt |
 | `settings/BackupRestoreSettingsFragment.java` (`finishImport`) | `ZenRestore.onImportFinished` (1 Zeile): Import beendet die Ersteinrichtung |
 | `player/mediabrowser/MediaBrowserImpl.kt` | `ZenFeatures.mediaBrowserEnabled`, `ZenMediaBrowser.withoutShorts`, Verlauf-Zweig entfernt |

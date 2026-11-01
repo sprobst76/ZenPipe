@@ -142,6 +142,12 @@ public enum StreamDialogDefaultEntry {
             org.schabi.newpipe.zen.ZenPraxisUi.onVideoMenu(fragment.requireActivity(),
                     item.getServiceId(), item.getUrl(), item.getName(), () -> { })),
 
+    // zen: local rating "more/less of this" (spec-bewertung.md, D79)
+    ZEN_RATING(R.string.zen_rating_menu, (fragment, item) ->
+            org.schabi.newpipe.zen.ZenRatingUi.onVideoMenu(fragment.requireActivity(),
+                    item.getServiceId(), item.getUrl(), item.getName(),
+                    item.getUploaderUrl(), item.getUploaderName())),
+
 
     MARK_AS_WATCHED(R.string.mark_as_watched, (fragment, item) ->
         new HistoryRecordManager(fragment.getContext())

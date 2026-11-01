@@ -142,7 +142,7 @@ data class StreamItem(
         return zenWhy(context)?.let { "$line\n$it" } ?: line
     }
 
-    private fun zenWhy(context: Context): String? = zenPick?.why?.let { org.schabi.newpipe.zen.classify.ZenClassWhy.feedLine(context, it) }
+    private fun zenWhy(context: Context): String? = zenPick?.let { org.schabi.newpipe.zen.classify.ZenClassWhy.feedLine(context, it) }
 
     private fun getStreamInfoDetailLineBase(context: Context): String {
         var viewsAndDate = ""

@@ -127,13 +127,34 @@ object ZenPraxisUi {
         }
     }
 
-    /** Long press on a video's title (detail page): copy the title, or the practice action. */
+    /**
+     * Long press on a video's title (detail page): copy the title, the practice action, or the
+     * local rating "More/less of this" (same wording as in the long-press menu, D79).
+     */
     @JvmStatic
-    fun showVideoLongPress(activity: Activity, serviceId: Int, url: String, name: String, copyTitle: Runnable) {
+    fun showVideoLongPress(
+        activity: Activity,
+        serviceId: Int,
+        url: String,
+        name: String,
+        uploaderUrl: String?,
+        uploaderName: String?,
+        copyTitle: Runnable
+    ) {
         AlertDialog.Builder(activity)
             .setTitle(name)
-            .setItems(arrayOf(activity.getString(R.string.zen_copy_title), videoMenuTitle(activity, serviceId, url))) { _, which ->
-                if (which == 0) copyTitle.run() else onVideoMenu(activity, serviceId, url, name) {}
+            .setItems(
+                arrayOf(
+                    activity.getString(R.string.zen_copy_title),
+                    videoMenuTitle(activity, serviceId, url),
+                    activity.getString(R.string.zen_rating_menu)
+                )
+            ) { _, which ->
+                when (which) {
+                    0 -> copyTitle.run()
+                    1 -> onVideoMenu(activity, serviceId, url, name) {}
+                    else -> ZenRatingUi.onVideoMenu(activity, serviceId, url, name, uploaderUrl, uploaderName)
+                }
             }
             .show()
     }

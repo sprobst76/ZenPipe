@@ -57,12 +57,20 @@ object ZenFeedPlanner {
         val classLevel: String? = null,
         /** Channel/keyword on the classifier exception list: weight 1.0 and no heavy rule. */
         val classExempt: Boolean = false,
-        /** Strongest theme (key, probability) for the "why" line only; never used for the selection. */
+        /**
+         * Strongest theme (key, probability): the "why" line and the theme part of the local rating
+         * ([ZenRatingWeights]); the classifier itself never selects by it.
+         */
         val classTheme: Pair<String, Double>? = null,
         /** Detected language (ISO code, null = unknown), see [ZenFeedLanguages]. */
         val lang: String? = null,
         /** The language is not allowed in the feed ("Languages in the feed"): never offered, never deleted. */
-        val langHidden: Boolean = false
+        val langHidden: Boolean = false,
+        /**
+         * Factor of the local rating "More/Less of this" ([ZenRatingWeights.factor], 0.4-1.3, 1.0 =
+         * not rated). Only the order: never eligibility, budget, cap, heavy or short rule.
+         */
+        val rating: Double = 1.0
     )
 
     /**
@@ -81,7 +89,14 @@ object ZenFeedPlanner {
      * One video of an edition. [why] is the compact classification at selection time (see
      * [whyOf]); null while the content rules are off.
      */
-    data class Pick(val url: String, val minutes: Int, val groupName: String?, val why: String? = null)
+    data class Pick(
+        val url: String,
+        val minutes: Int,
+        val groupName: String?,
+        val why: String? = null,
+        /** Local rating at selection time: +1 boosted ("more of this"), -1 demoted, 0 none. */
+        val rated: Int = 0
+    )
 
     data class Selection(val picks: List<Pick>, val eligibleCount: Int)
 
@@ -181,10 +196,10 @@ object ZenFeedPlanner {
 
     /**
      * Score of the edition order: [score] times [contentWeight] while weighting is on, times
-     * [SHORT_WEIGHT] for a short video.
+     * [SHORT_WEIGHT] for a short video, times the local rating factor ([Candidate.rating], always).
      */
     @JvmStatic
-    fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * (if (weighting) contentWeight(c) else 1.0) * (if (isShort(c)) SHORT_WEIGHT else 1.0)
+    fun weightedScore(c: Candidate, nowMillis: Long, weighting: Boolean): Double = score(c, nowMillis) * (if (weighting) contentWeight(c) else 1.0) * (if (isShort(c)) SHORT_WEIGHT else 1.0) * c.rating
 
     /**
      * Compact, stored "why" of a pick: `level|tone|weight|cat=p,cat=p` and, without a category,
@@ -273,7 +288,7 @@ object ZenFeedPlanner {
             if (heavy) heavyUsed++
             lastHeavy = heavy
             if (isShort(c)) shortUsed = true
-            picks.add(Pick(c.url, (c.durationSec / 60).toInt(), c.groupName, whyOf(c, rules)))
+            picks.add(Pick(c.url, (c.durationSec / 60).toInt(), c.groupName, whyOf(c, rules), ZenRatingWeights.signOf(c.rating)))
         }
         return Selection(picks, eligible.size)
     }

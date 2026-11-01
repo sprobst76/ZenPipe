@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: lokale Bewertung „Mehr/Weniger davon“ und Like-Liste (zen-docs/spec-bewertung.md). -->
+<resources>
+    <string name="zen_rating_menu">Mehr oder weniger davon…</string>
+    <string name="zen_rating_more">Mehr davon</string>
+    <string name="zen_rating_less">Weniger davon</string>
+    <string name="zen_rating_remove">Bewertung entfernen</string>
+    <string name="zen_rating_more_done">Gemerkt: mehr davon. Wirkt ab der nächsten Ausgabe; das Video steht auf deiner Like-Liste.</string>
+    <string name="zen_rating_less_done">Gemerkt: weniger davon. Wirkt ab der nächsten Ausgabe; ausgeblendet wird nichts.</string>
+    <string name="zen_rating_removed">Bewertung entfernt</string>
+    <string name="zen_rating_why_more">mehr davon</string>
+    <string name="zen_rating_why_less">weniger davon</string>
+    <string name="zen_rating_settings_title">Mehr oder weniger davon</string>
+    <string name="zen_rating_settings_hint">Nur auf diesem Gerät: „Mehr davon“ hebt Kanal und Thema in den nächsten Ausgaben leicht an, „Weniger davon“ stellt sie zurück. Nichts wird ausgeblendet, nichts gesendet, keine Sperre.</string>
+    <string name="zen_rating_list_title">Bewertungen</string>
+    <string name="zen_rating_list_button">Bewertungen (%1$d)</string>
+    <string name="zen_rating_list_empty">Noch keine Bewertungen. Lange auf ein Video drücken: „Mehr oder weniger davon…“.</string>
+    <string name="zen_like_list_title">Echtes Like wert</string>
+    <string name="zen_like_list_button">Like-Liste (%1$d)</string>
+    <string name="zen_like_list_empty">Leer. Videos mit „Mehr davon“ landen hier, damit du sie später bei YouTube liken kannst.</string>
+    <string name="zen_like_entry_message">„Bei YouTube liken“ öffnet das Video außerhalb von ZenPipe (YouTube-App oder Browser), dort kannst du es angemeldet liken. Danach „Erledigt“ tippen.</string>
+    <string name="zen_like_open">Bei YouTube liken</string>
+    <string name="zen_like_done">Erledigt</string>
+    <string name="zen_like_close">Schließen</string>
+</resources>

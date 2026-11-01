@@ -142,7 +142,8 @@ class ZenFeedState(
         } else {
             ""
         }
-        log?.add("edition", "n=${e.picks.size} leftover=${e.leftover} dayDistinct=${all.size}$content")
+        val rated = if (e.picks.any { it.rated != 0 }) " more=${e.picks.count { it.rated > 0 }} less=${e.picks.count { it.rated < 0 }}" else ""
+        log?.add("edition", "n=${e.picks.size} leftover=${e.leftover} dayDistinct=${all.size}$content$rated")
         return e
     }
 
@@ -195,7 +196,9 @@ class ZenFeedState(
             KEY_LEFTOVER to e.leftover,
             KEY_PICKS to e.picks.joinToString("\n") {
                 "${it.url}\t${it.minutes}\t${(it.groupName ?: "").replace('\t', ' ').replace('\n', ' ')}" +
-                    (it.why?.let { w -> "\t" + w.replace('\t', ' ').replace('\n', ' ') } ?: "")
+                    // why (may be empty) and, since the local rating, its sign as a 5th field
+                    (if (it.why != null || it.rated != 0) "\t" + (it.why ?: "").replace('\t', ' ').replace('\n', ' ') else "") +
+                    (if (it.rated != 0) "\t${it.rated}" else "")
             }
         )
     }
@@ -204,7 +207,7 @@ class ZenFeedState(
         val at = store.getLong(KEY_AT, -1)
         if (at < 0) return null
         val picks = lines(KEY_PICKS).mapNotNull {
-            val p = it.split('\t', limit = 4)
+            val p = it.split('\t', limit = 5)
             if (p[0].isEmpty()) {
                 null
             } else {
@@ -212,7 +215,8 @@ class ZenFeedState(
                     p[0],
                     p.getOrNull(1)?.toIntOrNull() ?: 0,
                     p.getOrNull(2)?.ifEmpty { null },
-                    p.getOrNull(3)?.ifEmpty { null }
+                    p.getOrNull(3)?.ifEmpty { null },
+                    p.getOrNull(4)?.toIntOrNull()?.coerceIn(-1, 1) ?: 0
                 )
             }
         }

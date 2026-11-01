@@ -33,6 +33,7 @@ app/src/main/java/org/schabi/newpipe/error/ErrorActivity.kt	ERROR_GITHUB_ISSUE_U
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	zenReduced = org.schabi.newpipe.zen.ZenSettings.reducedVideoDetails()	reduced video details
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPause.confirmClose(	closing video asks before pause
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPraxisUi.showVideoLongPress(	title long press marks practice video
+app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	info.getUploaderUrl(), info.getUploaderName(), () ->	title long press passes the channel for the rating
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	zenBlockStart(	pause gate before start
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenPause.blockStart(context, url)	pause gate by url
 app/src/main/java/org/schabi/newpipe/fragments/detail/VideoDetailFragment.java	ZenClassifier.onStreamInfo(	classify opened video
@@ -57,10 +58,13 @@ app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	public boole
 app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	R.id.zenFooterHint	list end hint view
 app/src/main/java/org/schabi/newpipe/info_list/InfoListAdapter.java	zenShowsEndHint()	list end hint logic
 app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO	stream dialog practice video entry
+app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	StreamDialogDefaultEntry.ZEN_RATING	stream dialog rating entry (more/less of this)
 app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	ZenFeatures.downloadsEnabled()	no download entry
 app/src/main/java/org/schabi/newpipe/info_list/dialog/InfoItemDialog.java	ZenFeatures.popupPlayerEnabled()	no popup entry
 app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZEN_PRAXIS_VIDEO(	practice video entry definition
 app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZenPraxisUi.onVideoMenu(	practice video entry action
+app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZEN_RATING(	rating entry definition
+app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	ZenRatingUi.onVideoMenu(	rating entry action
 app/src/main/java/org/schabi/newpipe/info_list/dialog/StreamDialogDefaultEntry.java	R.string.zen_copy_link	open in browser replaced by copy link
 app/src/main/java/org/schabi/newpipe/info_list/holder/ChannelMiniInfoItemHolder.java	ZenSettings.reducedVideoDetails()	no subscriber counts when reduced
 app/src/main/java/org/schabi/newpipe/info_list/holder/StreamInfoItemHolder.java	ZenSettings.reducedVideoDetails()	no view counts when reduced
@@ -76,7 +80,7 @@ app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	fun zenHandled(
 app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	ZenEditionPrep.shared.addListener	edition prep progress
 app/src/main/java/org/schabi/newpipe/local/feed/FeedViewModel.kt	ZenFeedDetails.shared.addListener	feed details progress
 app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	var zenPick:	why line data
-app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	ZenClassWhy.feedLine(	classifier why line
+app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	ZenClassWhy.feedLine(	classifier and rating why line
 app/src/main/java/org/schabi/newpipe/local/feed/item/StreamItem.kt	ZenSettings.reducedVideoDetails()	no view counts when reduced
 app/src/main/java/org/schabi/newpipe/local/feed/service/FeedLoadManager.kt	ZenClassifyWorker.enqueueIfInstalled(context)	classify new feed videos
 app/src/main/java/org/schabi/newpipe/local/feed/service/FeedLoadManager.kt	RSS "fast mode" cannot filter	fast mode permanently off

@@ -203,6 +203,7 @@ class ZenSettingsFragment : Fragment() {
         )
         renderLanguages()
         renderPraxis(snap)
+        renderRatings()
         renderSleep()
         renderWatchTime()
         renderQuotes()
@@ -312,6 +313,31 @@ class ZenSettingsFragment : Fragment() {
             }
             .setNegativeButton(R.string.cancel, null)
             .show()
+    }
+
+    /** Local rating "More/less of this" and the like list (spec-bewertung.md; neutral, no lock). */
+    private fun renderRatings() {
+        content.addView(
+            text(getString(R.string.zen_rating_settings_title), 16f, true),
+            LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { topMargin = dp(24) }
+        )
+        content.addView(text(getString(R.string.zen_rating_settings_hint), 12f))
+        val ratings = ZenRatings(Zen.store(requireContext()))
+        val buttons = LinearLayout(requireContext()).apply { orientation = LinearLayout.HORIZONTAL }
+        buttons.addView(
+            Button(requireContext()).apply {
+                text = getString(R.string.zen_like_list_button, ratings.likes().size)
+                setOnClickListener { ZenRatingUi.showLikeList(requireActivity()) { render() } }
+            }
+        )
+        buttons.addView(
+            Button(requireContext()).apply {
+                text = getString(R.string.zen_rating_list_button, ratings.all().size)
+                setOnClickListener { ZenRatingUi.showRatings(requireActivity()) { render() } }
+            }
+        )
+        content.addView(buttons)
     }
 
     /** Sleep timer: the duration offered first in the player (comfort, no lock). */

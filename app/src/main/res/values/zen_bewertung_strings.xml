@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ZenPipe: local rating "more/less of this" and the like list (zen-docs/spec-bewertung.md).
+     Separate file to keep upstream merges simple. -->
+<resources>
+    <string name="zen_rating_menu">More or less of this…</string>
+    <string name="zen_rating_more">More of this</string>
+    <string name="zen_rating_less">Less of this</string>
+    <string name="zen_rating_remove">Remove rating</string>
+    <string name="zen_rating_more_done">Noted: more of this. Applies from the next edition; the video is on your like list.</string>
+    <string name="zen_rating_less_done">Noted: less of this. Applies from the next edition; nothing is hidden.</string>
+    <string name="zen_rating_removed">Rating removed</string>
+    <string name="zen_rating_why_more">more of this</string>
+    <string name="zen_rating_why_less">less of this</string>
+    <string name="zen_rating_settings_title">More or less of this</string>
+    <string name="zen_rating_settings_hint">Only on this device: \"More of this\" slightly lifts the channel and topic in the next editions, \"Less of this\" moves them back. Nothing is hidden, nothing is sent, no lock.</string>
+    <string name="zen_rating_list_title">Ratings</string>
+    <string name="zen_rating_list_button">Ratings (%1$d)</string>
+    <string name="zen_rating_list_empty">No ratings yet. Long-press a video: \"More or less of this…\".</string>
+    <string name="zen_like_list_title">Worth a real like</string>
+    <string name="zen_like_list_button">Like list (%1$d)</string>
+    <string name="zen_like_list_empty">Empty. Videos you rate \"More of this\" appear here, so you can like them on YouTube later.</string>
+    <string name="zen_like_entry_message">\"Like on YouTube\" opens the video outside ZenPipe (YouTube app or browser), where you can like it while signed in. Then tap \"Done\".</string>
+    <string name="zen_like_open">Like on YouTube</string>
+    <string name="zen_like_done">Done</string>
+    <string name="zen_like_close">Close</string>
+</resources>

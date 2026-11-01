@@ -341,6 +341,7 @@ public final class InfoItemDialog {
             addMarkAsWatchedEntryIfNeeded();
             addEntry(StreamDialogDefaultEntry.SHOW_CHANNEL_DETAILS);
             addEntry(StreamDialogDefaultEntry.ZEN_PRAXIS_VIDEO); // zen: single practice video (D61)
+            addEntry(StreamDialogDefaultEntry.ZEN_RATING); // zen: more/less of this (D79)
             return this;
         }
 
