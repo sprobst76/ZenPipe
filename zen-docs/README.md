@@ -42,13 +42,13 @@ bindend; **Archiv** = Momentaufnahme.
 | [spec-pause-nach-abbruch.md](spec-pause-nach-abbruch.md) | Pflichtpause, Musik/Podcast-Heuristik, Pausenspruch | Spec |
 | [spec-einstellungs-sperre.md](spec-einstellungs-sperre.md) | 24-h-Sperre, Ersteinrichtung, Rückgängig | Spec |
 | [spec-praxis.md](spec-praxis.md) | Praxis-Kanäle/-Playlists, Kette, Sleep-Timer | Spec |
-| [spec-praxis-themen.md](spec-praxis-themen.md) | Praxis-Unterthemen pro Video, einzelne Praxis-Videos | umgesetzt 2026-10-20 (Gerät offen) |
+| [spec-praxis-themen.md](spec-praxis-themen.md) | Praxis-Unterthemen pro Video, einzelne Praxis-Videos | umgesetzt 2026-10-20, in zen.5/zen.6 veröffentlicht, Gerät geprüft (Rest: Drehung, TalkBack) |
 | [spec-design.md](spec-design.md) | Palette „Salbei“, WCAG, Umsetzung | Spec |
 | [spec-absichtsabfrage-motivation.md](spec-absichtsabfrage-motivation.md) | Absichtsabfrage neu: klare Frage ohne Eingabe, Tageszahlen, Praxis-Alternative, wechselnde Fragen, Knopfgewichtung; Schritt 2 Gegenmittel/Kontextton | Spec (Entwurf, nicht gebaut) |
 | [spec-bildung-und-hintergrundzeit.md](spec-bildung-und-hintergrundzeit.md) | Wiedergabezeit Bild/Ton, Ruhezeit-Anrechnung (gebaut); Bildung, Tageslimit (nur Spec) | Spec |
 | [spec-klassifikator-integration.md](spec-klassifikator-integration.md) | Lokaler Inhalts-Klassifikator: Analyse, Vorschlag, Entscheidungen E1–E8 (Abschnitte 0–9) | Spec |
 | [klassifikator-umsetzungsprotokoll.md](klassifikator-umsetzungsprotokoll.md) | Klassifikator-Umsetzung je Etappe: Bausteine, Messwerte, Abweichungen, Offenes (Abschnitte 10–14) | Status (Protokoll) |
-| [spec-bewertung.md](spec-bewertung.md) | Lokale Bewertung „Mehr/Weniger davon“, Like-Liste | umgesetzt 2026-11-01 (Gerät offen) |
+| [spec-bewertung.md](spec-bewertung.md) | Lokale Bewertung „Mehr/Weniger davon“, Like-Liste | umgesetzt 2026-11-01 (in zen.7 vorbereitet, Gerät bis auf Feed-Reihenfolge geprüft) |
 | [spec-verwandte-kanaele.md](spec-verwandte-kanaele.md) | Entdecken verwandter Kanäle | Spec, nicht gebaut |
 | [sprueche.md](sprueche.md) | Pausensprüche DE/EN (Quelle für `gen_sprueche.py`) | verbindlich (Inhalt) |
 | [gen_sprueche.py](gen_sprueche.py) | erzeugt `res/values{,-de}/zen_quotes.xml` aus sprueche.md | Werkzeug |
@@ -114,3 +114,4 @@ F-Droid-Repo im Projekt-README (Repo live, Fingerprint in README und [release.md
 6. Offene Sachfragen, die in mehreren Dokumenten auftauchen (keine Doku-Fehler, aber noch nicht entschieden): W14 (keine neue
    Ausgabe während Pause/Nachtruhe), Tageslimit F2 (Wert), Bildung/AP 7, Entdecken, Nachtruhe, Nachladen im Mobilfunk,
    Notfallschlüssel (bewusst nicht).
+7. **Bewertung (D79–D82)**: Wochen-Hinweis auf die Like-Liste und Bewertung am Pausenbildschirm bewusst nicht gebaut; Schrittstärken nach einigen Wochen am Log nachjustieren.

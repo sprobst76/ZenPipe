@@ -173,6 +173,9 @@ rejected by `AllowedAPKSigningKeys`. Remaining harmless warning: the empty archi
 - The workflow fails if the key in the secret does not match `FDROID_REPO_FINGERPRINT`
   (protects against accidentally uploading the release key or a test key).
 
+## Release history (short)
+zen.1–zen.4 (2026-10-13/14), zen.5 (hardening and practice themes, 2026-10-28), zen.6 (polish, 2026-10-28, tag `v0.1.0-zen.6`); zen.7 (rating, prepared 2026-11-01, not yet tagged). Each version: bump `ZENPIPE_BUILD`, changelog `<versionCode>.txt` (de-DE + en-US), tag `v<versionName>`; public push/tag only after Stefan's explicit go.
+
 ## Obtainium
 
 Source: GitHub releases of `https://github.com/sprobst76/ZenPipe` (Obtainium source "GitHub").
