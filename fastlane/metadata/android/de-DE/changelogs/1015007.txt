@@ -1,0 +1,4 @@
+Siebte ZenPipe-Entwicklungsversion: Bewertung.
+• Neu: „Mehr oder weniger davon…“ im Video-Menü steuert nur auf deinem Gerät die Reihenfolge im Feed (ohne Daumen, nichts wird ausgeblendet, keine Sperre)
+• Neu: Like-Liste in den Einstellungen: Videos mit „Mehr davon“ merken, bewusst bei YouTube liken, dann „Erledigt“
+• Die tägliche Praxis-Rückfrage wird beim Drehen nicht mehr mehrfach protokolliert

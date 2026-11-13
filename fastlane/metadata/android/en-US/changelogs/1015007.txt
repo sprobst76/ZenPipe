@@ -1,0 +1,4 @@
+Seventh ZenPipe development release: rating.
+• New: "More or less of this…" in the video menu steers the feed order on your device only (no thumbs, nothing is hidden, no lock)
+• New: like list in settings: remember videos you rated "more", like them deliberately on YouTube, then mark "Done"
+• The daily practice question is no longer logged repeatedly on rotation
